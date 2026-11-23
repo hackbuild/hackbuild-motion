@@ -124,6 +124,19 @@ export const VISEME_TO_VOWELS: Record<OculusViseme, Partial<Record<VrmVowel, num
   U: { ou: 1 },
 };
 
+/** The Oculus viseme that stands for each VRM vowel. */
+export const VOWEL_TO_VISEME: Record<VrmVowel, OculusViseme> = { aa: "aa", ih: "I", ou: "U", ee: "E", oh: "O" };
+
+/**
+ * ARKit shapes a lip consonant drives on top of the vowel composites, as
+ * a share of its viseme weight: closed lips for PP, the lower lip rolled
+ * in under the teeth for FF. Chosen by eye, not measured.
+ */
+export const VISEME_ARKIT: Partial<Record<OculusViseme, readonly { shape: ArkitShape; weight: number }[]>> = {
+  PP: [{ shape: "mouthClose", weight: 1 }],
+  FF: [{ shape: "mouthRollLower", weight: 0.6 }],
+};
+
 /** Presets whose source smile already closes the eyes, so blink should blend down. */
 export const OVERRIDE_BLINK: readonly VrmExpression[] = ["happy", "relaxed"];
 

@@ -7,7 +7,10 @@ import {
   ARKIT_52,
   HUMAN_BONES,
   OCULUS_VISEMES,
+  VISEME_ARKIT,
   VISEME_TO_VOWELS,
+  VOWEL_TO_VISEME,
+  VRM_VOWELS,
   VRM_EXPRESSIONS,
   type HumanBone,
   type RigNodeInput,
@@ -230,6 +233,9 @@ describe("expression and viseme table", () => {
     expect(OCULUS_VISEMES.length).toBe(15);
     expect(VRM_EXPRESSIONS.length).toBe(18);
     for (const v of OCULUS_VISEMES) expect(VISEME_TO_VOWELS[v]).toBeDefined();
+    // the vowel to viseme table is the inverse of the vowel visemes' rows
+    for (const k of VRM_VOWELS) expect(VISEME_TO_VOWELS[VOWEL_TO_VISEME[k]]).toEqual({ [k]: 1 });
+    for (const shapes of Object.values(VISEME_ARKIT)) for (const s of shapes!) expect(ARKIT_52).toContain(s.shape);
   });
 
   it("resolves VRChat, MMD, ARKit and Oculus style models", () => {

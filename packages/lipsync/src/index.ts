@@ -12,7 +12,9 @@ import {
   ARKIT_COMPOSITES,
   OCULUS_VISEMES,
   type OculusViseme,
+  VISEME_ARKIT,
   VISEME_TO_VOWELS,
+  VOWEL_TO_VISEME,
   VRM_VOWELS,
   type VrmVowel,
   oculusMorph,
@@ -446,8 +448,7 @@ export class LipSync {
       goalV = { aa: 0, ih: 0, ou: 0, ee: 0, oh: 0 };
       for (const k of VRM_VOWELS) goalV[k] = shape[k] * open;
       // the matching visemes, so Oculus targets move with the audio too
-      const map: Record<VrmVowel, OculusViseme> = { aa: "aa", ih: "I", ou: "U", ee: "E", oh: "O" };
-      for (const k of VRM_VOWELS) this.raw[OCULUS_VISEMES.indexOf(map[k])] = goalV[k];
+      for (const k of VRM_VOWELS) this.raw[OCULUS_VISEMES.indexOf(VOWEL_TO_VISEME[k])] = goalV[k];
     } else {
       f.source = "silent";
       this.raw.fill(0);
@@ -489,9 +490,10 @@ export function drive(sink: ExpressionSink, frame: LipFrame, target: MouthTarget
   } else {
     const sum = new Map<string, number>();
     for (const k of VRM_VOWELS) for (const b of ARKIT_COMPOSITES[k]) sum.set(b.morph, (sum.get(b.morph) ?? 0) + b.weight * frame.vowels[k]);
-    const pp = frame.visemes[OCULUS_VISEMES.indexOf("PP")]!;
-    sum.set("mouthClose", Math.max(sum.get("mouthClose") ?? 0, pp));
-    sum.set("mouthRollLower", Math.max(sum.get("mouthRollLower") ?? 0, frame.visemes[OCULUS_VISEMES.indexOf("FF")]! * 0.6));
+    for (const [v, shapes] of Object.entries(VISEME_ARKIT) as [OculusViseme, readonly { shape: string; weight: number }[]][]) {
+      const x = frame.visemes[OCULUS_VISEMES.indexOf(v)]!;
+      for (const s of shapes) sum.set(s.shape, Math.max(sum.get(s.shape) ?? 0, x * s.weight));
+    }
     for (const [m, w] of sum) sink.setValue(m, Math.min(1, w));
   }
 }

@@ -24,7 +24,8 @@ offers a three.js adapter under `/three`.
   `referenceRest()` is a 1.70 m reference humanoid in the normalized space.
 - The expression and viseme table: the 18 VRM 1.0 expressions, ARKit 52,
   the 15 Oculus visemes, morph name aliases (VRChat, MMD, plain English),
-  ARKit and Oculus composites, viseme to vowel weights, and
+  ARKit and Oculus composites, viseme to vowel weights, the vowel to
+  viseme map, the ARKit shapes a lip consonant adds, and
   `resolveExpressions(morphNames)`. avatar, lipsync and the action grammar
   read this table and keep no copy.
 - `/three`: `mapObject3D(root)`, `chainsOf(root)`, `restOf(bones)` and

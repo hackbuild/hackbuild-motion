@@ -13,7 +13,7 @@
 // makes (jaw to open, lip aperture to closure, and so on), tuned against bellows-voice's own targets for body 0 and a
 // rendered engine track (the test fixtures). Every constant is inferred:
 // nobody has tuned them by eye on a face yet.
-import { OCULUS_VISEMES, type OculusViseme, VRM_VOWELS, type VrmVowel } from "@hackbuild/rig/expressions";
+import { type ArkitShape, OCULUS_VISEMES, type OculusViseme, VOWEL_TO_VISEME, VRM_VOWELS, type VrmVowel } from "@hackbuild/rig/expressions";
 import type { LipFrame } from "./index.js";
 
 /** Vocal tract state at one instant, in the units of bellows-voice's articulator probe. */
@@ -117,7 +117,6 @@ export function vowelWeights(c: MouthChannels, out?: Record<VrmVowel, number>, w
 }
 
 const at = (v: OculusViseme): number => OCULUS_VISEMES.indexOf(v);
-const VOWEL_VISEME: Record<VrmVowel, OculusViseme> = { aa: "aa", ee: "E", ih: "I", oh: "O", ou: "U" };
 
 /**
  * A LipFrame from articulator state, with `source` "timeline" while
@@ -150,7 +149,7 @@ export function articulatoryFrame(f: ArticulatorFrame, out?: LipFrame & { channe
   if (cons > 1) for (let i = 0; i < v.length; i++) v[i] = v[i]! / cons;
   const left = Math.max(0, 1 - cons);
   const w = vowelWeights(c, o.vowels);
-  for (const k of VRM_VOWELS) v[at(VOWEL_VISEME[k])] = w[k] * left;
+  for (const k of VRM_VOWELS) v[at(VOWEL_TO_VISEME[k])] = w[k] * left;
   const lips = 1 - Math.max(c.closure, 0.5 * c.labiodental);
   for (const k of VRM_VOWELS) o.vowels[k] = w[k] * lips;
   o.open = c.open;
@@ -159,13 +158,12 @@ export function articulatoryFrame(f: ArticulatorFrame, out?: LipFrame & { channe
 }
 
 /**
- * ARKit blendshape weights straight from the channels, per the report's
- * table: jawOpen from the jaw, mouthClose from the lip closure, pucker
+ * ARKit blendshape weights straight from the channels: jawOpen from the jaw, mouthClose from the lip closure, pucker
  * when rounded with a small aperture and funnel when rounded and open,
  * stretch and a little smile when spread, mouthRollLower for f and v,
  * tongueOut for th.
  */
-export function arkitFromChannels(c: MouthChannels, out: Map<string, number> = new Map()): Map<string, number> {
+export function arkitFromChannels(c: MouthChannels, out: Map<ArkitShape, number> = new Map()): Map<ArkitShape, number> {
   out.clear();
   const funnel = c.round * c.open;
   out.set("jawOpen", c.open);
