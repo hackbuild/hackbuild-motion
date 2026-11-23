@@ -5,12 +5,12 @@
 // render returns the same spans from 0. The span shape is copied here
 // structurally, so this file imports nothing from bellows and the package
 // runs without it installed. The span shape was read from bellows-voice
-// 0.7.3 and is unchanged in 0.8.0 (git ac30dc2, not on npm), the commit the
-// optional peer dependency pins, on bellowsjs 0.5.0.
+// 0.7.3 and is unchanged in 0.8.0, the npm release the optional peer
+// dependency pins, on bellowsjs 0.5.0.
 import type { OculusViseme } from "@hackbuild/rig/expressions";
 import type { SpeechEvent } from "./index.js";
 
-/** The bellows-voice release the optional peer pins, by git commit (0.8.0 is not on npm). */
+/** The bellows-voice npm release the optional peer pins; the commit is its gitHead. */
 export const BELLOWS_VOICE_VERSION = "0.8.0";
 export const BELLOWS_VOICE_COMMIT = "ac30dc229f492ecb6bd80b2ea0f71c6a370b368c";
 /** The bellowsjs version bellows-voice 0.8.0 runs on. */

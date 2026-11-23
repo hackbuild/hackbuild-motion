@@ -40,7 +40,7 @@
     "@hackbuild/rig": "0.1.0"
   },
   "peerDependencies": {
-    "bellows-voice": "github:virgilvox/bellows-voice#ac30dc229f492ecb6bd80b2ea0f71c6a370b368c",
+    "bellows-voice": "0.8.0",
     "bellowsjs": "0.5.0"
   },
   "peerDependenciesMeta": {

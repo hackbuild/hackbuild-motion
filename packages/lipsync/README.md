@@ -75,8 +75,8 @@ For an offline render that starts at 0, pass the play time as the offset.
 Beatbox spans map to the viseme of each sound's place; bellows' pause `_`
 makes no event. The span shape is copied structurally, so the subpath
 imports nothing from bellows. `bellows-voice` is an optional peer pinned
-to git commit ac30dc2 (0.8.0, not on npm on 2026-11-23) and `bellowsjs`
-to 0.5.0; the package runs without either.
+to 0.8.0 on npm and `bellowsjs` to 0.5.0; the package runs without
+either.
 
 ### Articulatory source
 
@@ -89,7 +89,7 @@ source with those fields drives it.
 
 - `mouthChannels(frame)`: open, closure, round, spread, labiodental,
   dental, alveolar, postalveolar, sibilant, retroflex, velar and nasal,
-  each 0 to 1, after the mapping in the bellows integration report
+  each 0 to 1, each from the articulators that make that shape
   (thresholds inferred from bellows-voice's body 0 targets and a rendered engine track).
 - `articulatoryFrame(frame)`: a `LipFrame` for `drive()`. Consonant
   visemes come from the channels, the rest of the mouth goes to the vowel
@@ -178,13 +178,14 @@ uses only the rig's plain data tables, so it carries no wasm.
   the band thresholds are inferred from formant ranges, not fitted.
 - Nobody has watched a face driven by it in a browser or listened to it;
   the automated pass in `docs/browser-checks.md` drove the 2D face on the
-  lipsync page from the bellows voice's spans and tract model and counted
+  lipsync page from the bellows voice's spans, tract model and live
+  articulator probe (bellows-voice 0.8.0 from the npm CDN) and counted
   open and shut frames only.
 - Dominance values and viseme to vowel weights were chosen by eye.
 - The articulatory thresholds have not been tuned by eye on a face, and
   the articulatory source has not been compared in time against the
-  dominance timeline. The live probe in a browser has not run here;
-  only the offline track has.
+  dominance timeline. The live probe ran once in Chrome (open on 293 of
+  371 frames, lips shut on 30, measured); nobody has judged its timing.
 - The letter rules are English only.
 
 ## Size budget

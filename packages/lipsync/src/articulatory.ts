@@ -4,13 +4,13 @@
 // articulator probe frame in bellows-voice (the owner's articulatory voice,
 // MIT): centimetres in the adult male head frame, x forward and y up from
 // the glottis, the velum port in cm^2. A frame from the engine's
-// `articulatorProbe` (bellows-voice 0.8.0, git ac30dc2) or from its
+// `articulatorProbe` (bellows-voice 0.8.0 on npm) or from its
 // offline `renderSpeech` track passes straight in; `fromProbe` reads a
 // live probe at the heard time, and `fromTractModel` reads the main thread
 // `TractModel`, which follows the plan rather than the audio.
 //
-// Channels and thresholds follow the mapping in the bellows integration
-// report, tuned against bellows-voice's own targets for body 0 and a
+// Channels and thresholds map each articulator to the mouth shape it
+// makes (jaw to open, lip aperture to closure, and so on), tuned against bellows-voice's own targets for body 0 and a
 // rendered engine track (the test fixtures). Every constant is inferred:
 // nobody has tuned them by eye on a face yet.
 import { OCULUS_VISEMES, type OculusViseme, VRM_VOWELS, type VrmVowel } from "@hackbuild/rig/expressions";
