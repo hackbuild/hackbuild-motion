@@ -1,0 +1,36 @@
+{
+  "name": "@hackbuild/motion-net",
+  "version": "0.2.0",
+  "description": "Runtime and quadruped gait host for a categorical codebook matching motion network. Loads external CC BY-NC 4.0 weights at run time. Rust core on wasm SIMD128, worker with an in-page fallback.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Moheeb Zara <hackbuildvideo@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackbuild/hackbuild-motion.git",
+    "directory": "packages/motion-net"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.11.0"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./inline": {
+      "types": "./dist/wasm/inline.d.ts",
+      "import": "./dist/wasm/inline.js"
+    },
+    "./wasm": "./dist/wasm/motion_net_bg.wasm",
+    "./iife": "./dist/motion-net.iife.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ../../tools/build-package.mjs motion-net"
+  }
+}

@@ -2,6 +2,15 @@
 
 Versions follow semver per package. Nothing is published to npm yet.
 
+## 0.2.0 (unreleased)
+
+- `@hackbuild/motion-net`: rewritten under MIT from a functional
+  specification and the published paper; the earlier CC BY-NC version is
+  removed. Weight loader with format checks, the forward pass on wasm
+  SIMD128, a blob worker with an in page fallback, and `QuadrupedHost`, a
+  gait backend over the published quadruped network. Weights stay CC
+  BY-NC 4.0, loaded at run time.
+
 ## 0.1.0 (unreleased)
 
 - repository scaffold: rules, hooks, voice and commit linters, CI.

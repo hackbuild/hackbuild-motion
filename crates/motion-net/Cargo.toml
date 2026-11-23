@@ -1,0 +1,21 @@
+[package]
+name = "hackbuild-motion-net"
+version = "0.2.0"
+description = "Runtime for a categorical codebook matching motion network: f16 and f32 weight loading, code estimate, refinement and a time conditioned decoder on wasm SIMD128"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+name = "motion_net"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["std"]
+std = []
+wasm = ["std", "dep:wasm-bindgen"]
+
+[dependencies]
+libm = "0.2.16"
+wasm-bindgen = { version = "=0.2.129", optional = true }

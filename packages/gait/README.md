@@ -104,11 +104,8 @@ inlined, `THREE` read from the page).
 
 ### Not verified by anything
 
-- No neural source fills `MotorState` yet. For `@hackbuild/motion-net`:
-  stamp each prediction with its request time, blend the previous
-  prediction into the current one, match playback speed to the requested
-  trajectory, and offer a turn in place mode (HACKLE lessons, owner
-  supplied).
+- `@hackbuild/motion-net`'s `QuadrupedHost` fills `MotorState` with
+  source `neural`; nothing here checks it against this package's gait.
 
 - Motion on the HACKLE Meshy dog or any real rig, in a real browser at real
   frame rate. Nobody has looked at it yet.

@@ -6,6 +6,7 @@
     { "path": "packages/ik" },
     { "path": "packages/gait" },
     { "path": "packages/retarget" },
+    { "path": "packages/motion-net" },
     { "path": "packages/motion-match" },
     { "path": "packages/presence" },
     { "path": "packages/avatar" },

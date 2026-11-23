@@ -17,6 +17,12 @@
       "what": "a bvh walk on another rig, in centimeters, retargeted onto the normalized humanoid. drop your own bvh."
     },
     {
+      "name": "motion-net",
+      "what": "the quadruped codebook matching network (cc by-nc 4.0 weights, fetched from a url you give or read from dropped files, never hosted here) driving a dog of simple shapes: speed, turn, style, foot slide.",
+      "timeoutS": 120,
+      "localQuery": "manifest=/local/quadruped.json&bin=/local/quadruped.bin"
+    },
+    {
       "name": "motion-match",
       "what": "motion matching over a synthetic gait clip database with inertialized transitions, following your speed and turn.",
       "timeoutS": 60

@@ -12,6 +12,7 @@ they pass their tests; the table below grows with them.
 | [`@hackbuild/ik`](packages/ik) | `hackbuild-ik` | two bone with pole, FABRIK, CCD, clamped look at, finger curl, foot locking |
 | [`@hackbuild/gait`](packages/gait) | `hackbuild-gait` | Froude gait choice, leg oscillators, footfall tables, posture springs, tail and ears, backend interface |
 | [`@hackbuild/retarget`](packages/retarget) | `hackbuild-retarget` | humanoid motion format, clip retargeting between any rigs, BVH and VMD readers, motion tags |
+| [`@hackbuild/motion-net`](packages/motion-net) | `hackbuild-motion-net` | runtime and quadruped gait host for the codebook matching network on wasm SIMD128, worker with an in page fallback; MIT code, CC BY-NC 4.0 weights loaded at run time, not included |
 | [`@hackbuild/motion-match`](packages/motion-match) | `hackbuild-motion-match` | motion matching with inertialized transitions over a clip database |
 | [`@hackbuild/presence`](packages/presence) | | gaze, blink, breath, idle scheduler, point, reach, throw, layered clip player |
 | [`@hackbuild/avatar`](packages/avatar) | | VRM, Mixamo, UAL, GLB and FBX into the normalized space, material repair, wardrobe, first person head hide |
@@ -55,8 +56,8 @@ Each package README carries its own dated list. Across the repository:
   vitest both check.
 - 2026-11-23: the example pages in Chrome 150 on an Apple M1 with the real
   GPU, measured by the automated pass: 13 checks pass, 12 not run, 0 fail
-  (`docs/browser-checks.md`). The motion-net WebGPU path matches the CPU
-  f32 path within 5.07e-7 (measured).
+  (`docs/browser-checks.md`; the motion-net rows were replaced after its
+  rewrite).
 
 ### Not verified by anything
 
