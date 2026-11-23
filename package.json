@@ -10,10 +10,15 @@
     "prepare": "git config core.hooksPath .githooks || true",
     "build": "npm run build --workspaces --if-present",
     "test": "vitest run --passWithNoTests && node --test tools/test/*.test.mjs",
-    "typecheck": "tsc -b",
+    "typecheck": "tsc -b && tsc -p tsconfig.tests.json",
     "lint:voice": "git ls-files | grep -Ev '\\.(png|jpe?g|glb|bin|wasm|wav)$|^(LICENSES/|RULES.md|CLAUDE.md|tools/)|package-lock.json|Cargo.lock' | xargs node tools/lint-voice.mjs"
   },
   "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/three": "0.186.0",
+    "fast-check": "4.10.2",
+    "rolldown": "1.2.19",
+    "three": "0.186.1",
     "typescript": "7.0.2",
     "vitest": "5.0.3"
   }

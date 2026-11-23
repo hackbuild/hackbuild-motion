@@ -1,0 +1,21 @@
+[package]
+name = "hackbuild-organic"
+version = "0.1.0"
+description = "Critically damped springs, inertialization, seeded noise and samplers for procedural animation"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+name = "organic"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["std"]
+std = []
+wasm = ["std", "dep:wasm-bindgen"]
+
+[dependencies]
+libm = "0.2.16"
+wasm-bindgen = { version = "=0.2.129", optional = true }
