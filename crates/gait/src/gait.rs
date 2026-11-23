@@ -206,6 +206,8 @@ impl Gait {
 
     /// Advances one frame. Returns a bit per leg that touched down.
     pub fn update(&mut self, dt: f64, body: BodyMotion, rng: &mut dyn Rng) -> u32 {
+        // a frame clock can step back (an animation frame stamped before the last read); time never runs backward here
+        let dt = if dt > 0.0 { dt } else { 0.0 };
         let v = libm::fabs(body.v);
         let n = self.legs.len();
         self.weights_for(v, rng);

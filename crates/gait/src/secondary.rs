@@ -29,6 +29,8 @@ impl SpringChain {
     }
     /// Link 0 chases `drive + extra[0]`, link k chases link k-1 plus `extra[k]`.
     pub fn update(&mut self, dt: f64, drive: f64, extra: &[f64]) {
+        // a frame clock can step back (an animation frame stamped before the last read); time never runs backward here
+        let dt = if dt > 0.0 { dt } else { 0.0 };
         let mut goal = drive;
         for i in 0..self.links.len() {
             let g = goal + extra.get(i).copied().unwrap_or(0.0);
@@ -142,6 +144,8 @@ impl Wag {
     }
 
     pub fn update<R: Rng + ?Sized>(&mut self, dt: f64, inp: &WagInput, rng: &mut R) -> TailPose {
+        // a frame clock can step back (an animation frame stamped before the last read); time never runs backward here
+        let dt = if dt > 0.0 { dt } else { 0.0 };
         self.time += dt;
         if self.time > self.until {
             if !inp.mode_weights.is_empty() {
@@ -218,6 +222,8 @@ impl EarPair {
         flap: f64,
         bounce: f64,
     ) -> [f64; 2] {
+        // a frame clock can step back (an animation frame stamped before the last read); time never runs backward here
+        let dt = if dt > 0.0 { dt } else { 0.0 };
         let kick = -head_yaw_rate * 0.09;
         let base = perk.clamp(-1.0, 1.0) * 0.45 - negative * 0.5 + bounce;
         spring(

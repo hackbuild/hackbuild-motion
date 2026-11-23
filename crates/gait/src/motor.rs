@@ -71,6 +71,8 @@ impl PhaseEstimator {
     }
 
     pub fn update(&mut self, dt: f64, contacts: &[bool], source: MotorSource) -> MotorState {
+        // a frame clock can step back (an animation frame stamped before the last read); time never runs backward here
+        let dt = if dt > 0.0 { dt } else { 0.0 };
         self.time += dt;
         for (i, c) in contacts.iter().enumerate().take(self.stance.len()) {
             if *c {

@@ -186,6 +186,8 @@ impl BodyDynamics {
     }
 
     pub fn update<R: Rng + ?Sized>(&mut self, dt: f64, inp: &BodyInput, rng: &mut R) -> BodyPose {
+        // a frame clock can step back (an animation frame stamped before the last read); time never runs backward here
+        let dt = if dt > 0.0 { dt } else { 0.0 };
         let k = self.params.size;
         let n_legs = 4;
         for (i, s) in self.post.iter_mut().enumerate() {
@@ -327,5 +329,22 @@ mod tests {
             "{}",
             pose.roll
         );
+    }
+
+    #[test]
+    fn a_backward_frame_step_stays_finite() {
+        let mut r = Mulberry32::new(3);
+        let mut b = BodyDynamics::new(dog_postures(), BodyParams::default(), &mut r);
+        let inp = BodyInput {
+            v: 0.8,
+            w: 0.4,
+            posture_goals: alloc::vec![0.0; 4],
+            ..Default::default()
+        };
+        // measured before the fix: drop and breathe were NaN after a dt of -0.004
+        let pose = b.update(-0.004, &inp, &mut r);
+        assert!(pose.drop.is_finite() && pose.breathe.is_finite());
+        let pose = b.update(1.0 / 60.0, &inp, &mut r);
+        assert!(pose.drop.is_finite() && pose.breathe.is_finite());
     }
 }
