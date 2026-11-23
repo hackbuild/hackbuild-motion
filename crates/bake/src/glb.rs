@@ -30,7 +30,7 @@ pub fn err<T>(msg: impl Into<String>) -> Result<T, BakeError> {
 }
 
 fn u32_at(b: &[u8], at: usize) -> Result<u32, BakeError> {
-    match b.get(at..at + 4) {
+    match at.checked_add(4).and_then(|end| b.get(at..end)) {
         Some(s) => Ok(u32::from_le_bytes([s[0], s[1], s[2], s[3]])),
         None => err("glb: file ends inside a header"),
     }
@@ -51,7 +51,8 @@ impl Glb {
         while at + 8 <= total {
             let len = u32_at(bytes, at)? as usize;
             let kind = u32_at(bytes, at + 4)?;
-            let body = match bytes.get(at + 8..at + 8 + len) {
+            let start = at + 8;
+            let body = match start.checked_add(len).and_then(|end| bytes.get(start..end)) {
                 Some(b) => b,
                 None => return err("glb: chunk runs past the end of the file"),
             };
@@ -68,7 +69,7 @@ impl Glb {
                 CHUNK_BIN if bin.is_empty() => bin = body.to_vec(),
                 _ => {}
             }
-            at += 8 + len;
+            at = start + len;
         }
         let json = match json {
             Some(j) => j,
@@ -157,7 +158,7 @@ impl Glb {
         };
         let off = uint(v, "byteOffset", 0);
         let len = uint(v, "byteLength", 0);
-        match self.bin.get(off..off + len) {
+        match off.checked_add(len).and_then(|end| self.bin.get(off..end)) {
             Some(b) => Ok(b),
             None => err(format!("glb: buffer view {view} runs past the buffer")),
         }
@@ -232,24 +233,47 @@ pub fn read_accessor(g: &Glb, index: usize) -> Result<Packed, BakeError> {
         .get("normalized")
         .and_then(Value::as_bool)
         .unwrap_or(false);
-    let mut data = vec![0u8; elem * count];
-    if let Some(view) = a.get("bufferView").and_then(Value::as_u64) {
-        let view = view as usize;
-        let bytes = g.view_bytes(view)?;
-        let stride = g
-            .array("bufferViews")
-            .get(view)
-            .map(|v| uint(v, "byteStride", 0))
-            .unwrap_or(0);
-        let stride = if stride == 0 { elem } else { stride };
-        let base = uint(a, "byteOffset", 0);
-        for i in 0..count {
-            let s = base + i * stride;
-            match bytes.get(s..s + elem) {
-                Some(src) => data[i * elem..(i + 1) * elem].copy_from_slice(src),
-                None => return err(format!("glb: accessor {index} runs past its buffer view")),
-            }
+    let past = || BakeError(format!("glb: accessor {index} runs past its buffer view"));
+    let Some(view) = a.get("bufferView").and_then(Value::as_u64) else {
+        // no view: zeros by the spec, bounded by the file size so a forged
+        // count cannot ask for more memory than the input could describe
+        let size = elem.checked_mul(count).ok_or_else(past)?;
+        if size > g.bin.len().max(1 << 20) {
+            return Err(past());
         }
+        return Ok(Packed {
+            component_type: ct,
+            kind,
+            normalized,
+            count,
+            elem,
+            data: vec![0u8; size],
+        });
+    };
+    let view = view as usize;
+    let bytes = g.view_bytes(view)?;
+    let stride = g
+        .array("bufferViews")
+        .get(view)
+        .map(|v| uint(v, "byteStride", 0))
+        .unwrap_or(0);
+    let stride = if stride == 0 { elem } else { stride };
+    let base = uint(a, "byteOffset", 0);
+    // the last element must end inside the view before anything is allocated
+    if count > 0 {
+        let end = (count - 1)
+            .checked_mul(stride)
+            .and_then(|x| x.checked_add(base))
+            .and_then(|x| x.checked_add(elem))
+            .ok_or_else(past)?;
+        if end > bytes.len() {
+            return Err(past());
+        }
+    }
+    let mut data = vec![0u8; elem * count];
+    for i in 0..count {
+        let s = base + i * stride;
+        data[i * elem..(i + 1) * elem].copy_from_slice(&bytes[s..s + elem]);
     }
     Ok(Packed {
         component_type: ct,
