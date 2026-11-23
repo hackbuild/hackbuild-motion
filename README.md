@@ -85,9 +85,8 @@ Each package README carries its own dated list. Across the repository:
   seed, per crate, through a committed golden trace that `cargo test` and
   vitest both check.
 - 2026-11-23: the example pages in Chrome 150 on an Apple M1 with the real
-  GPU, measured by the automated pass: 13 checks pass, 12 not run, 0 fail
-  (`docs/browser-checks.md`; the motion-net rows were replaced after its
-  rewrite).
+  GPU, measured by the automated pass: 13 checks pass, 10 not run, 0 fail
+  (counted from the table in `docs/browser-checks.md`).
 
 ### Not verified by anything
 
