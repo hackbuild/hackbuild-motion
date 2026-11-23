@@ -121,6 +121,12 @@ dog.rotations; // 27 x 4 quaternions
   skeleton; a person watching the gait at frame rate has not been
   recorded.
 
+- 2026-11-23: `Predictor.predict` rejects an input of the wrong length and
+  keeps working; a run asked for after `dispose`, a worker crash after
+  start, and an engine error with no run id each reject the pending runs
+  instead of leaving them open (tested on a small synthetic network in
+  the page engine; the worker crash path is untested).
+
 ### Not verified by anything
 
 - The worker and the in page fallback from file://, and the fallback on a

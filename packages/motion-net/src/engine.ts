@@ -70,8 +70,9 @@ export function engineMain(port: Port): void {
   const run = (id: number, input: Float32Array) => {
     if (!ex || !mem) throw new Error("motion-net: engine not initialized");
     const [dIn, dOut, hid, , frames] = dims as [number, number, number, number, number];
+    if (input.length !== dIn) throw new Error(`motion-net: the network takes ${dIn} values, got ${input.length}`);
     const t0 = now();
-    new Float32Array(mem.buffer, ex.mn_input!(h), dIn).set(input.subarray(0, dIn));
+    new Float32Array(mem.buffer, ex.mn_input!(h), dIn).set(input);
     if (ex.mn_forward!(h) !== 0) throw new Error("motion-net: forward failed");
     const frameData = new Float32Array(mem.buffer, ex.mn_output!(h, 0), frames * dOut).slice();
     const code = new Float32Array(mem.buffer, ex.mn_output!(h, 1), hid).slice();
@@ -111,6 +112,9 @@ export class Predictor {
   private readonly waiting = new Map<number, { resolve: (p: RawPrediction) => void; reject: (e: Error) => void }>();
   /** Why the worker was not used, when it was not. */
   fallbackReason: string | null = null;
+  /** Raw input length the network takes; set by `create`. */
+  inputLength = 0;
+  private dead: string | null = null;
   private constructor(
     readonly mode: EngineMode,
     private readonly send: (m: EngineIn, transfer?: Transferable[]) => void,
@@ -119,6 +123,10 @@ export class Predictor {
 
   /** Runs one evaluation on a raw input of 339 values. */
   predict(input: Float32Array): Promise<RawPrediction> {
+    if (this.dead) return Promise.reject(new Error(this.dead));
+    if (this.inputLength && input.length !== this.inputLength) {
+      return Promise.reject(new Error(`motion-net: the network takes ${this.inputLength} values, got ${input.length}`));
+    }
     const id = ++this.seq;
     return new Promise((resolve, reject) => {
       this.waiting.set(id, { resolve, reject });
@@ -129,7 +137,13 @@ export class Predictor {
 
   dispose(): void {
     this.stop();
-    for (const w of this.waiting.values()) w.reject(new Error("motion-net: predictor disposed"));
+    this.fail("motion-net: predictor disposed");
+  }
+
+  /** @internal Rejects every pending run and every later one. */
+  fail(message: string): void {
+    this.dead ??= message;
+    for (const w of this.waiting.values()) w.reject(new Error(message));
     this.waiting.clear();
   }
 
@@ -143,6 +157,9 @@ export class Predictor {
       const w = this.waiting.get(m.id);
       this.waiting.delete(m.id);
       w?.reject(new Error(m.message));
+    } else if (m.kind === "error") {
+      // an error with no run id leaves the engine in an unknown state
+      this.fail(`motion-net: the engine failed: ${m.message}`);
     }
   }
 
@@ -160,7 +177,9 @@ export class Predictor {
     let reason: string | null = want === false ? "worker off by option" : null;
     if (want !== false) {
       try {
-        return await workerPredictor(init(), opts.workerTimeoutMs ?? 10000);
+        const p = await workerPredictor(init(), opts.workerTimeoutMs ?? 10000);
+        p.inputLength = d.dIn;
+        return p;
       } catch (e) {
         if (want === true) throw e;
         reason = (e as Error).message;
@@ -168,6 +187,7 @@ export class Predictor {
     }
     const p = await pagePredictor(init());
     p.fallbackReason = reason;
+    p.inputLength = d.dIn;
     return p;
   }
 }
@@ -224,7 +244,13 @@ function workerPredictor(init: EngineIn, timeoutMs: number): Promise<Predictor> 
       p.receive(m);
     };
     w.onerror = (ev) => {
-      if (p) return;
+      if (p) {
+        // the worker died after it started: settle every pending run
+        w.terminate();
+        URL.revokeObjectURL(url);
+        p.fail(`motion-net: the worker failed: ${ev.message || "unknown error"}`);
+        return;
+      }
       clearTimeout(timer);
       w.terminate();
       reject(new Error(`the worker failed: ${ev.message || "blocked"}`));

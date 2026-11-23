@@ -177,7 +177,8 @@ async function bytesOf(src: Source, opts: LoadOptions): Promise<ArrayBuffer> {
     return fail(`could not fetch ${String(src)}: ${(e as Error).message}`);
   }
   if (!res.ok) fail(`fetch ${String(src)} answered ${res.status}`);
-  const total = Number(res.headers.get("content-length") ?? 0);
+  // with a content-encoding the length header is the compressed size; report no total
+  const total = res.headers.get("content-encoding") ? 0 : Number(res.headers.get("content-length") ?? 0);
   if (!opts.onProgress || !res.body) return res.arrayBuffer();
   const reader = res.body.getReader();
   const parts: Uint8Array[] = [];
