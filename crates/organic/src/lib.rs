@@ -6,13 +6,15 @@
 //! (`tests/golden.rs` and the TypeScript package test check this).
 //!
 //! The spring formulas follow Daniel Holden's published articles
-//! "Spring-It-On" and "Dead Blending" (theorangeduck.com).
+//! "Spring-It-On" and "Dead Blending" (theorangeduck.com). The target
+//! approximation cascade is ported from bellows-voice (MIT, same owner).
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::needless_range_loop)]
 
 extern crate alloc;
 
+pub mod cascade;
 pub mod clock;
 pub mod curve;
 pub mod golden;

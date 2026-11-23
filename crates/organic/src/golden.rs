@@ -1,6 +1,7 @@
 //! A fixed scenario over every public function, used to prove that the
 //! native and the wasm build give identical numbers for one seed.
 
+use crate::cascade::{CascadeBank, settle};
 use crate::clock::BodyClock;
 use crate::curve::{keyed, minimum_jerk};
 use crate::inertialize::Inertializer;
@@ -81,5 +82,19 @@ pub fn trace(seed: u32) -> Vec<f64> {
     }
     out.push(c.pressure);
     out.push(c.circadian());
+    out.push(settle(6, 0.98));
+    let mut cb = CascadeBank::new(2, 120.0, 6);
+    cb.set_time(0, 0.12);
+    cb.set_rate(1, 40.0);
+    cb.snap(1, -0.5);
+    cb.set_targets(&[1.0, 0.75]);
+    for f in 0..10 {
+        if f == 6 {
+            cb.place(0, 0.1);
+            cb.set_target(0, -0.25);
+        }
+        cb.step();
+        out.extend_from_slice(&[cb.values[0], cb.values[1], cb.velocity(0)]);
+    }
     out
 }

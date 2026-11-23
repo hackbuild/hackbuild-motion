@@ -6,7 +6,7 @@ import * as wasm from "./wasm/organic.js";
 
 export * from "./scalar.js";
 export type { WasmSource } from "./load.js";
-export { SpringBank, Inertializer, NoiseBank, SeededRng } from "./wasm/organic.js";
+export { SpringBank, Inertializer, NoiseBank, SeededRng, CascadeBank } from "./wasm/organic.js";
 
 /** Loads the wasm. With no argument the inlined copy is used (works from file://). */
 export async function load(source?: WasmSource): Promise<void> {

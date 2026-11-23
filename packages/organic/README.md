@@ -20,10 +20,21 @@ What is in it:
   `poissonGap`, `eventInStep`, `gamma`, `logNormal`, `weightedIndex`.
 - `seededRng` (Mulberry32), `hashSeed`, `minimumJerk`, `keyed`,
   `BodyClock` (circadian drive and sleep pressure).
+- `CascadeBank` in wasm (`organic::cascade` in the crate): target
+  approximation smoothing, a cascade of N equal first order lags stepped
+  in closed form, exact at any step rate. At order 6 a move from rest is
+  bell shaped (velocity peak at 0.42 of the 98 percent time, computed);
+  order 2 gives the fast start and long tail of a critically damped
+  follower. `setTime(i, s)` sets the 98 percent time; `place` moves the
+  output alone for contacts. For jaw and lip targets, the integration
+  report suggests order 6 at the articulators' 10 to 11 Hz (inferred).
 
 The spring and inertialization formulas follow Daniel Holden's published
 articles "Spring-It-On" and "Dead Blending" (theorangeduck.com). Written for
-this library from the HACKLE organic kernel.
+this library from the HACKLE organic kernel. The cascade is ported from
+`src/dsp/cascade.ts` in bellows-voice (MIT, by the same owner), which
+implements the target approximation model of Birkholz, Kroger and
+Neuschaefer-Rube 2011 and Birkholz and Hoole 2012.
 
 Why part of it is TypeScript: a scalar spring step or one random draw costs
 less than a call into wasm, so the scalar kernel lives in `src/scalar.ts`.
@@ -93,6 +104,14 @@ first on PATH.
 - 2026-11-22: the IIFE bundle loads in Node with three from the global
   scope and reproduces the first golden value (measured by hand).
 
+- 2026-11-23: `cargo test -p hackbuild-organic` passed 31 tests
+  (counted), six for the cascade: the 98 percent constant 12.03 at order
+  6 and 5.83 at order 2, the set time, the same curve at 100 and 1000 Hz
+  within 1e-12, the velocity peak at 0.42 with 38 percent done, contacts
+  and bad input (computed). The golden trace grew to 157 values with a
+  two channel cascade and stays bit identical between native and wasm
+  (measured); `npx vitest run packages/organic` passed 18 of 18.
+
 ### Not verified by anything
 
 - Motion in a real browser at real frame rate: nobody has looked at it yet.
@@ -105,10 +124,10 @@ first on PATH.
 
 | file | raw | gzip |
 |---|---|---|
-| `organic_bg.wasm` | 60,702 bytes | 23,791 bytes |
-| `organic.iife.js` (wasm inlined as base64) | 107,890 bytes | 42,294 bytes |
+| `organic_bg.wasm` | 69,202 bytes | 27,045 bytes |
+| `organic.iife.js` (wasm inlined as base64) | 122,003 bytes | 46,193 bytes |
 
-Measured 2026-11-22 with wasm-opt from wasm-pack 0.13.1. Budget: wasm
+Measured 2026-11-23 with wasm-opt from wasm-pack 0.13.1. Budget: wasm
 under 80 KB raw; a change that crosses it says why in its commit.
 
 ## Licence

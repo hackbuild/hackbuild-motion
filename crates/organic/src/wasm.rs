@@ -1,6 +1,7 @@
 //! wasm-bindgen surface. Flat `Float64Array` layouts: rotations are `x y z w`
 //! per bone, positions `x y z` per point.
 
+use crate::cascade::CascadeBank;
 use crate::inertialize::Inertializer;
 use crate::math::{Quat, Vec3};
 use crate::noise::{Ou, Pink};
@@ -226,5 +227,60 @@ impl NoiseBank {
     }
     pub fn uniform(&mut self) -> f64 {
         self.rng.next_f64()
+    }
+}
+
+/// Target approximation smoothing, many channels at a fixed step rate
+/// (ported from bellows-voice, MIT).
+#[wasm_bindgen(js_name = CascadeBank)]
+pub struct WasmCascadeBank(CascadeBank);
+
+#[wasm_bindgen(js_class = CascadeBank)]
+impl WasmCascadeBank {
+    #[wasm_bindgen(constructor)]
+    pub fn new(channels: usize, step_rate_hz: f64, order: usize) -> WasmCascadeBank {
+        WasmCascadeBank(CascadeBank::new(channels, step_rate_hz, order))
+    }
+    pub fn channels(&self) -> usize {
+        self.0.channels()
+    }
+    pub fn order(&self) -> usize {
+        self.0.order()
+    }
+    #[wasm_bindgen(js_name = setRate)]
+    pub fn set_rate(&mut self, i: usize, per_second: f64) {
+        self.0.set_rate(i, per_second);
+    }
+    #[wasm_bindgen(js_name = setTime)]
+    pub fn set_time(&mut self, i: usize, seconds: f64) {
+        self.0.set_time(i, seconds);
+    }
+    #[wasm_bindgen(js_name = setTarget)]
+    pub fn set_target(&mut self, i: usize, target: f64) {
+        self.0.set_target(i, target);
+    }
+    #[wasm_bindgen(js_name = setTargets)]
+    pub fn set_targets(&mut self, targets: &[f64]) {
+        self.0.set_targets(targets);
+    }
+    pub fn snap(&mut self, i: usize, value: f64) {
+        self.0.snap(i, value);
+    }
+    pub fn place(&mut self, i: usize, value: f64) {
+        self.0.place(i, value);
+    }
+    pub fn velocity(&self, i: usize) -> f64 {
+        self.0.velocity(i)
+    }
+    pub fn value(&self, i: usize) -> f64 {
+        self.0.values.get(i).copied().unwrap_or(0.0)
+    }
+    /// Steps `steps` times and writes the outputs into `out`.
+    pub fn step(&mut self, steps: u32, out: &mut [f64]) {
+        for _ in 0..steps {
+            self.0.step();
+        }
+        let n = out.len().min(self.0.values.len());
+        out[..n].copy_from_slice(&self.0.values[..n]);
     }
 }

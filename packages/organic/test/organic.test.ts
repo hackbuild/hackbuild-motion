@@ -10,6 +10,7 @@ import {
   OU,
   Pink,
   SeededRng,
+  CascadeBank,
   SpringBank,
   decay,
   fastNegexp,
@@ -239,5 +240,21 @@ describe("inertialization", () => {
     expect(hips.position.y).toBeCloseTo(0.5, 3);
     expect(inert.active).toBe(false);
     inert.dispose();
+  });
+});
+
+describe("cascade", () => {
+  it("reaches 98 percent at the set time with a bell shaped move", () => {
+    const b = new CascadeBank(1, 1000, 6);
+    b.setTime(0, 0.2);
+    b.setTarget(0, 1);
+    const out = new Float64Array(1);
+    b.step(100, out);
+    const half = out[0]!;
+    b.step(100, out);
+    expect(Math.abs(out[0]! - 0.98)).toBeLessThan(2e-3);
+    expect(half).toBeGreaterThan(0.3);
+    expect(half).toBeLessThan(0.6);
+    b.free();
   });
 });
