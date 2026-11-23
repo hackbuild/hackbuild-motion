@@ -32,6 +32,36 @@ T pose, +Z forward, meters, feet at y = 0), takes an injected
 `Rng = () => number`, loads its wasm from a URL, bytes or an inlined copy so
 it runs from file://, and ships a single file IIFE build.
 
+## Install
+
+Not published to npm yet. From a clone, build the packages you want:
+
+    npm ci && npm run build -w @hackbuild/organic -w @hackbuild/gait
+
+Each package also ships `dist/<name>.iife.js`, a single file build with its
+wasm inlined, for a page opened from file://.
+
+## Use
+
+```ts
+import { load, QuadrupedGait } from "@hackbuild/gait";
+
+await load();
+// four legs in the body frame (x left, z forward), meters
+const legs = [
+  { x: 0.09, z: 0.22, toe: 0.02, front: true },
+  { x: -0.09, z: 0.22, toe: 0.02, front: true },
+  { x: 0.09, z: -0.2, toe: 0.02, front: false },
+  { x: -0.09, z: -0.2, toe: 0.02, front: false },
+];
+let seed = 1;
+const rng = () => (seed = (seed * 16807) % 2147483647) / 2147483647; // any seeded () => number
+const gait = new QuadrupedGait(legs, 0.42, { rng });
+const state = gait.update(1 / 60, { x: 0, z: 0, yaw: 0 }, { speed: 1.2, turnRate: 0 });
+```
+
+Each package README has a fuller example.
+
 ## Develop
 
     source ~/.nvm/nvm.sh && nvm use

@@ -119,3 +119,8 @@ function frame(dt: number) {
 - Face tracks in clips, procedural nod, shake and think gestures, foot
   locking and turn in place steps are not in this package yet.
 - Reach duration constants and the 0.6 s point retract are inferred.
+
+## Licence
+
+Code MIT (`LICENSE` in this package and at the repository root). This
+README is CC-BY-4.0, its code samples also MIT.
