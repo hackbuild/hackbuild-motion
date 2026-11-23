@@ -128,7 +128,7 @@ describe("mapper", () => {
     expect(nodes[r.byBone.rightThumbMetacarpal!]!.name).toBe("thumb_01_r");
   });
 
-  it("finds four legs, a tail and ears on the HACKLE dog", () => {
+  it("finds four legs, a tail and ears on a Meshy dog rig", () => {
     const r = mapRig(DOG);
     expect(r.missingRequired.length).toBeGreaterThan(0);
     const chains = limbChains(DOG);

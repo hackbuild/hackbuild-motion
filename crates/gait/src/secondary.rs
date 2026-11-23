@@ -71,7 +71,7 @@ fn m(name: &str, amp: f64, hz: f64, lift: f64, circle: f64, tip: f64) -> WagMode
 }
 
 /// Eight wag modes: tail wagging moves between about eight stable modes
-/// (Ren 2022). Amplitudes and rates from the HACKLE body (vendor).
+/// (Ren 2022). Amplitudes and rates from an earlier in-house dog simulator (vendor).
 pub fn wag_modes() -> Vec<WagMode> {
     alloc::vec![
         m("still", 0.05, 0.45, -0.25, 0.0, 0.0),

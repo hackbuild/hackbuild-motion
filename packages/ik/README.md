@@ -27,8 +27,9 @@ skeleton, a raw bone array or a test.
 - `/three`: `solveTwoBone`, `solveChain`, `lookAtChain`, `curlFingers`,
   `FootLock`, `rotateWorld`.
 
-Written for this library from the HACKLE leg solver and foot lock and the
-ARBOR arm solver, hand frame and finger curl.
+Written for this library from the leg solver and foot lock of an earlier
+in-house dog simulator and an earlier arm solver with its hand frame and
+finger curl.
 
 ## Install
 
@@ -95,7 +96,7 @@ function frame(dt: number) {
 ### Not verified by anything
 
 - The finger and thumb curl directions on a real rig: the axes follow the
-  ARBOR hand frame and the test checks only that fingertips move.
+  earlier arm solver's hand frame and the test checks only that fingertips move.
 - Look at and IK in a real browser at real frame rate.
 - Digitigrade three segment legs (hock joints); use `fabrik` with hinge
   limits or `twoBone` on the first two segments until a dedicated solver

@@ -8,7 +8,7 @@ use organic::Rng;
 use organic::math::smoothstep;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-/// Defaults from the HACKLE tunables (vendor): pace 0.12, trot 0.42, canter 1.5.
+/// Defaults from an earlier in-house dog simulator (vendor): pace 0.12, trot 0.42, canter 1.5.
 pub struct FroudeThresholds {
     pub pace: f64,
     pub trot: f64,

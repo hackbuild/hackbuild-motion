@@ -76,7 +76,7 @@ fn t(name: &str, offsets: &[f64], duty: f64, clearance: f64, f: (f64, f64, f64, 
 }
 
 /// Walk, pace, trot, canter and gallop for a dog sized quadruped, in the
-/// order the Froude selector weights them. Values from the HACKLE body
+/// order the Froude selector weights them. Values from an earlier in-house dog simulator
 /// (vendor, tuned by eye on a 0.78 m tall dog).
 pub fn quadruped() -> Vec<GaitTable> {
     alloc::vec![

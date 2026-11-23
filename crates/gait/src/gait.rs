@@ -103,7 +103,7 @@ pub fn to_world(x: f64, z: f64, bx: f64, bz: f64, yaw: f64) -> [f64; 2] {
 }
 
 impl Gait {
-    /// A quadruped gait (LF RF LH RH) with the HACKLE tables and Froude thresholds.
+    /// A quadruped gait (LF RF LH RH) with the default dog tables and Froude thresholds.
     pub fn quadruped(legs: Vec<LegSpec>, leg_length: f64) -> Self {
         Gait::new(
             legs,

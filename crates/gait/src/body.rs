@@ -44,7 +44,7 @@ fn p(
 }
 
 /// Sit, down, bow and reach for a dog, legs LF RF LH RH. Values from the
-/// HACKLE body (vendor, tuned by eye on a 0.78 m tall dog).
+/// Values from an earlier in-house dog simulator (vendor, tuned by eye on a 0.78 m tall dog).
 pub fn dog_postures() -> Vec<Posture> {
     alloc::vec![
         p(

@@ -31,7 +31,8 @@ What is in it:
 
 The spring and inertialization formulas follow Daniel Holden's published
 articles "Spring-It-On" and "Dead Blending" (theorangeduck.com). Written for
-this library from the HACKLE organic kernel. The cascade is ported from
+this library from the spring and noise kernel of an earlier in-house
+simulator. The cascade is ported from
 `src/dsp/cascade.ts` in bellows-voice (MIT, by the same owner), which
 implements the target approximation model of Birkholz, Kroger and
 Neuschaefer-Rube 2011 and Birkholz and Hoole 2012.
@@ -122,8 +123,8 @@ first on PATH.
 
 - Motion in a real browser at real frame rate: nobody has looked at it yet.
 - The iife bundle on a page opened from file:// in a browser.
-- Performance against the original HACKLE kernel.
-- Dead blending, which the plan lists beside offset inertialization, is not
+- Performance against the earlier kernel.
+- Dead blending, the published alternative to offset inertialization, is not
   written.
 
 ## Size budget

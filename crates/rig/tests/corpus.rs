@@ -3,7 +3,7 @@
 //! Sets: Mixamo (prefixed), Ready Player Me style (Mixamo names without the
 //! prefix), Quaternius UAL (Unreal mannequin names), Unreal 5 manny, VRoid
 //! VRM export, Meshy humanoid (inferred), CMU BVH, 3ds Max Biped, Rigify
-//! deform bones, SMPL, Xsens, Character Creator, MMD, and the HACKLE dog rig.
+//! deform bones, SMPL, Xsens, Character Creator, MMD, and a Meshy dog rig.
 
 use organic::{Mulberry32, Rng};
 use rig::bones::{HumanBone, REQUIRED};
@@ -340,7 +340,7 @@ const MMD: &str = "センター
 左足D < 下半身
 右足D < 下半身";
 
-/// The HACKLE dog: a Meshy quadruped rig, names as the app requires them.
+/// A Meshy quadruped dog rig, bone names as an earlier dog simulator required them.
 const DOG: &str = "root
 hips < root
 spine2 < hips

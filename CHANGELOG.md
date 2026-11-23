@@ -59,7 +59,7 @@ Versions follow semver per package. Nothing is published to npm yet.
   network (request time stamps, blend from arrival, per sequence
   playheads, staleness health, coast past the end, turn in place, partial
   decode) filling gait's `MotorState`, and `NeuralFallback` with a 2 s
-  procedural hold. Bit equal to the legacy port on the quadruped weights
+  procedural hold. Bit equal to an earlier implementation on the quadruped weights
   with f64 sums. No weights in the repository.
 - `@hackbuild/motion-match`: feature database, bounding box search
   matching brute force, inertialized transitions, synthetic gait clips,

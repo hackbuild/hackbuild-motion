@@ -39,7 +39,7 @@ the repair and the parts a person sees.
   through the same `setValue(name, weight)`.
 - `HeadHider`: first person view. The head bone scales to 0.001 for one
   render and is restored after it, also when the draw throws, so the body
-  still shows in mirrors and shadows (HACKLE lesson 11).
+  still shows in mirrors and shadows.
 - `checkRedistribution(meta, { modified })`: the licence gate for exporting
   or composing avatars, for VRM 1.0 and 0.x metadata.
 - `probeFbx(bytes)`: tells a rigged character from an animation only FBX

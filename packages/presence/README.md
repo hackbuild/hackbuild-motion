@@ -1,8 +1,8 @@
 # @hackbuild/presence
 
 The procedural layers that make a standing humanoid read as present,
-written for this library from the HACKLE human and the family research
-notes. Plain TypeScript over the `@hackbuild/organic` springs and samplers,
+written for this library from an earlier in-house humanoid and published
+research on gaze and idle motion. Plain TypeScript over the `@hackbuild/organic` springs and samplers,
 with a three.js adapter under `/three`. No wasm.
 
 - `GazeController`: aversion episodes timed after Andrist 2014 per mode
@@ -14,7 +14,7 @@ with a three.js adapter under `/three`. No wasm.
   past the head range.
 - `SeamHold`: hysteresis at the atan2 seam. Past 2.2 rad with a sign flip
   the previous side is kept, so a target crossing behind does not whip the
-  head 180 degrees (HACKLE lesson 5).
+  head 180 degrees.
 - `Blink` (1 to 8 s gaps, 85 percent single, triangle lid curve) and
   `Breath` (inhale 40 percent of the cycle, a slow rate drift).
 - `IdleScheduler`: a postural change about every 20 s (fidget, weight shift,

@@ -1,5 +1,5 @@
 //! Procedural locomotion for legged rigs, written for this library from the
-//! HACKLE dog body.
+//! body of an earlier in-house dog simulator.
 //!
 //! - [`table`]: footfall tables (walk, pace, trot, canter, gallop for four
 //!   legs; tripod, ripple and wave for six) as validated data, and footfall

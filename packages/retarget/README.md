@@ -32,8 +32,8 @@ it and offers a three.js adapter under `/three`.
   `LiveRetarget`, which copies a driver rig's pose onto a target every
   frame so a whole clip library on the driver plays on any model.
 
-Written for this library. The rest alignment generalizes the ARBOR driver
-retarget (bone directions aligned at rest).
+Written for this library. The rest alignment generalizes an earlier arm
+solver's retarget (bone directions aligned at rest).
 
 ## Install
 

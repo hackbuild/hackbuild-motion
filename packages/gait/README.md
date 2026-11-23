@@ -1,7 +1,7 @@
 # @hackbuild/gait
 
 Procedural locomotion for legged rigs, written for this library from the
-HACKLE dog body. The core is the Rust crate `crates/gait` compiled to
+body of an earlier in-house dog simulator. The core is the Rust crate `crates/gait` compiled to
 wasm32 with SIMD128; this package loads it and offers a three.js adapter
 under `/three`.
 
@@ -9,7 +9,7 @@ under `/three`.
   four legs (LF RF LH RH, Hildebrand offsets), tripod, ripple and wave for
   six in the crate, with footfall diagrams.
 - Gait choice from the Froude number with a 10 percent dead band and a per
-  animal pace bias (thresholds 0.12, 0.42, 1.5 from the HACKLE tunables,
+  animal pace bias (thresholds 0.12, 0.42, 1.5 from an earlier dog simulator,
   vendor).
 - `QuadrupedGait`: a phase oscillator per leg pulled toward its table
   offset, landing prediction, minimum jerk swings, step in place when
@@ -107,7 +107,7 @@ inlined, `THREE` read from the page).
 - `@hackbuild/motion-net`'s `QuadrupedHost` fills `MotorState` with
   source `neural`; nothing here checks it against this package's gait.
 
-- Motion on the HACKLE Meshy dog or any real rig, in a real browser at real
+- Motion on a Meshy dog or any real rig, in a real browser at real
   frame rate. Nobody has looked at it yet.
 - Turn in place stepping beyond what the oscillator does when only the turn
   rate is non zero; a dedicated pattern is open.

@@ -30,8 +30,8 @@ offers a three.js adapter under `/three`.
 - `/three`: `mapObject3D(root)`, `chainsOf(root)`, `restOf(bones)` and
   `applyRestFix(root, bones, report)`.
 
-Written for this library; the mapper merges the ideas of the HACKLE and
-ARBOR classifiers with chain shifts and depth assigned spines.
+Written for this library; the mapper merges the ideas of two earlier
+in-house bone classifiers (a dog simulator and an arm solver) with chain shifts and depth assigned spines.
 
 Why the table is TypeScript: it is plain data read by TypeScript packages,
 which should not wait for wasm to load to read it.
@@ -83,7 +83,7 @@ face.aa?.binds; // [{ morph: "viseme_aa", weight: 1 }] on a Ready Player Me styl
   bones, SMPL, MMD; Xsens and Character Creator spot checks. A seeded
   property test reshuffles six sets 20 times each with namespaces and an
   FBX style duplicate child and gets the same mapping (computed).
-- 2026-11-22: on the HACKLE dog rig the humanoid mapper reports missing
+- 2026-11-22: on a Meshy dog rig the humanoid mapper reports missing
   required bones and the chain finder returns the four legs, tail, ears,
   neck and spine in order (computed).
 - 2026-11-22: the rest analysis golden trace is bit identical between the
@@ -93,8 +93,9 @@ face.aa?.binds; // [{ morph: "viseme_aa", weight: 1 }] on a Ready Player Me styl
 ### Not verified by anything
 
 - Real exported files: the name sets were written by hand from exporter
-  conventions, the ARBOR driver table and the HACKLE rig names. The Meshy
-  humanoid set is inferred from the HACKLE sources (`headfront`) and the
+  conventions, an earlier arm solver's driver table and an earlier dog
+  simulator's rig names. The Meshy humanoid set is inferred from that
+  simulator's sources (`headfront`) and the
   exporter's Mixamo style names, not read from a Meshy file.
 - Character Creator and Xsens are spot checked, not required to map fully.
 - Rest analysis on rigs whose head is not above the hips in the rest pose.
