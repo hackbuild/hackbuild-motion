@@ -16,6 +16,9 @@ use organic::{Quat, Vec3};
 use rig::bones::HumanBone::{self, *};
 use rig::reference::reference_position;
 
+/// The frames `to_clip` writes at most: 20 minutes at 30 fps.
+pub const MAX_FRAMES: usize = 36_000;
+
 /// Meters per MMD unit.
 pub const MMD_UNIT: f64 = 0.08;
 
@@ -138,7 +141,9 @@ impl VmdFile {
     /// decoded forms of `self.names`.
     pub fn to_clip(&self, names: &[String]) -> (Skeleton, Clip) {
         let skel = mmd_skeleton();
-        let frames = self.last_frame() as usize + 1;
+        // keys past MAX_FRAMES are dropped: a forged key frame would otherwise
+        // allocate a frame per index up to it (u32::MAX wraps to 0 on wasm32)
+        let frames = (self.last_frame() as u64 + 1).min(MAX_FRAMES as u64) as usize;
         let n = skel.len();
         let mut rotations = alloc::vec![alloc::vec![Quat::IDENTITY; n]; frames];
         let mut translations = alloc::vec![skel.rest_t.clone(); frames];

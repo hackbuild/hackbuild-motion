@@ -119,9 +119,9 @@ pub fn parse_bvh(text: &str) -> Result<(Skeleton, Clip), BvhError> {
         .map(|c| c.iter().any(|x| matches!(x, Ch::Px | Ch::Py | Ch::Pz)))
         .collect();
     let mut clip = Clip {
-        times: Vec::with_capacity(frames),
-        rotations: Vec::with_capacity(frames),
-        translations: Vec::with_capacity(frames),
+        times: Vec::with_capacity(frames.min(MAX_RESERVE)),
+        rotations: Vec::with_capacity(frames.min(MAX_RESERVE)),
+        translations: Vec::with_capacity(frames.min(MAX_RESERVE)),
         moves,
     };
     for f in 0..frames {
@@ -191,6 +191,10 @@ pub fn parse_bvh(text: &str) -> Result<(Skeleton, Clip), BvhError> {
     };
     Ok((skel, clip))
 }
+
+/// Frames reserved up front; a forged `Frames:` count beyond this grows the
+/// vectors as values arrive and fails when the values run out.
+const MAX_RESERVE: usize = 1 << 16;
 
 fn root_of(parents: &[Option<usize>], mut j: usize) -> usize {
     while let Some(p) = parents[j] {
@@ -274,5 +278,11 @@ Frame Time: 0.033333
         let (s, _) = parse_bvh(bvh).unwrap();
         // the frame 0 floor (toe height) plus the rest hips height above the toe
         assert!((s.rest_t[0].y - 90.0).abs() < 1e-3, "{}", s.rest_t[0].y);
+    }
+
+    #[test]
+    fn a_forged_frame_count_is_an_error() {
+        let bvh = BVH.replace("Frames: 2", "Frames: 1000000000000000");
+        assert!(parse_bvh(&bvh).is_err());
     }
 }
