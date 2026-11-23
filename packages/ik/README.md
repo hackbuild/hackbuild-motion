@@ -93,6 +93,15 @@ function frame(dt: number) {
   `cargo test -p hackbuild-ik` passes 16 unit tests; the golden trace was
   regenerated for the new release curve.
 
+- 2026-11-23: a straight chain with the target on its own axis was a
+  FABRIK fixed point (a T pose arm stuck 0.1 m from a target at 0.4 m);
+  the solver now bends such a chain off the line when the error stops
+  falling, and a Rust test covers it. The TypeScript property runs on 16
+  fixed seeds instead of a random one. It skips a segment folded back
+  within 8 degrees of the one before it (a degenerate joint) and allows
+  512 iterations: near a folded solution 128 left up to 2 mm. Over 20,000
+  scanned seeds of 200 runs each, every case met 1e-4 m (computed).
+
 ### Not verified by anything
 
 - The finger and thumb curl directions on a real rig: the axes follow the

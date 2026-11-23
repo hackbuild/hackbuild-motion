@@ -61,6 +61,48 @@ fn constrain(prev_dir: Option<Vec3>, dir: Vec3, limit: Limit) -> Vec3 {
     }
 }
 
+/// A chain lying on one line through the root, with the target on that
+/// line too, is a fixed point of FABRIK: both passes only slide joints along
+/// the line, so a straight chain (a T pose arm) never folds toward a target
+/// on its own axis. When that holds, push the interior joints a tenth of a
+/// segment off the line, all to one side; the next pass restores lengths.
+fn bend_if_straight(p: &mut [Vec3], target: Vec3, len: &[f64], total: f64) {
+    let n = p.len();
+    if n < 3 {
+        return;
+    }
+    let root = p[0];
+    let far = p
+        .iter()
+        .copied()
+        .chain(core::iter::once(target))
+        .fold(root, |a, q| {
+            if (q - root).length() > (a - root).length() {
+                q
+            } else {
+                a
+            }
+        });
+    let axis = (far - root).normalize();
+    if axis.length() < 1e-12 {
+        return;
+    }
+    let tol = 1e-6 * total;
+    let off_line = |q: Vec3| (q - root).reject(axis).length() > tol;
+    if p.iter().any(|q| off_line(*q)) || off_line(target) {
+        return;
+    }
+    let side = if axis.x.abs() < 0.9 {
+        axis.cross(Vec3::X)
+    } else {
+        axis.cross(Vec3::Y)
+    }
+    .normalize();
+    for i in 1..n - 1 {
+        p[i] += side * (0.1 * len[i - 1]);
+    }
+}
+
 /// FABRIK (Aristidou and Lasenby 2011). `p` holds joint positions from root
 /// to end and is solved in place; the root stays fixed and segment lengths
 /// are kept. `limits`, when given, has one entry per segment.
@@ -98,10 +140,16 @@ pub fn fabrik(
         };
     }
     let mut it = 0;
+    let mut last = f64::INFINITY;
     while it < iterations {
-        if (p[n - 1] - target).length() <= tolerance {
+        let err = (p[n - 1] - target).length();
+        if err <= tolerance {
             break;
         }
+        if err >= last * (1.0 - 1e-9) {
+            bend_if_straight(p, target, &len, total);
+        }
+        last = err;
         it += 1;
         // backward: end onto the target
         p[n - 1] = target;
@@ -223,6 +271,20 @@ mod tests {
         }
         // measured: every reachable target is met within 64 iterations
         assert!(reached as f64 >= cases as f64 * 0.98, "{reached}");
+    }
+
+    #[test]
+    fn straight_chain_folds_toward_a_target_on_its_axis() {
+        // a T pose arm and a target on the arm's own axis, nearer than the
+        // reach: before the bend this sat at a fixed point 0.1 m away
+        let mut p: Vec<Vec3> = (0..4)
+            .map(|i| Vec3::new(i as f64 * 0.3, 0.0, 0.0))
+            .collect();
+        let info = fabrik(&mut p, Vec3::new(0.4, 0.0, 0.0), 64, 1e-6, None);
+        assert!(info.error < 1e-6, "{}", info.error);
+        for w in p.windows(2) {
+            assert!(((w[1] - w[0]).length() - 0.3).abs() < 1e-9);
+        }
     }
 
     #[test]
