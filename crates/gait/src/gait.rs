@@ -226,7 +226,10 @@ impl Gait {
         blend_offsets(&self.tables, &self.weights, &mut self.offs);
         let activity = clamp((v + libm::fabs(body.w) * 0.25) / 0.06, 0.0, 1.0);
         let mut touch = 0u32;
-        if self.standing && activity > 0.5 && body.posed < 0.2 {
+        // a standing step in progress finishes before the stride starts, so
+        // no foot is marked stance while it is still in the air
+        let stepping = self.feet.iter().any(|f| f.step.is_some());
+        if self.standing && activity > 0.5 && body.posed < 0.2 && !stepping {
             // start the stride with the leg furthest from its spot
             self.standing = false;
             let mut worst = 0.0;
@@ -244,9 +247,9 @@ impl Gait {
                 let ft = &mut self.feet[i];
                 ft.phase = frac(self.phase + self.offs[i]);
                 ft.stance = ft.phase < duty;
-                if !ft.stance {
-                    ft.lift = [ft.x, ft.z];
-                }
+                // a foot whose phase wraps in its first frame lands where it is
+                ft.lift = [ft.x, ft.z];
+                ft.land = [ft.x, ft.z];
                 ft.step = None;
             }
         } else if !self.standing && activity < 0.08 && self.feet.iter().all(|f| f.stance) {
@@ -323,6 +326,7 @@ impl Gait {
                         ft.stance = false;
                         ft.phase = duty + 0.01;
                         ft.lift = [ft.x, ft.z];
+                        ft.land = [ft.x, ft.z];
                     }
                 }
             }
@@ -347,12 +351,6 @@ impl Gait {
                         ft.stance = true;
                         touch |= 1 << i;
                     }
-                } else if body.posed > 0.05 {
-                    let k = 1.0 - libm::exp(-dt * 5.0);
-                    ft.x = lerp(ft.x, s[0], k);
-                    ft.z = lerp(ft.z, s[1], k);
-                    ft.y = toe;
-                    ft.stance = true;
                 } else if !swinging
                     && libm::hypot(ft.x - s[0], ft.z - s[1]) > self.params.step_threshold
                 {
@@ -491,6 +489,93 @@ mod tests {
                 assert!(
                     libm::hypot(s[0] - g.feet[i].x, s[1] - g.feet[i].z) < g.params.relift + 0.3
                 );
+            }
+        }
+    }
+
+    #[test]
+    fn no_foot_jumps_on_the_first_frames_of_a_stride() {
+        // a stride started away from the origin used to land a foot that
+        // wrapped in its first frame at a stale spot (0, 0)
+        for &hz in &[30.0, 60.0, 120.0] {
+            let dt = 1.0 / hz;
+            let mut v = 0.2;
+            while v < 5.0 {
+                let mut g = dog();
+                let mut r = Mulberry32::new(3);
+                g.reset(5.0, 5.0, 0.0);
+                let mut body = BodyMotion {
+                    x: 5.0,
+                    z: 5.0,
+                    v,
+                    ..Default::default()
+                };
+                for _ in 0..(hz as usize) {
+                    let prev = g.feet.clone();
+                    body.z += v * dt;
+                    g.update(dt, body, &mut r);
+                    // one stride length, v / f, bounds any foot's move in a frame
+                    let stride = v / g.freq.max(0.5);
+                    for i in 0..4 {
+                        let d = libm::hypot(g.feet[i].x - prev[i].x, g.feet[i].z - prev[i].z);
+                        assert!(d < stride, "{v} m/s at {hz} Hz: foot {i} moved {d} m");
+                    }
+                }
+                v += 0.1;
+            }
+        }
+    }
+
+    #[test]
+    fn sitting_does_not_slide_planted_feet() {
+        let mut g = dog();
+        let mut r = Mulberry32::new(7);
+        let dt = 1.0 / 60.0;
+        g.reset(0.0, 0.0, 0.0);
+        g.offsets = alloc::vec![[0.0, 0.05], [0.0, 0.05], [0.0, 0.13], [0.0, 0.13]];
+        let body = BodyMotion {
+            posed: 1.0,
+            ..Default::default()
+        };
+        for _ in 0..60 {
+            let prev = g.feet.clone();
+            g.update(dt, body, &mut r);
+            for i in 0..4 {
+                if prev[i].stance && g.feet[i].stance {
+                    let d = libm::hypot(g.feet[i].x - prev[i].x, g.feet[i].z - prev[i].z);
+                    assert!(d < 1e-12, "planted foot {i} slid {d} m");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn no_stance_foot_in_the_air() {
+        let dt = 1.0 / 60.0;
+        for seed in 0..40 {
+            let mut g = dog();
+            let mut r = Mulberry32::new(seed);
+            g.reset(0.0, 0.0, 0.0);
+            // drift the body so a standing step starts, then command a walk
+            let mut body = BodyMotion {
+                x: 0.1 + 0.002 * seed as f64,
+                ..Default::default()
+            };
+            for k in 0..120 {
+                if k == 3 + (seed as usize % 10) {
+                    body.v = 0.8;
+                }
+                body.z += body.v * dt;
+                g.update(dt, body, &mut r);
+                for i in 0..4 {
+                    if g.feet[i].stance {
+                        let h = g.feet[i].y - g.legs[i].toe;
+                        assert!(
+                            h.abs() < 1e-9,
+                            "seed {seed} frame {k}: stance foot {i} at {h} m"
+                        );
+                    }
+                }
             }
         }
     }
