@@ -8,6 +8,7 @@ they pass their tests; the table below grows with them.
 | package | crate | what |
 |---|---|---|
 | [`@hackbuild/organic`](packages/organic) | `hackbuild-organic` | springs, inertialization, seeded noise, samplers, body clock |
+| [`@hackbuild/rig`](packages/rig) | `hackbuild-rig` | bone name mapper, limb chains, rest analysis, expression and viseme table |
 
 Every package works in one normalized humanoid space (VRM 1.0 bone names,
 T pose, +Z forward, meters, feet at y = 0), takes an injected

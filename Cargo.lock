@@ -23,6 +23,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hackbuild-rig"
+version = "0.1.0"
+dependencies = [
+ "hackbuild-organic",
+ "libm",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "libm"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"

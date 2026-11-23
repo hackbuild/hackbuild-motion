@@ -12,3 +12,9 @@ Versions follow semver per package. Nothing is published to npm yet.
   inertialization for rotations and positions, OU and pink noise, samplers,
   Mulberry32 seeded stream shared bit for bit by Rust, wasm and TypeScript,
   minimum jerk curves, body clock, three.js `PoseInertializer`.
+- `@hackbuild/rig`: humanoid bone name mapper without per rig tables
+  (chain shifts, depth assigned spine, numbered fingers, MMD dialect,
+  report of missing, unmapped, helper and ambiguous bones), limb chains for
+  non humanoids, rest analysis (facing, units, floor, A pose), reference
+  humanoid, the expression and viseme table (VRM, ARKit 52, Oculus 15),
+  three.js `mapObject3D`, `chainsOf`, `restOf`, `applyRestFix`.

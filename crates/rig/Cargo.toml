@@ -1,0 +1,22 @@
+[package]
+name = "hackbuild-rig"
+version = "0.1.0"
+description = "Humanoid bone name mapper without per rig tables, limb chains for non humanoids, rest pose analysis"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+name = "rig"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["std"]
+std = ["organic/std"]
+wasm = ["std", "dep:wasm-bindgen"]
+
+[dependencies]
+libm = "0.2.16"
+organic = { package = "hackbuild-organic", path = "../organic", default-features = false }
+wasm-bindgen = { version = "=0.2.129", optional = true }
