@@ -61,7 +61,11 @@ The host follows HACKLE lesson 6 and plan item 5.4.2:
   turns it off and the capability says so.
 - `enter(from)` seeds root, speed and pose from the outgoing backend and
   requests at once; `follow(root)` keeps the root on the procedural body
-  while that one drives.
+  while that one drives, and moves a root the caller pushed out of an
+  obstacle: the pose, the sequences in play and the requested
+  trajectories move with it, so the next frame does not play back into
+  the obstacle (before this, a root held at a wall read 73 m/s of
+  speed in the host test, computed).
 - Only the frames used before the next request are decoded (`decodeFrames:
   "auto"`): 9 of 16 at 10 Hz with 40 ms latency (computed).
 - An in page session predicts at half the file's rate.

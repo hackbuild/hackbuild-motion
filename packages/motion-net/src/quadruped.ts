@@ -287,19 +287,48 @@ export class CodebookGait implements LocomotionBackend {
     this.vel.set(v, i * 3);
   }
 
-  /** Moves the root without a prediction, for a caller whose other backend drives the body. */
+  /**
+   * Moves the root without a prediction: for a caller whose other backend
+   * drives the body, or one that pushes the root out of an obstacle. The
+   * pose, the sequences in play and the requested trajectories move with
+   * it, so the next frame continues from the new root instead of playing
+   * back to the old one.
+   */
   follow(r: { x: number; z: number; yaw: number }): void {
-    const dx = r.x - this.root.x;
-    const dz = r.z - this.root.z;
-    const dyaw = wrap(r.yaw - this.root.yaw);
+    const o = { ...this.root };
+    const dyaw = wrap(r.yaw - o.yaw);
+    const at = (x: number, z: number): [number, number] => {
+      const w = toWorld(dyaw, x - o.x, 0, z - o.z);
+      return [r.x + w[0], r.z + w[2]];
+    };
+    const turn = (x: number, z: number): [number, number] => {
+      const w = toWorld(dyaw, x, 0, z);
+      return [w[0], w[2]];
+    };
     for (let i = 0; i < this.n; i++) {
-      const lx = this.pos[i * 3]! - this.root.x;
-      const lz = this.pos[i * 3 + 2]! - this.root.z;
-      const w = toWorld(dyaw, lx, 0, lz);
-      this.pos[i * 3] = this.root.x + w[0] + dx;
-      this.pos[i * 3 + 2] = this.root.z + w[2] + dz;
+      const [x, z] = at(this.pos[i * 3]!, this.pos[i * 3 + 2]!);
+      this.pos[i * 3] = x;
+      this.pos[i * 3 + 2] = z;
+      [this.vel[i * 3], this.vel[i * 3 + 2]] = turn(this.vel[i * 3]!, this.vel[i * 3 + 2]!);
       this.rot.set(yawQuat(dyaw, this.rot, i * 4), i * 4);
     }
+    for (const s of this.prev === this.cur ? [this.cur] : [this.cur, this.prev]) {
+      if (!s) continue;
+      for (let f = 0; f < s.frames; f++) {
+        [s.root[f * 3], s.root[f * 3 + 1]] = at(s.root[f * 3]!, s.root[f * 3 + 1]!);
+        s.root[f * 3 + 2] = wrap(s.root[f * 3 + 2]! + dyaw);
+        [s.rootVel[f * 2], s.rootVel[f * 2 + 1]] = turn(s.rootVel[f * 2]!, s.rootVel[f * 2 + 1]!);
+      }
+    }
+    for (const t of [this.sim, this.ctl]) {
+      for (let k = 0; k < this.S; k++) {
+        const q = k * 5;
+        [t[q], t[q + 1]] = at(t[q]!, t[q + 1]!);
+        t[q + 2] = wrap(t[q + 2]! + dyaw);
+        [t[q + 3], t[q + 4]] = turn(t[q + 3]!, t[q + 4]!);
+      }
+    }
+    this.rootVel = turn(this.rootVel[0], this.rootVel[1]);
     this.root = { x: r.x, z: r.z, yaw: r.yaw };
     this.heading = r.yaw;
   }

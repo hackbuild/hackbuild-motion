@@ -513,6 +513,27 @@ describe("codebook gait host", () => {
     expect(m.contacts).toHaveLength(4);
   });
 
+  it("keeps a root pushed out of an obstacle instead of playing back into it", async () => {
+    const { net, g } = fakeGait();
+    const dt = 1 / 60;
+    await drive(g, net, 2, { speed: 1.2, turnRate: 0 });
+    // a wall across +z at the current root: every frame the caller pushes the root back to it
+    const wall = g.root.z;
+    let worst = 0;
+    await drive(g, net, 1, { speed: 1.2, turnRate: 0 }, dt, () => {
+      if (g.root.z > wall) g.follow({ x: g.root.x, z: wall, yaw: g.root.yaw });
+    });
+    for (let f = 0; f < 30; f++) {
+      const before = { ...g.root };
+      const r = g.update(dt, { speed: 0, turnRate: 0 });
+      await net.step(dt);
+      worst = Math.max(worst, Math.hypot(r.x - before.x, r.z - before.z) / dt);
+    }
+    // with the command at zero the root eases off; it never jumps back by the pushed distance
+    expect(worst).toBeLessThan(2);
+    expect(g.root.z).toBeLessThan(wall + 0.5);
+  });
+
   it("decodes only the frames used before the next request", async () => {
     const { net, g } = fakeGait();
     const asked: number[] = [];
