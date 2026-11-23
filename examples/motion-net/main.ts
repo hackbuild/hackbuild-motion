@@ -5,17 +5,17 @@ import { $, FrameTimer, auto, check, finish, mb, onDrop, params, quantile, reado
 
 const r = result("motion-net");
 $("#controls").innerHTML = `
-<p id="licence"></p>
-<label>manifest url <input id="murl" type="url" size="60"></label>
-<label>weights url <input id="burl" type="url" size="60"></label>
-<button id="upstream">fill in the published weights (cc by-nc 4.0, non-commercial use only)</button>
-<button id="fetch">download and load</button>
-<div class="drop" id="drop">or drop quadruped.json and quadruped.bin here <input id="files" type="file" multiple accept=".json,.bin"></div>
-<label>speed m/s <input id="speed" type="range" min="0" max="3.5" step="0.05" value="1"><span id="speedv">1.00</span></label>
-<label>turn rad/s <input id="turn" type="range" min="-1.5" max="1.5" step="0.05" value="0"><span id="turnv">0.00</span></label>
-<label>style <select id="style"><option value="auto">auto by speed</option>${STYLES.map((s) => `<option>${s}</option>`).join("")}</select></label>
-<label><input id="wander" type="checkbox"> wander (changes speed and turn every 2 s)</label>
-<label><input id="noworker" type="checkbox"> run the network in the page (no worker)</label>`;
+<p class="pg-note" id="licence"></p>
+<label class="hb-ctl is-wide">manifest url <input class="hb-input" id="murl" type="url" inputmode="url" autocomplete="off" spellcheck="false"></label>
+<label class="hb-ctl is-wide">weights url <input class="hb-input" id="burl" type="url" inputmode="url" autocomplete="off" spellcheck="false"></label>
+<button class="hb-btn hb-btn-2" id="upstream">fill in the published weights (cc by-nc 4.0, non-commercial use only)</button>
+<button class="hb-btn" id="fetch">download and load</button>
+<div class="hb-dropzone" id="drop"><span>or drop quadruped.json and quadruped.bin here, or tap to pick both</span> <input id="files" type="file" multiple accept=".json,.bin" aria-label="pick quadruped.json and quadruped.bin"></div>
+<label class="hb-ctl">speed m/s <input class="hb-range" id="speed" type="range" min="0" max="3.5" step="0.05" value="1"><span class="hb-readout" id="speedv">1.00</span></label>
+<label class="hb-ctl">turn rad/s <input class="hb-range" id="turn" type="range" min="-1.5" max="1.5" step="0.05" value="0"><span class="hb-readout" id="turnv">0.00</span></label>
+<label class="hb-ctl">style <select class="hb-select" id="style"><option value="auto">auto by speed</option>${STYLES.map((s) => `<option>${s}</option>`).join("")}</select></label>
+<label class="hb-check"><input id="wander" type="checkbox"> wander (changes speed and turn every 2 s)</label>
+<label class="hb-check"><input id="noworker" type="checkbox"> run the network in the page (no worker)</label>`;
 $("#licence").textContent = `${WEIGHT_LICENCE} nothing downloads until you press the button or drop the files. the weights are about ${mb(UPSTREAM.binBytes)}.`;
 const murl = $("#murl") as HTMLInputElement;
 const burl = $("#burl") as HTMLInputElement;

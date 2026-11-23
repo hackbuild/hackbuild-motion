@@ -6,10 +6,10 @@ import { $, FrameTimer, auto, check, finish, readout, result, sleep, status } fr
 
 const r = result("gait");
 $("#controls").innerHTML = `
-<label>speed m/s <input id="speed" type="range" min="0" max="3" step="0.05" value="0.8"><span id="speedv">0.80</span></label>
-<label>turn rad/s <input id="turn" type="range" min="-1.5" max="1.5" step="0.05" value="0.4"><span id="turnv">0.40</span></label>
-<label>tail <select id="wag">${WAG_MODES.map((m, i) => `<option value="${i}"${i === 1 ? " selected" : ""}>${m}</option>`).join("")}</select></label>
-<label>sit <input id="sit" type="range" min="0" max="1" step="0.05" value="0"></label>`;
+<label class="hb-ctl">speed m/s <input class="hb-range" id="speed" type="range" min="0" max="3" step="0.05" value="0.8"><span class="hb-readout" id="speedv">0.80</span></label>
+<label class="hb-ctl">turn rad/s <input class="hb-range" id="turn" type="range" min="-1.5" max="1.5" step="0.05" value="0.4"><span class="hb-readout" id="turnv">0.40</span></label>
+<label class="hb-ctl">tail <select class="hb-select" id="wag">${WAG_MODES.map((m, i) => `<option value="${i}"${i === 1 ? " selected" : ""}>${m}</option>`).join("")}</select></label>
+<label class="hb-ctl">sit <input class="hb-range" id="sit" type="range" min="0" max="1" step="0.05" value="0"></label>`;
 const speed = $("#speed") as HTMLInputElement;
 const turn = $("#turn") as HTMLInputElement;
 const wag = $("#wag") as HTMLSelectElement;

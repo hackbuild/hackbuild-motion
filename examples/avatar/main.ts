@@ -10,14 +10,15 @@ const r = result("avatar");
 // GitHub pinned to one commit; the pack's home is quaternius.com.
 const UAL = "https://raw.githubusercontent.com/IAFahim/quaternius.universalAnimationLibrary.standard/8456155dbae7eb861f553a2341871ccae633c857/UAL1_Standard.fbx";
 $("#controls").innerHTML = `
-<label style="flex:1 1 100%">model url <input id="url" type="url" value="${attr(params.get("url") ?? UAL)}"></label>
-<div class="drop" id="drop">or drop a .vrm, .glb or .fbx here <input id="file" type="file" accept=".vrm,.glb,.gltf,.fbx"></div>
-<button id="go">load</button>
-<label>clip <select id="clip" disabled></select></label>
-<label><input id="fp" type="checkbox"> first person view (head hidden)</label>`;
+<label class="hb-ctl is-wide">model url <input class="hb-input" id="url" type="url" inputmode="url" autocomplete="off" spellcheck="false" value="${attr(params.get("url") ?? UAL)}"></label>
+<div class="hb-dropzone" id="drop"><span>or drop a .vrm, .glb or .fbx here, or tap to pick one</span> <input id="file" type="file" accept=".vrm,.glb,.gltf,.fbx" aria-label="pick a .vrm, .glb or .fbx model"></div>
+<button class="hb-btn" id="go">load</button>
+<label class="hb-ctl">clip <select class="hb-select" id="clip" disabled></select></label>
+<label class="hb-check"><input id="fp" type="checkbox"> first person view (head hidden)</label>`;
 const lic = document.createElement("p");
+lic.className = "pg-note";
 lic.textContent = "the default model is the quaternius universal animation library mannequin, cc0 1.0, 24.9 MB (vendor). any model you load stays in this tab.";
-$("#controls").before(lic);
+$("#controls").prepend(lic);
 const clipSel = $("#clip") as HTMLSelectElement;
 const fp = $("#fp") as HTMLInputElement;
 
@@ -45,6 +46,7 @@ async function open(src: string | File) {
   const walk = avatar.animations.findIndex((a) => /walk/i.test(a.name));
   if (walk >= 0) clipSel.value = String(walk);
   play();
+  frameView();
   const warn = avatar.warnings.length ? ` ${avatar.warnings.join(" ")}` : "";
   status(`${name}: ${avatar.format}${avatar.dialect ? ` (${avatar.dialect})` : ""}, ${Object.keys(avatar.bones).length} humanoid bones, ${avatar.animations.length} clips.${warn}`, avatar.warnings.length ? "warn" : "ok");
   ($("#go") as HTMLButtonElement).disabled = false;
@@ -57,6 +59,32 @@ function play() {
   if (a) mixer.clipAction(a).play();
 }
 clipSel.addEventListener("change", play);
+
+// a narrow viewport frames the face: the camera sits in front of the head
+// (+Z forward) at face distance; a wider one keeps the stage's whole body view
+const host = renderer.domElement.parentElement!;
+const wideCam = camera.position.clone();
+const wideTarget = controls.target.clone();
+const narrow = () => host.clientWidth < 641;
+let framedNarrow: boolean | null = null;
+function frameView() {
+  framedNarrow = narrow();
+  const headBone = avatar?.bones.head;
+  if (!avatar || !headBone) return;
+  avatar.root.updateMatrixWorld(true);
+  const h = headBone.getWorldPosition(new THREE.Vector3());
+  if (framedNarrow) {
+    controls.target.set(h.x, h.y + 0.05, h.z);
+    camera.position.set(h.x + 0.12, h.y + 0.1, h.z + 0.75);
+  } else {
+    controls.target.copy(wideTarget);
+    camera.position.copy(wideCam);
+  }
+  controls.update();
+}
+new ResizeObserver(() => {
+  if (framedNarrow !== null && framedNarrow !== narrow()) frameView();
+}).observe(host);
 $("#go").addEventListener("click", () => open(($("#url") as HTMLInputElement).value.trim()).catch((e) => status(`could not load: ${(e as Error).message}`, "bad")));
 onDrop($("#drop"), ([f]) => f && open(f).catch((e) => status(`could not load ${f.name}: ${(e as Error).message}`, "bad")), $("#file") as HTMLInputElement);
 if (!auto) status("press load for the cc0 mannequin, or drop your own model.");

@@ -23,6 +23,8 @@ jobs:
         with:
           node-version-file: .nvmrc
       - run: npm install -g npm@11.21.0
+      # hackbuild-ui is vendored pinned by commit; the tarball must be the one recorded
+      - run: cd tools/vendor && sha256sum -c SHA256SUMS
       - run: rustup target add wasm32-unknown-unknown
       - run: cargo install wasm-pack --version 0.13.1 --locked
       - run: npm ci

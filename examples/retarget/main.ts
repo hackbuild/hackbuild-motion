@@ -6,8 +6,8 @@ import { $, FrameTimer, auto, check, finish, onDrop, readout, result, sleep, sta
 
 const r = result("retarget");
 $("#controls").innerHTML = `
-<div class="drop" id="drop">drop a .bvh or .vmd clip here, or <input id="file" type="file" accept=".bvh,.vmd"></div>
-<label><input id="src" type="checkbox" checked> show the source skeleton</label>`;
+<div class="hb-dropzone" id="drop"><span>drop a .bvh or .vmd clip here, or tap to pick one</span> <input id="file" type="file" accept=".bvh,.vmd" aria-label="pick a .bvh or .vmd clip"></div>
+<label class="hb-check"><input id="src" type="checkbox" checked> show the source skeleton</label>`;
 const showSrc = $("#src") as HTMLInputElement;
 
 // A walk written as BVH text in code: a source rig with other names, centimeters,

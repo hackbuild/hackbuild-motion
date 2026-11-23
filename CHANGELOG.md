@@ -10,6 +10,13 @@ Versions follow semver per package. Nothing is published to npm yet.
   SIMD128, a blob worker with an in page fallback, and `QuadrupedHost`, a
   gait backend over the published quadruped network. Weights stay CC
   BY-NC 4.0, loaded at run time.
+- Example pages: restyled on the hack.build design system, hackbuild-ui
+  0.4.4 vendored pinned by commit in `tools/vendor` with its sha-256
+  checked in CI, fonts inlined so the pages open offline. Mobile first:
+  the viewport sits above the controls on a phone, one finger orbits and
+  two pinch zoom, controls take 44 px rows and 16 px fields, a drop zone
+  opens the file picker on tap, and the avatar and lipsync pages frame the
+  face on a viewport under 641 px. The dark scene branch is gone.
 
 ## 0.1.0 (unreleased)
 

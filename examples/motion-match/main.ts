@@ -5,15 +5,16 @@ import { $, FrameTimer, auto, check, finish, quantile, readout, result, sleep, s
 
 const r = result("motion-match");
 $("#controls").innerHTML = `
-<label>speed m/s <input id="speed" type="range" min="0" max="3.5" step="0.05" value="1.2"></label>
-<label>turn rad/s <input id="turn" type="range" min="-1.5" max="1.5" step="0.05" value="0"></label>
-<label><input id="wander" type="checkbox" checked> wander (changes speed and turn every 2 s)</label>`;
+<label class="hb-ctl">speed m/s <input class="hb-range" id="speed" type="range" min="0" max="3.5" step="0.05" value="1.2"></label>
+<label class="hb-ctl">turn rad/s <input class="hb-range" id="turn" type="range" min="-1.5" max="1.5" step="0.05" value="0"></label>
+<label class="hb-check"><input id="wander" type="checkbox" checked> wander (changes speed and turn every 2 s)</label>`;
 const speed = $("#speed") as HTMLInputElement;
 const turn = $("#turn") as HTMLInputElement;
 const wander = $("#wander") as HTMLInputElement;
 const note = document.createElement("p");
+note.className = "pg-note";
 note.textContent = "the database here is synthetic gait clips built by the package (stand, walk, jog, run, turns, starts and stops). matching over real capture clips is a separate check.";
-$("#controls").before(note);
+$("#controls").prepend(note);
 
 status("loading the motion-match wasm and building the clip database.");
 await load();

@@ -6,10 +6,10 @@ import { $, FrameTimer, auto, check, finish, readout, result, sleep, status } fr
 
 const r = result("ik");
 $("#controls").innerHTML = `
-<label>chain <select id="method"><option>fabrik</option><option>ccd</option></select></label>
-<label><input id="look" type="checkbox" checked> head looks at the ball</label>
-<label><input id="lock" type="checkbox" checked> foot lock</label>
-<label>ball speed <input id="rate" type="range" min="0" max="2" step="0.05" value="1"></label>`;
+<label class="hb-ctl">chain <select class="hb-select" id="method"><option>fabrik</option><option>ccd</option></select></label>
+<label class="hb-check"><input id="look" type="checkbox" checked> head looks at the ball</label>
+<label class="hb-check"><input id="lock" type="checkbox" checked> foot lock</label>
+<label class="hb-ctl">ball speed <input class="hb-range" id="rate" type="range" min="0" max="2" step="0.05" value="1"></label>`;
 const method = $("#method") as HTMLSelectElement;
 const look = $("#look") as HTMLInputElement;
 const lockOn = $("#lock") as HTMLInputElement;

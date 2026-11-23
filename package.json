@@ -23,6 +23,7 @@
     "@pixiv/three-vrm": "3.5.5",
     "@types/node": "22.20.5",
     "@types/three": "0.186.0",
+    "@virgilvox/hackbuild-ui": "file:tools/vendor/hackbuild-ui-0.4.4-5fcf588.tgz",
     "fast-check": "4.10.2",
     "puppeteer-core": "25.18.1",
     "rolldown": "1.2.19",

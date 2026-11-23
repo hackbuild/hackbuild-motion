@@ -54,3 +54,35 @@ frames from the system voice. Earlier text on this page gave counts of
 | lipsync | the bellows voice drives the face from its tract model (rerun 2026-11-23, bellows-voice 0.8.0) | pass | the same line through `TractModel` and the articulatory source, open on 328 of 371 frames, lips shut on 12 (measured); sync not judged by a person |
 | lipsync | the bellows articulator probe drives the face as the audio plays (run 2026-11-23, bellows-voice 0.8.0) | pass | `articulatorProbe` at 60 frames per second read through `fromProbe` at the heard time, open on 293 of 371 frames, lips shut on 30 (measured); sync not judged by a person |
 | bake | the bake page in a browser on a real model, texture hook included | not run | no bake page yet |
+
+## Mobile and width pass of 2026-11-23
+
+The `?auto` checks ran before and after the restyle on the same machine
+and browser, without local weights: 6 pass, 0 fail, 1 not run (motion-net,
+no weights given) both times, with the numbers within run to run spread.
+
+After the restyle on hackbuild-ui 0.4.4, every page and the index were
+opened from a local server in the same Chrome through puppeteer-core,
+with no `?auto`, at these widths:
+
+| profile | widths and settings |
+|---|---|
+| puppeteer `iPhone 15` | 393 by 659, touch, mobile, device pixel ratio 3 |
+| puppeteer `Pixel 7` | 393 by 851, touch, mobile |
+| set widths, phone | 320, 360 and 390 px, touch, mobile, device pixel ratio 2 |
+| set widths, desktop | 768, 1024, 1280 and 1440 px, mouse |
+
+Measured on each: no horizontal scroll at any width (document scroll
+width equal to the window width on all 72 loads); no button, select,
+text field, link or check row under 44 px tall on a phone width; no field
+under 16 px there; on the phones the viewport is square and ends at
+446 to 564 px from the top, above the fold of a 659 px tall iPhone 15
+window. On the five three.js pages a one finger drag and a two finger
+pinch sent as touch events to the canvas left the page unscrolled, with
+`touch-action: none` on the canvas. Whether the camera moved the right
+way was looked at in screenshots, not measured.
+
+The avatar page loaded the CC0 mannequin on the iPhone 15 profile and
+framed the face (screenshot looked at by the agent that ran the pass).
+The lipsync face draws closer on a viewport under 641 px. The owner has
+not looked at any page on a phone yet, and no real phone was used.

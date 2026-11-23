@@ -5,13 +5,13 @@ import { $, FrameTimer, auto, check, finish, onDrop, readout, result, sleep, sta
 
 const r = result("lipsync");
 $("#controls").innerHTML = `
-<label style="flex:1 1 100%">text <input id="text" type="text" value="the quick brown fox jumps over the lazy dog, then naps in the warm sun."></label>
-<button id="say">speak with the system voice</button>
-<button id="timed">play as timed text (silent)</button>
-<button id="bellows">speak with the bellows voice</button>
-<label>bellows mouth <select id="bmode"><option value="spans">from its phoneme spans</option><option value="tract">from its tract model</option><option value="probe">from its articulator probe, as heard</option></select></label>
-<button id="mic">use the microphone</button>
-<div class="drop" id="drop">or drop an audio file to drive the mouth from its level <input id="file" type="file" accept="audio/*"></div>`;
+<label class="hb-ctl is-wide">text <input class="hb-input" id="text" type="text" autocomplete="off" value="the quick brown fox jumps over the lazy dog, then naps in the warm sun."></label>
+<button class="hb-btn" id="say">speak with the system voice</button>
+<button class="hb-btn hb-btn-2" id="timed">play as timed text (silent)</button>
+<button class="hb-btn hb-btn-2" id="bellows">speak with the bellows voice</button>
+<label class="hb-ctl">bellows mouth <select class="hb-select" id="bmode"><option value="spans">from its phoneme spans</option><option value="tract">from its tract model</option><option value="probe">from its articulator probe, as heard</option></select></label>
+<button class="hb-btn hb-btn-2" id="mic">use the microphone</button>
+<div class="hb-dropzone" id="drop"><span>or drop an audio file to drive the mouth from its level, or tap to pick one</span> <input id="file" type="file" accept="audio/*" aria-label="pick an audio file"></div>`;
 const text = $("#text") as HTMLInputElement;
 const canvas = document.createElement("canvas");
 $("#stage").append(canvas);
@@ -186,14 +186,19 @@ $("#bmode").addEventListener("change", async () => {
 });
 
 function face(f: LipFrame) {
-  const w = (canvas.width = canvas.clientWidth * devicePixelRatio);
-  const h = (canvas.height = canvas.clientHeight * devicePixelRatio);
-  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
-  g.fillStyle = dark ? "#1b1d20" : "#ffffff";
+  // at most 2 device pixels per css pixel, sized to the viewport every frame
+  const dpr = Math.min(devicePixelRatio, 2);
+  const w = Math.round(canvas.clientWidth * dpr);
+  const h = Math.round(canvas.clientHeight * dpr);
+  if (canvas.width !== w) canvas.width = w;
+  if (canvas.height !== h) canvas.height = h;
+  // paper behind the face, as hackbuild-ui asks of a scene; no dark branch
+  g.fillStyle = "#f5f0e6";
   g.fillRect(0, 0, w, h);
   const cx = w / 2;
   const cy = h / 2;
-  const s = Math.min(w, h) / 2.6;
+  // a narrow (square) viewport frames the face closer, so the mouth reads on a phone
+  const s = Math.min(w, h) / (canvas.clientWidth < 641 ? 2.3 : 2.6);
   g.fillStyle = "#e0b48a";
   g.beginPath();
   g.ellipse(cx, cy, s * 0.8, s, 0, 0, Math.PI * 2);

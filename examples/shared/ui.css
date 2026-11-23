@@ -1,93 +1,48 @@
-:root {
-  --bg: #f4f3ef;
-  --panel: #ffffff;
-  --ink: #1c1d1f;
-  --dim: #5f636a;
-  --line: #d9d7d0;
-  --accent: #1f6feb;
-  --ok: #1a7f37;
-  --bad: #b42318;
-  --warn: #9a6700;
-  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  color-scheme: light;
+/* Layout glue for the example pages, mobile first: the base is a 360 px
+   phone, wider layouts come in at min-width. The look is the hackbuild-ui
+   class layer (shared/hb/hackbuild.css, loaded before this file); this
+   file only places things and adds no colour, face or token of its own. */
+.hb-header h1 a { color: inherit; text-decoration: none; display: inline-block; min-height: 44px; line-height: 44px; }
+.hb-header h1 { overflow-wrap: anywhere; }
+body.hb { display: flex; flex-direction: column; min-height: 100vh; }
+.pg-top { padding-top: var(--hb-s3); padding-bottom: var(--hb-s4); width: 100%; }
+.pg-top:not(:has(.hb-viewport)) { padding-bottom: 0; }
+.pg-main { padding-top: var(--hb-s3); padding-bottom: var(--hb-s5); display: flex; flex-direction: column; width: 100%; }
+.pg-main > * { min-width: 0; }
+.pg-what { max-width: var(--hb-measure); color: var(--hb-ink-2); margin: 0 0 var(--hb-s3); }
+.pg-foot { width: 100%; padding-bottom: max(var(--hb-s6), env(safe-area-inset-bottom)); }
+.pg-foot p { font-family: var(--hb-utility); font-size: 11px; color: var(--hb-ink-3); margin: 0; border-top: 1px dashed rgba(26, 26, 26, .25); padding-top: var(--hb-s3); }
+
+/* controls row: every control takes its own row on a phone */
+.hb-bar > .hb-btn, .hb-bar > .hb-check, .hb-bar > .hb-dropzone { flex: 1 1 100%; width: auto; min-width: 0; }
+.hb-bar .hb-btn { white-space: normal; text-align: left; }
+.hb-bar > .hb-check { white-space: normal; }
+.hb-bar > .hb-dropzone { padding: var(--hb-s2) var(--hb-s3); cursor: pointer; }
+.hb-bar > .pg-note { font-family: var(--hb-body); font-size: 13px; color: var(--hb-ink-2); flex: 1 1 100%; margin: 0; max-width: var(--hb-measure); }
+
+/* viewport: a three.js scene orbits with one finger and zooms with two;
+   the 2d face lets the page scroll */
+.hb-viewport:not(.is-orbit) > canvas { touch-action: pan-y pinch-zoom; }
+
+/* index list: page name over its line */
+.pg-pages { list-style: none; margin: 0 0 var(--hb-s4); padding: 0; }
+.pg-pages > .hb-row { cursor: default; flex-direction: column; align-items: flex-start; gap: var(--hb-s1); }
+.pg-pages a { font-weight: 700; color: var(--hb-ink); display: inline-block; min-height: 44px; line-height: 44px; }
+.pg-what a.hb-link { display: inline-block; min-height: 44px; line-height: 44px; }
+.pg-pages span { font-family: var(--hb-body); font-size: 13px; color: var(--hb-ink-2); }
+
+@media (min-width: 641px) {
+  /* the toolbar goes back under the header on a wider screen */
+  .hb-bar { order: -1; }
+  .hb-header { order: -2; }
+  .pg-top { padding-top: var(--hb-s4); }
+  .pg-main { padding-top: var(--hb-s4); }
+  .hb-bar > .hb-btn, .hb-bar > .hb-check { flex: 0 1 auto; }
+  .hb-bar > .hb-dropzone { flex: 1 1 320px; }
+  .pg-pages > .hb-row { flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: var(--hb-s3); }
+  .pg-pages a { min-width: 13ch; }
+  .pg-pages span { flex: 1 1 320px; }
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #121315;
-    --panel: #1b1d20;
-    --ink: #e8e6e1;
-    --dim: #9aa0a8;
-    --line: #2e3136;
-    --accent: #6ea8ff;
-    --ok: #57c27a;
-    --bad: #ff7b72;
-    --warn: #e3b341;
-    color-scheme: dark;
-  }
+@media (min-width: 641px) and (pointer: fine) {
+  .pg-pages a, .hb-header h1 a, .pg-what a.hb-link { min-height: 0; line-height: inherit; }
 }
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font: 14px/1.45 var(--mono);
-}
-header, main, footer { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
-header { padding-top: 20px; }
-h1 { font-size: 18px; margin: 0 0 4px; font-weight: 600; }
-h1 a { color: var(--dim); text-decoration: none; }
-p { margin: 0 0 10px; color: var(--dim); }
-a { color: var(--accent); }
-.stage {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: 70vh;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  overflow: hidden;
-}
-.stage canvas { display: block; width: 100%; height: 100%; }
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  align-items: center;
-  margin: 12px 0;
-}
-.controls label { display: inline-flex; gap: 6px; align-items: center; color: var(--dim); }
-input, select, button, textarea {
-  font: inherit;
-  color: var(--ink);
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 4px 8px;
-}
-input[type="url"], input[type="text"] { min-width: 0; flex: 1 1 320px; }
-button { cursor: pointer; }
-button:disabled, input:disabled, select:disabled { opacity: 0.5; cursor: not-allowed; }
-.status { min-height: 1.45em; margin: 8px 0; }
-.status[data-kind="bad"] { color: var(--bad); }
-.status[data-kind="warn"] { color: var(--warn); }
-.status[data-kind="ok"] { color: var(--ok); }
-.readout {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 4px 16px;
-  margin: 8px 0 24px;
-  color: var(--dim);
-}
-.readout b { color: var(--ink); font-weight: 500; }
-.drop {
-  border: 1px dashed var(--line);
-  border-radius: 6px;
-  padding: 10px;
-  color: var(--dim);
-}
-.drop.over { border-color: var(--accent); }
-ul.pages { list-style: none; padding: 0; margin: 16px 0; }
-ul.pages li { padding: 8px 0; border-bottom: 1px solid var(--line); }
-ul.pages a { font-weight: 600; }
-footer { color: var(--dim); padding-bottom: 24px; }
