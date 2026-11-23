@@ -1,0 +1,20 @@
+{
+  "name": "hackbuild-motion-workspace",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "Moheeb Zara <hackbuildvideo@gmail.com>",
+  "workspaces": ["packages/*"],
+  "engines": { "node": "^22.18.0 || >=24.11.0" },
+  "scripts": {
+    "prepare": "git config core.hooksPath .githooks || true",
+    "build": "npm run build --workspaces --if-present",
+    "test": "vitest run --passWithNoTests && node --test tools/test/*.test.mjs",
+    "typecheck": "tsc -b",
+    "lint:voice": "git ls-files | grep -Ev '\\.(png|jpe?g|glb|bin|wasm|wav)$|^(LICENSES/|RULES.md|CLAUDE.md|tools/)|package-lock.json|Cargo.lock' | xargs node tools/lint-voice.mjs"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "5.0.3"
+  }
+}
