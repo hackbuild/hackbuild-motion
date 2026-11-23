@@ -23,3 +23,10 @@ Versions follow semver per package. Nothing is published to npm yet.
   eye direction clamp, hand frame and finger curl, contact locking and
   pelvis drop, three.js `solveTwoBone`, `solveChain`, `lookAtChain`,
   `curlFingers`, `FootLock`.
+- `@hackbuild/gait`: footfall tables for four and six legs, Froude gait
+  selection with hysteresis and pace bias, leg oscillator with landing
+  prediction, minimum jerk swings, step in place and a stop that lets
+  swings land, body dynamics (postures, terrain, bob, lean, load shift,
+  breathing, sway), tail wag modes, ear springs, potential field steering,
+  the locomotion backend interface, three.js `measureQuadruped` and
+  `driveQuadruped`.

@@ -1,0 +1,23 @@
+[package]
+name = "hackbuild-gait"
+version = "0.1.0"
+description = "Procedural legged locomotion: Froude gait choice, leg oscillators, footfall tables, posture springs, tail and ear secondary motion"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+name = "gait"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["std"]
+std = ["organic/std", "ik/std"]
+wasm = ["std", "dep:wasm-bindgen"]
+
+[dependencies]
+libm = "0.2.16"
+organic = { package = "hackbuild-organic", path = "../organic", default-features = false }
+ik = { package = "hackbuild-ik", path = "../ik", default-features = false }
+wasm-bindgen = { version = "=0.2.129", optional = true }

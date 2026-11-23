@@ -10,6 +10,7 @@ they pass their tests; the table below grows with them.
 | [`@hackbuild/organic`](packages/organic) | `hackbuild-organic` | springs, inertialization, seeded noise, samplers, body clock |
 | [`@hackbuild/rig`](packages/rig) | `hackbuild-rig` | bone name mapper, limb chains, rest analysis, expression and viseme table |
 | [`@hackbuild/ik`](packages/ik) | `hackbuild-ik` | two bone with pole, FABRIK, CCD, clamped look at, finger curl, foot locking |
+| [`@hackbuild/gait`](packages/gait) | `hackbuild-gait` | Froude gait choice, leg oscillators, footfall tables, posture springs, tail and ears, backend interface |
 
 Every package works in one normalized humanoid space (VRM 1.0 bone names,
 T pose, +Z forward, meters, feet at y = 0), takes an injected
