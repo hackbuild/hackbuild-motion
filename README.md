@@ -2,7 +2,7 @@
 
 Rigs, retargeting, IK, procedural and neural motion, avatars and lip sync for 3D characters on the web. Rust cores compiled to wasm, TypeScript bindings for three.js.
 
-Status: phase A in progress, 2026-11-22. Packages land in `packages/` as
+Status: phase A landed, 2026-11-22. Packages land in `packages/` as
 they pass their tests; the table below grows with them.
 
 | package | crate | what |
@@ -11,6 +11,7 @@ they pass their tests; the table below grows with them.
 | [`@hackbuild/rig`](packages/rig) | `hackbuild-rig` | bone name mapper, limb chains, rest analysis, expression and viseme table |
 | [`@hackbuild/ik`](packages/ik) | `hackbuild-ik` | two bone with pole, FABRIK, CCD, clamped look at, finger curl, foot locking |
 | [`@hackbuild/gait`](packages/gait) | `hackbuild-gait` | Froude gait choice, leg oscillators, footfall tables, posture springs, tail and ears, backend interface |
+| [`@hackbuild/retarget`](packages/retarget) | `hackbuild-retarget` | humanoid motion format, clip retargeting between any rigs, BVH and VMD readers, motion tags |
 
 Every package works in one normalized humanoid space (VRM 1.0 bone names,
 T pose, +Z forward, meters, feet at y = 0), takes an injected

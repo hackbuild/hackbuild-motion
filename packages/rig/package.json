@@ -23,6 +23,14 @@
       "types": "./dist/three.d.ts",
       "import": "./dist/three.js"
     },
+    "./bones": {
+      "types": "./dist/bones.d.ts",
+      "import": "./dist/bones.js"
+    },
+    "./expressions": {
+      "types": "./dist/expressions.d.ts",
+      "import": "./dist/expressions.js"
+    },
     "./inline": {
       "types": "./dist/wasm/inline.d.ts",
       "import": "./dist/wasm/inline.js"

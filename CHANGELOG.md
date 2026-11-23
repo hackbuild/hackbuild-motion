@@ -30,3 +30,9 @@ Versions follow semver per package. Nothing is published to npm yet.
   breathing, sway), tail wag modes, ear springs, potential field steering,
   the locomotion backend interface, three.js `measureQuadruped` and
   `driveQuadruped`.
+- `@hackbuild/retarget`: `HumanoidMotion` interchange format with a
+  binary pack, rest aligned retargeting between any mapped rigs (facing,
+  units, A pose), first frame rest detection, floor settling, BVH and VMD
+  readers, motion tags, three.js `retargetAnimation`, `LiveRetarget`,
+  `skeletonFromObject3D`, `sampleAnimationClip`, `toAnimationClip`.
+- `@hackbuild/rig`: `./bones` and `./expressions` subpath exports.

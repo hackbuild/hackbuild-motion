@@ -1,4 +1,4 @@
 {
   "files": [],
-  "references": [{ "path": "packages/organic" }, { "path": "packages/rig" }, { "path": "packages/ik" }, { "path": "packages/gait" }]
+  "references": [{ "path": "packages/organic" }, { "path": "packages/rig" }, { "path": "packages/ik" }, { "path": "packages/gait" }, { "path": "packages/retarget" }]
 }
