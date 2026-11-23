@@ -1,0 +1,316 @@
+{
+ "source": "bellows-voice 0.7.3 on bellowsjs 0.5.0: planSung(speechPlan(lyricsToSyllables(text))), General American, times rounded to 10 us",
+ "text": "Hello there, little bottle. Would you meet me at noon?",
+ "phrases": [
+  {
+   "start": -0.072,
+   "end": 0.615,
+   "vel": 0.8,
+   "spans": [
+    {
+     "ipa": "h",
+     "start": -0.072,
+     "end": 0,
+     "kind": "onset"
+    },
+    {
+     "ipa": "ɛ",
+     "start": 0,
+     "end": 0.115,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "l",
+     "start": 0.115,
+     "end": 0.167,
+     "kind": "onset"
+    },
+    {
+     "ipa": "o",
+     "start": 0.167,
+     "end": 0.2486,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "u",
+     "start": 0.2486,
+     "end": 0.269,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "ð",
+     "start": 0.269,
+     "end": 0.325,
+     "kind": "onset"
+    },
+    {
+     "ipa": "ɛ",
+     "start": 0.325,
+     "end": 0.563,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "ɹ",
+     "start": 0.563,
+     "end": 0.615,
+     "kind": "coda"
+    }
+   ],
+   "pitches": [
+    {
+     "time": -0.072,
+     "hz": 138.591
+    },
+    {
+     "time": 0.115,
+     "hz": 103.826
+    },
+    {
+     "time": 0.269,
+     "hz": 123.471
+    },
+    {
+     "time": 0.42625,
+     "hz": 89.348
+    }
+   ]
+  },
+  {
+   "start": 0.908,
+   "end": 1.975,
+   "vel": 0.8,
+   "spans": [
+    {
+     "ipa": "beat:in>",
+     "start": 0.908,
+     "end": 1.228,
+     "kind": "onset"
+    },
+    {
+     "ipa": "_",
+     "start": 1.228,
+     "end": 1.278,
+     "kind": "onset"
+    },
+    {
+     "ipa": "l",
+     "start": 1.278,
+     "end": 1.33,
+     "kind": "onset"
+    },
+    {
+     "ipa": "ɪ",
+     "start": 1.33,
+     "end": 1.4268,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "ɾ",
+     "start": 1.4268,
+     "end": 1.4468,
+     "kind": "onset"
+    },
+    {
+     "ipa": "ə",
+     "start": 1.4468,
+     "end": 1.5238,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "ɫ",
+     "start": 1.5238,
+     "end": 1.5838,
+     "kind": "coda"
+    },
+    {
+     "ipa": "b",
+     "start": 1.5838,
+     "end": 1.6398,
+     "kind": "onset"
+    },
+    {
+     "ipa": "ɑ",
+     "start": 1.6398,
+     "end": 1.808,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "ɾ",
+     "start": 1.808,
+     "end": 1.828,
+     "kind": "onset"
+    },
+    {
+     "ipa": "ə",
+     "start": 1.828,
+     "end": 1.915,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "ɫ",
+     "start": 1.915,
+     "end": 1.975,
+     "kind": "coda"
+    }
+   ],
+   "pitches": [
+    {
+     "time": 0.908,
+     "hz": 138.591
+    },
+    {
+     "time": 1.4268,
+     "hz": 105.845
+    },
+    {
+     "time": 1.5838,
+     "hz": 128.318
+    },
+    {
+     "time": 1.808,
+     "hz": 81.46
+    }
+   ]
+  },
+  {
+   "start": 2.267,
+   "end": 4.3927,
+   "vel": 0.8,
+   "spans": [
+    {
+     "ipa": "beat:in>",
+     "start": 2.267,
+     "end": 2.587,
+     "kind": "onset"
+    },
+    {
+     "ipa": "_",
+     "start": 2.587,
+     "end": 2.637,
+     "kind": "onset"
+    },
+    {
+     "ipa": "w",
+     "start": 2.637,
+     "end": 2.685,
+     "kind": "onset"
+    },
+    {
+     "ipa": "ʊ",
+     "start": 2.685,
+     "end": 2.8776,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "d",
+     "start": 2.8776,
+     "end": 2.9256,
+     "kind": "coda"
+    },
+    {
+     "ipa": "j",
+     "start": 2.9256,
+     "end": 2.9696,
+     "kind": "onset"
+    },
+    {
+     "ipa": "u",
+     "start": 2.9696,
+     "end": 3.1946,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "m",
+     "start": 3.1946,
+     "end": 3.2546,
+     "kind": "onset"
+    },
+    {
+     "ipa": "i",
+     "start": 3.2546,
+     "end": 3.42565,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "t",
+     "start": 3.42565,
+     "end": 3.48565,
+     "kind": "coda"
+    },
+    {
+     "ipa": "m",
+     "start": 3.48565,
+     "end": 3.54565,
+     "kind": "onset"
+    },
+    {
+     "ipa": "i",
+     "start": 3.54565,
+     "end": 3.70065,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "æ",
+     "start": 3.70065,
+     "end": 3.93895,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "t",
+     "start": 3.93895,
+     "end": 3.99895,
+     "kind": "coda"
+    },
+    {
+     "ipa": "n",
+     "start": 3.99895,
+     "end": 4.05495,
+     "kind": "onset"
+    },
+    {
+     "ipa": "u",
+     "start": 4.05495,
+     "end": 4.3367,
+     "kind": "nucleus"
+    },
+    {
+     "ipa": "n",
+     "start": 4.3367,
+     "end": 4.3927,
+     "kind": "coda"
+    }
+   ],
+   "pitches": [
+    {
+     "time": 2.267,
+     "hz": 138.591
+    },
+    {
+     "time": 2.9256,
+     "hz": 126.357
+    },
+    {
+     "time": 3.1946,
+     "hz": 123.471
+    },
+    {
+     "time": 3.48565,
+     "hz": 120.651
+    },
+    {
+     "time": 3.70065,
+     "hz": 117.895
+    },
+    {
+     "time": 3.99895,
+     "hz": 123.471
+    },
+    {
+     "time": 4.17544,
+     "hz": 89.348
+    }
+   ]
+  }
+ ],
+ "leadIn": 0.42199999999999993
+}

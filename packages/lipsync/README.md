@@ -57,6 +57,27 @@ function frame(dt: number) {
 }
 ```
 
+### Bellows voice
+
+`@hackbuild/lipsync/bellows` reads the plan bellows-voice (the owner's
+articulatory voice for the bellowsjs engine, MIT) returns from `speak()`,
+`sing()` and `beatbox()`. Its spans are the exact sounds the engine plays,
+already on the AudioContext clock, so the mouth needs no estimate:
+
+```ts
+import { fromSungPlan } from "@hackbuild/lipsync/bellows";
+
+const plan = alto.speak("Shall we meet at noon?");
+lips.push(fromSungPlan(plan)); // offset 0: live plans are on the context clock
+```
+
+For an offline render that starts at 0, pass the play time as the offset.
+Beatbox spans map to the viseme of each sound's place; bellows' pause `_`
+makes no event. The span shape is copied structurally, so the subpath
+imports nothing from bellows; `bellows-voice` 0.7.3 and `bellowsjs` 0.5.0
+are optional peer dependencies pinned to the versions the fixture came
+from, and the package runs without them.
+
 `dist/lipsync.iife.js` is the single file build (`HackbuildLipsync`). It
 uses only the rig's plain data tables, so it carries no wasm.
 
@@ -86,6 +107,13 @@ uses only the rig's plain data tables, so it carries no wasm.
   list with flaps and dark l keeps sil at 0 from its first to its last
   span (computed).
 
+- 2026-11-23: `test/bellows.test.ts` runs a real plan made by
+  bellows-voice 0.7.3 (`test/fixtures/bellows-plan.json`, two sentences,
+  flaps, dark l and an in breath): one event per sounding span at its
+  times, no sil at the middle of any span, a 60 ms m between vowels
+  reaches 0.9 or more on the timeline and 0.55 after the default output
+  follower (computed).
+
 ### Not verified by anything
 
 - No real TTS engine's events or real speech audio have gone through it;
@@ -99,9 +127,9 @@ uses only the rig's plain data tables, so it carries no wasm.
 
 | file | raw | gzip |
 |---|---|---|
-| `lipsync.iife.js` | 17,284 bytes | 6,274 bytes |
+| `lipsync.iife.js` | 21,114 bytes | 7,695 bytes |
 
-Measured 2026-11-22. Budget: under 32 KB raw.
+Measured 2026-11-23. Budget: under 32 KB raw.
 
 ## Licence
 
