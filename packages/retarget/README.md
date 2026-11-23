@@ -94,6 +94,12 @@ wasm inlined, `THREE` read from the page).
 - 2026-11-22: the golden trace (a seeded BVH through parse, retarget,
   floor, analysis and bind) is bit identical between the native and the
   wasm build (measured).
+- 2026-11-23: a BVH root with a zero OFFSET rests on the frame 0 floor
+  (its lowest joint) plus the rest pose's root to lowest joint height. A
+  clip that starts crouched with the hips at 60 on a 90 leg rests at 90
+  (computed); before, it rested at 60 and the clip floated 30 units. The
+  TypeScript suite passes 11 of 11, `cargo test -p hackbuild-retarget`
+  15 of 15 (counted).
 
 ### Not verified by anything
 

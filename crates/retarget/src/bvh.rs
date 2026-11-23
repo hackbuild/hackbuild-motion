@@ -8,8 +8,11 @@
 //! hips height only in the channels; their rest then stands one hip height
 //! under the floor the motion walks on, and a retarget measured against
 //! that rest floats the clip by the same height. A root with a zero OFFSET
-//! and a Y position channel takes the first frame's height as its rest
-//! height, so rest and motion share one floor.
+//! and a Y position channel is rested on the first frame's floor: the
+//! lowest joint at frame 0 is taken as the floor, and the rest root stands
+//! above it by the rest pose's root to lowest joint height. A clip that
+//! starts in a crouch still rests at standing height, and rest and motion
+//! share one floor.
 
 use crate::skeleton::{Clip, Skeleton};
 use alloc::format;
@@ -144,11 +147,39 @@ pub fn parse_bvh(text: &str) -> Result<(Skeleton, Clip), BvhError> {
         clip.translations.push(tr);
     }
     let mut rest_t = offsets;
-    if let Some(first) = clip.translations.first() {
+    if let (Some(t0), Some(r0)) = (clip.translations.first(), clip.rotations.first()) {
+        // world heights at frame 0 and in the rest pose (identity rotations,
+        // root at 0); joints are listed parent first
+        let mut wy = alloc::vec![0.0; n];
+        let mut wr = alloc::vec![Quat::IDENTITY; n];
+        let mut ry = alloc::vec![0.0; n];
+        for j in 0..n {
+            match parents[j] {
+                Some(p) => {
+                    wy[j] = wy[p] + wr[p].rotate(t0[j]).y;
+                    wr[j] = wr[p].mul(r0[j]);
+                    ry[j] = ry[p] + rest_t[j].y;
+                }
+                None => {
+                    wy[j] = t0[j].y;
+                    wr[j] = r0[j];
+                }
+            }
+        }
         for j in 0..n {
             let zero = rest_t[j].x == 0.0 && rest_t[j].y == 0.0 && rest_t[j].z == 0.0;
             if parents[j].is_none() && zero && channels[j].contains(&Ch::Py) {
-                rest_t[j].y = first[j].y;
+                // the frame 0 floor is its lowest joint; the rest root stands
+                // that far above it as the rest pose's lowest joint is below
+                // the root, so a clip that starts in a crouch does not float
+                let (mut floor, mut low) = (wy[j], 0.0f64);
+                for k in 0..n {
+                    if root_of(&parents, k) == j {
+                        floor = floor.min(wy[k]);
+                        low = low.min(ry[k]);
+                    }
+                }
+                rest_t[j].y = floor - low;
             }
         }
     }
@@ -159,6 +190,13 @@ pub fn parse_bvh(text: &str) -> Result<(Skeleton, Clip), BvhError> {
         rest_r: alloc::vec![Quat::IDENTITY; n],
     };
     Ok((skel, clip))
+}
+
+fn root_of(parents: &[Option<usize>], mut j: usize) -> usize {
+    while let Some(p) = parents[j] {
+        j = p;
+    }
+    j
 }
 
 #[cfg(test)]
@@ -203,5 +241,38 @@ Frame Time: 0.033333
         // chest Zrotation 90: +Y onto -X
         let y = c.rotations[1][1].rotate(Vec3::Y);
         assert!((y.x + 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn a_clip_that_starts_in_a_crouch_rests_at_standing_height() {
+        // hips to toe is 90 at rest; frame 0 crouches with the hips at 60,
+        // both knees bent so the toes stay on the floor at y = 0
+        let bvh = "HIERARCHY
+ROOT Hips
+{
+  OFFSET 0 0 0
+  CHANNELS 6 Xposition Yposition Zposition Zrotation Xrotation Yrotation
+  JOINT Leg
+  {
+    OFFSET 0 0 0
+    CHANNELS 3 Zrotation Xrotation Yrotation
+    JOINT Shin
+    {
+      OFFSET 0 -45 0
+      CHANNELS 3 Zrotation Xrotation Yrotation
+      End Site
+      {
+        OFFSET 0 -45 0
+      }
+    }
+  }
+}
+MOTION
+Frames: 1
+Frame Time: 0.033333
+0 60 0 0 0 0 0 -48.189685 0 0 96.37937 0";
+        let (s, _) = parse_bvh(bvh).unwrap();
+        // the frame 0 floor (toe height) plus the rest hips height above the toe
+        assert!((s.rest_t[0].y - 90.0).abs() < 1e-3, "{}", s.rest_t[0].y);
     }
 }
