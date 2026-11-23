@@ -31,7 +31,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "node ../../tools/build-package.mjs avatar"
