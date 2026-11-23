@@ -20,6 +20,12 @@ body.hb { display: flex; flex-direction: column; min-height: 100vh; }
 .hb-bar > .hb-dropzone { padding: var(--hb-s2) var(--hb-s3); cursor: pointer; }
 .hb-bar > .pg-note { font-family: var(--hb-body); font-size: 13px; color: var(--hb-ink-2); flex: 1 1 100%; margin: 0; max-width: var(--hb-measure); }
 
+/* a fold inside the bar takes a full row and stacks its controls */
+.hb-bar > .hb-fold { flex: 1 1 100%; min-width: 0; margin: 0; }
+.hb-bar > .hb-fold > div { display: flex; flex-wrap: wrap; gap: var(--hb-s2); align-items: center; }
+.hb-bar > .hb-fold > div > .hb-btn, .hb-bar > .hb-fold > div > .hb-dropzone { flex: 1 1 100%; width: auto; min-width: 0; }
+.hb-bar > .hb-fold > div > .hb-dropzone { padding: var(--hb-s2) var(--hb-s3); cursor: pointer; }
+
 /* viewport: a three.js scene orbits with one finger and zooms with two;
    the 2d face lets the page scroll */
 .hb-viewport:not(.is-orbit) > canvas { touch-action: pan-y pinch-zoom; }
@@ -42,6 +48,23 @@ body.hb { display: flex; flex-direction: column; min-height: 100vh; }
   .pg-pages > .hb-row { flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: var(--hb-s3); }
   .pg-pages a { min-width: 13ch; }
   .pg-pages span { flex: 1 1 320px; }
+}
+@media (min-width: 641px) {
+  .hb-bar > .hb-fold > div > .hb-btn { flex: 0 1 auto; }
+  .hb-bar > .hb-fold > div > .hb-dropzone { flex: 1 1 320px; }
+  .hb-bar > .hb-fold > div > .hb-ctl.is-wide { flex: 1 1 300px; }
+}
+
+/* pg-side: a page with a long control set puts it in a column beside the
+   view from 1024 px, so the view stays whole on a 1280 by 720 screen */
+@media (min-width: 1024px) {
+  body.hb.pg-side { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 380px); grid-template-rows: auto auto 1fr auto; align-items: start; }
+  body.pg-side > .hb-header, body.pg-side > .pg-foot { grid-column: 1 / -1; }
+  body.pg-side > .pg-top { grid-column: 1; grid-row: 2; }
+  body.pg-side > .pg-main { grid-column: 1; grid-row: 3; }
+  body.pg-side > .hb-bar { grid-column: 2; grid-row: 2 / 4; align-self: stretch; align-content: flex-start; padding: var(--hb-s4) var(--hb-s4) var(--hb-s4) var(--hb-s3); border-bottom: 0; }
+  body.pg-side > .hb-bar > *, body.pg-side > .hb-bar > .hb-ctl, body.pg-side .hb-bar > .hb-fold > div > * { flex: 1 1 100%; }
+  body.pg-side .hb-ctl > .hb-range { flex: 1 1 auto; width: auto; }
 }
 @media (min-width: 641px) and (pointer: fine) {
   .pg-pages a, .hb-header h1 a, .pg-what a.hb-link { min-height: 0; line-height: inherit; }

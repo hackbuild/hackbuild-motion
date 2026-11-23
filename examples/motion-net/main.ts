@@ -4,13 +4,18 @@ import { stage } from "../shared/scene.js";
 import { $, FrameTimer, auto, check, finish, mb, onDrop, params, quantile, readout, result, sleep, status } from "../shared/ui.js";
 
 const r = result("motion-net");
+// from 1024 px the controls sit in a column beside the view (ui.css, pg-side),
+// so the whole view fits a 1280 by 720 screen; a phone keeps view first, controls below
+document.body.classList.add("pg-side");
 $("#controls").innerHTML = `
 <p class="pg-note" id="licence"></p>
+<details class="hb-fold" id="source" open><summary>weights: urls or files</summary><div>
 <label class="hb-ctl is-wide">manifest url <input class="hb-input" id="murl" type="url" inputmode="url" autocomplete="off" spellcheck="false"></label>
 <label class="hb-ctl is-wide">weights url <input class="hb-input" id="burl" type="url" inputmode="url" autocomplete="off" spellcheck="false"></label>
 <button class="hb-btn hb-btn-2" id="upstream">fill in the published weights (cc by-nc 4.0, non-commercial use only)</button>
 <button class="hb-btn" id="fetch">download and load</button>
 <div class="hb-dropzone" id="drop"><span>or drop quadruped.json and quadruped.bin here, or tap to pick both</span> <input id="files" type="file" multiple accept=".json,.bin" aria-label="pick quadruped.json and quadruped.bin"></div>
+</div></details>
 <label class="hb-ctl">speed m/s <input class="hb-range" id="speed" type="range" min="0" max="3.5" step="0.05" value="1"><span class="hb-readout" id="speedv">1.00</span></label>
 <label class="hb-ctl">turn rad/s <input class="hb-range" id="turn" type="range" min="-1.5" max="1.5" step="0.05" value="0"><span class="hb-readout" id="turnv">0.00</span></label>
 <label class="hb-ctl">style <select class="hb-select" id="style"><option value="auto">auto by speed</option>${STYLES.map((s) => `<option>${s}</option>`).join("")}</select></label>
@@ -78,6 +83,8 @@ async function start(manifest: string | File, bin: string | File): Promise<void>
     host = new QuadrupedHost(predictor, weights.styles);
     const where = predictor.mode === "worker" ? "in a worker" : `in the page (${predictor.fallbackReason ?? "by choice"})`;
     status(`network loaded, running ${where}. ${WEIGHT_LICENCE}`, "ok");
+    // the source fold closes once weights run; it opens again from its summary
+    ($("#source") as HTMLDetailsElement).open = false;
   } catch (e) {
     status(`${(e as Error).message}. nothing was loaded.`, "bad");
     r.notes.push(`load: ${(e as Error).message}`);
