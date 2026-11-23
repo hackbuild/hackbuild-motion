@@ -62,6 +62,78 @@ impl TextureHook for CommandHook {
     }
 }
 
+/// Flags that take a value, and flags that stand alone. Anything else
+/// starting with `--`, including the `--name=value` form, is an error.
+const VALUE_FLAGS: [&str; 9] = [
+    "--ratio",
+    "--error",
+    "--texture-max",
+    "--texture-hook",
+    "--report",
+    "--source",
+    "--licence",
+    "--budget",
+    "--lock",
+];
+const VALUE_FLAGS_MORE: [&str; 2] = ["--as", "--forbid"];
+const BARE_FLAGS: [&str; 1] = ["--no-lock-border"];
+
+fn check_flags(args: &[String]) -> Result<(), String> {
+    let mut i = 0;
+    while i < args.len() {
+        let a = args[i].as_str();
+        if a.starts_with("--") {
+            if VALUE_FLAGS.contains(&a) || VALUE_FLAGS_MORE.contains(&a) {
+                if args.get(i + 1).is_none() {
+                    return Err(format!("{a} needs a value"));
+                }
+                i += 1;
+            } else if !BARE_FLAGS.contains(&a) {
+                return Err(format!("unknown flag {a}. write flags as --name value"));
+            }
+        }
+        i += 1;
+    }
+    Ok(())
+}
+
+/// A private folder for texture hook files, made with create_dir so an
+/// existing path (a planted symlink) is never reused.
+fn private_dir() -> Result<PathBuf, String> {
+    let base = std::env::temp_dir();
+    let t = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    for k in 0..32u32 {
+        let d = base.join(format!("hb-bake-{}-{t:x}-{k}", std::process::id()));
+        if std::fs::create_dir(&d).is_ok() {
+            return Ok(d);
+        }
+    }
+    Err("cannot make a private temp folder for the texture hook".into())
+}
+
+/// Lock entry path of `file`: relative to the lock file's folder, with
+/// `/` separators, so `lock check` finds it again from any working folder.
+fn lock_name(file: &str, lock_path: &str) -> Result<String, String> {
+    let f = std::fs::canonicalize(file).map_err(|e| format!("cannot read {file}: {e}"))?;
+    let dir = Path::new(lock_path)
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .unwrap_or(Path::new("."));
+    let dir =
+        std::fs::canonicalize(dir).map_err(|e| format!("cannot read {}: {e}", dir.display()))?;
+    let rel = f
+        .strip_prefix(&dir)
+        .map_err(|_| format!("{file} is outside the lock file's folder. name it with --as"))?;
+    Ok(rel
+        .components()
+        .map(|c| c.as_os_str().to_string_lossy())
+        .collect::<Vec<_>>()
+        .join("/"))
+}
+
 fn flag<'a>(args: &'a [String], name: &str) -> Option<&'a str> {
     args.iter()
         .position(|a| a == name)
@@ -102,6 +174,7 @@ fn write(path: &Path, bytes: &[u8]) -> Result<(), String> {
 }
 
 fn run(args: &[String]) -> Result<(), String> {
+    check_flags(args)?;
     let pos = positional(args);
     match pos.as_slice() {
         ["optimize", input, output] => {
@@ -109,10 +182,23 @@ fn run(args: &[String]) -> Result<(), String> {
             if let Some(r) = flag(args, "--ratio") {
                 opts.ratio = r
                     .parse()
-                    .map_err(|_| "--ratio takes a number from 0 to 1")?;
+                    .ok()
+                    .filter(|x: &f32| (0.0..=1.0).contains(x))
+                    .ok_or("--ratio takes a number from 0 to 1")?;
             }
             if let Some(e) = flag(args, "--error") {
-                opts.error = e.parse().map_err(|_| "--error takes a number")?;
+                opts.error = e
+                    .parse()
+                    .ok()
+                    .filter(|x: &f32| x.is_finite() && *x >= 0.0)
+                    .ok_or("--error takes a number from 0 up")?;
+            }
+            let same = match (std::fs::canonicalize(input), std::fs::canonicalize(output)) {
+                (Ok(a), Ok(b)) => a == b,
+                _ => input == output,
+            };
+            if same {
+                return Err("optimize would overwrite its input. name another output".into());
             }
             opts.lock_border = !args.iter().any(|a| a == "--no-lock-border");
             for t in flags(args, "--texture-max") {
@@ -130,20 +216,20 @@ fn run(args: &[String]) -> Result<(), String> {
                 }
             }
             let glb = read(input)?;
-            let mut keep = KeepTextures;
-            let mut cmd;
-            let hook: &mut dyn TextureHook = match flag(args, "--texture-hook") {
+            let result = match flag(args, "--texture-hook") {
                 Some(p) => {
-                    cmd = CommandHook {
+                    let mut cmd = CommandHook {
                         program: p.to_string(),
-                        dir: std::env::temp_dir(),
+                        dir: private_dir()?,
                         count: 0,
                     };
-                    &mut cmd
+                    let r = optimize(&glb, &opts, &mut cmd);
+                    let _ = std::fs::remove_dir_all(&cmd.dir);
+                    r
                 }
-                None => &mut keep,
+                None => optimize(&glb, &opts, &mut KeepTextures),
             };
-            let (bytes, report) = optimize(&glb, &opts, hook).map_err(|e| e.0)?;
+            let (bytes, report) = result.map_err(|e| e.0)?;
             write(Path::new(output), &bytes)?;
             println!(
                 "{}",
@@ -187,8 +273,11 @@ fn run(args: &[String]) -> Result<(), String> {
                 Ok(t) => Lock::parse(&t).map_err(|e| e.0)?,
                 Err(_) => Lock::default(),
             };
-            let name = flag(args, "--as").unwrap_or(file);
-            lock.upsert(entry(name, &read(file)?, source, licence, budget));
+            let name = match flag(args, "--as") {
+                Some(n) => n.trim_start_matches("./").to_string(),
+                None => lock_name(file, lock_path)?,
+            };
+            lock.upsert(entry(&name, &read(file)?, source, licence, budget));
             write(Path::new(lock_path), lock.write().as_bytes())
         }
         ["lock", "check"] => {

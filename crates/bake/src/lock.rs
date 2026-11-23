@@ -104,10 +104,7 @@ impl Lock {
             if a.source.trim().is_empty() {
                 failures.push(format!("{}: no source", a.path));
             }
-            if let Some(f) = forbid
-                .iter()
-                .find(|f| !f.is_empty() && a.licence.contains(f.as_str()))
-            {
+            if let Some(f) = forbid.iter().find(|f| licence_matches(&a.licence, f)) {
                 failures.push(format!(
                     "{}: licence {} matches forbidden {}",
                     a.path, a.licence, f
@@ -149,6 +146,20 @@ impl Lock {
             failures,
         }
     }
+}
+
+/// Whether a licence names the forbidden term as whole tokens: "NC"
+/// matches "CC-BY-NC-4.0" and not "NCSA". Case is ignored; a multi token
+/// term such as "CC-BY-NC" matches the same tokens in a row.
+pub fn licence_matches(licence: &str, term: &str) -> bool {
+    let split = |s: &str| -> Vec<String> {
+        s.split(|c: char| !c.is_ascii_alphanumeric() && c != '.')
+            .filter(|t| !t.is_empty())
+            .map(str::to_ascii_lowercase)
+            .collect()
+    };
+    let (l, t) = (split(licence), split(term));
+    !t.is_empty() && l.windows(t.len()).any(|w| w == t.as_slice())
 }
 
 #[cfg(test)]

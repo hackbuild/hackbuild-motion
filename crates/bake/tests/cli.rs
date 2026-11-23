@@ -98,3 +98,80 @@ fn clips_write_a_pack_and_usage_exits_two() {
     assert_eq!(bin().arg("nonsense").status().unwrap().code(), Some(2));
     let _ = std::fs::remove_dir_all(&d);
 }
+
+#[test]
+fn bad_flags_and_paths_are_refused() {
+    let d = scratch("flags");
+    let input = d.join("in.glb");
+    std::fs::write(&input, bake::golden::synthetic_glb(3, 4)).unwrap();
+    let run = |args: &[&str]| {
+        let o = bin()
+            .arg("optimize")
+            .arg(&input)
+            .arg(d.join("out.glb"))
+            .args(args)
+            .output()
+            .unwrap();
+        (
+            o.status.success(),
+            String::from_utf8_lossy(&o.stderr).to_string(),
+        )
+    };
+    let (ok, err) = run(&["--ratio=0.1"]);
+    assert!(!ok && err.contains("unknown flag"), "{err}");
+    let (ok, err) = run(&["--ratio", "7"]);
+    assert!(!ok && err.contains("0 to 1"), "{err}");
+    let (ok, err) = run(&["--error", "-1"]);
+    assert!(!ok && err.contains("--error"), "{err}");
+    let same = bin()
+        .arg("optimize")
+        .arg(&input)
+        .arg(d.join(".").join("in.glb"))
+        .output()
+        .unwrap();
+    assert!(!same.status.success());
+    assert!(String::from_utf8_lossy(&same.stderr).contains("overwrite its input"));
+    assert_eq!(
+        std::fs::read(&input).unwrap(),
+        bake::golden::synthetic_glb(3, 4)
+    );
+    let _ = std::fs::remove_dir_all(&d);
+}
+
+#[test]
+fn lock_paths_are_relative_to_the_lock_file() {
+    let d = scratch("lockpath");
+    std::fs::create_dir_all(d.join("assets")).unwrap();
+    std::fs::write(d.join("assets/a.bin"), b"abc").unwrap();
+    let lock = d.join("assets/assets.lock.json");
+    for name in ["assets/a.bin", "./assets/a.bin"] {
+        let add = bin()
+            .current_dir(&d)
+            .args(["lock", "add", name, "--source", "s", "--licence", "NCSA"])
+            .arg("--lock")
+            .arg(&lock)
+            .output()
+            .unwrap();
+        assert!(
+            add.status.success(),
+            "{}",
+            String::from_utf8_lossy(&add.stderr)
+        );
+    }
+    let text = std::fs::read_to_string(&lock).unwrap();
+    let v: serde_json::Value = serde_json::from_str(&text).unwrap();
+    assert_eq!(v["assets"].as_array().unwrap().len(), 1, "{text}");
+    assert_eq!(v["assets"][0]["path"], "a.bin");
+    // checked from another folder; NCSA is not an NC licence
+    let check = bin()
+        .args(["lock", "check", "--forbid", "NC", "--lock"])
+        .arg(&lock)
+        .output()
+        .unwrap();
+    assert!(
+        check.status.success(),
+        "{}",
+        String::from_utf8_lossy(&check.stderr)
+    );
+    let _ = std::fs::remove_dir_all(&d);
+}

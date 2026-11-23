@@ -36,8 +36,9 @@ the same bytes.
 - `writeLock`, `checkLock`, `lockEntry`, `sha256Hex`: assets.lock.json with
   path, source, licence, SHA-256, size and an optional byte budget. The
   check fails on a hash or size drift, a missing file, an empty licence or
-  source, a licence matching a forbidden substring (for example `NC`), or a
-  file over its budget.
+  source, a licence naming a forbidden term as whole tokens (`NC` fails
+  `CC-BY-NC-4.0` and passes `NCSA`), or a file over its budget. The CLI
+  stores each path relative to the lock file's folder.
 
 ## Install
 
@@ -112,6 +113,10 @@ inlined).
 - 2026-11-22: the command line optimize, lock add, lock check (pass, then
   fail after a file change) and clips commands ran end to end (measured in
   `tests/cli.rs`).
+- 2026-11-23: the CLI refuses unknown flags and the `--name=value` form, a
+  ratio outside 0 to 1, a negative error, and an output that is its own
+  input; texture hook files go in a fresh folder made with create_dir
+  (tested in `tests/cli.rs`, the hook path itself still untested).
 - 2026-11-23: a sparse morph target (the form Blender writes shape keys
   in) keeps its index and value buffer views through optimize; before,
   both views were dropped and the accessor pointed at the wrong data
