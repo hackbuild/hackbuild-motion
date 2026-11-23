@@ -3,14 +3,16 @@
 // frame, `ArticulatorFrame`, whose field names and units are those of the
 // articulator probe frame in bellows-voice (the owner's articulatory voice,
 // MIT): centimetres in the adult male head frame, x forward and y up from
-// the glottis, the velum port in cm^2. `fromTractModel` reads the same
-// fields from bellows-voice's main thread `TractModel` today; the engine's
-// own probe is pending upstream and needs no change here when it lands.
+// the glottis, the velum port in cm^2. A frame from the engine's
+// `articulatorProbe` (bellows-voice 0.8.0, git ac30dc2) or from its
+// offline `renderSpeech` track passes straight in; `fromProbe` reads a
+// live probe at the heard time, and `fromTractModel` reads the main thread
+// `TractModel`, which follows the plan rather than the audio.
 //
 // Channels and thresholds follow the mapping in the bellows integration
-// report, tuned against bellows-voice 0.7.3's own targets for body 0 (the
-// test fixture). Every constant is inferred: nobody has tuned them by eye
-// on a face yet.
+// report, tuned against bellows-voice's own targets for body 0 and a
+// rendered engine track (the test fixtures). Every constant is inferred:
+// nobody has tuned them by eye on a face yet.
 import { OCULUS_VISEMES, type OculusViseme, VRM_VOWELS, type VrmVowel } from "@hackbuild/rig/expressions";
 import type { LipFrame } from "./index.js";
 
@@ -34,8 +36,8 @@ export interface ArticulatorFrame {
   tongueTipY: number;
   /** Velar port, cm^2; under 0 is closed. */
   velum: number;
-  /** 1 while the voice sounds, 0 when it holds its last state. Absent means sounding. */
-  sounding?: number;
+  /** True or 1 while the voice sounds, false or 0 when it holds its last state. Absent means sounding. */
+  sounding?: number | boolean;
 }
 
 /** The mouth channels the report maps from articulators, each 0 to 1. */
@@ -58,29 +60,31 @@ const clamp01 = (x: number): number => (x <= 0 ? 0 : x >= 1 ? 1 : x);
 const bump = (x: number, c: number, w: number): number => clamp01(1 - Math.abs(x - c) / w);
 
 /**
- * Channels from a frame. Constants from bellows-voice 0.7.3 body 0 targets
- * (inferred thresholds between them): jaw 0.2 at u to 1.85 at the open o;
- * lips shut at an aperture of -0.2 and open from 0.1; alveolar contact
- * with the tip at 9.68 cm, s at 9.1, sh at 9.5 with 0.75 cm of rounding,
- * th at 8.2 forward of 5.8, r with the tip back of 5 cm; the dorsum seals
- * the velum at 8.35.
+ * Channels from a frame. Constants from bellows-voice's body 0 targets and
+ * a rendered engine track (inferred thresholds between them): jaw 0.2 at
+ * u to 1.85 at the open o; lips shut at an aperture of -0.2 and open from
+ * 0.1; the tip reaches the ridge at 9.55 cm in the engine (target 9.68),
+ * forward of 5.9 for t, d, n and l, at 5.55 to 5.85 for sh and ch, back of
+ * 5.95 and lower for r; s at 9.1 forward of 6; th forward of 6.55 at 8.2;
+ * the dorsum seals the velum at 8.35.
  */
 export function mouthChannels(f: ArticulatorFrame, out?: MouthChannels): MouthChannels {
   const c = out ?? ({} as MouthChannels);
   const ld = clamp01(f.labiodental);
+  const x = f.tongueTipX;
+  const y = f.tongueTipY;
   c.open = clamp01((f.jaw - 0.2) / 1.65);
   c.closure = clamp01((0.1 - f.lipAperture) / 0.3) * (1 - ld);
   c.round = clamp01(f.lipProtrusion / 1.4);
   c.spread = clamp01(f.lipWidth) * (1 - clamp01(f.lipProtrusion / 0.6));
   c.labiodental = ld;
-  const shRound = clamp01((f.lipProtrusion - 0.6) / 0.15);
-  const tipUp = clamp01((f.tongueTipY - 9.55) / 0.12);
   c.nasal = clamp01(f.velum / 0.3);
-  c.postalveolar = clamp01((f.tongueTipY - 9.4) / 0.1) * shRound;
-  c.alveolar = tipUp * (1 - c.postalveolar);
-  c.sibilant = bump(f.tongueTipY, 9.1, 0.25) * clamp01((f.tongueTipX - 5.2) / 0.2) * (1 - c.postalveolar);
-  c.dental = bump(f.tongueTipY, 8.2, 0.4) * clamp01((f.tongueTipX - 5.75) / 0.2);
-  c.retroflex = clamp01((5.2 - f.tongueTipX) / 0.3) * clamp01((f.tongueTipY - 8.6) / 0.4) * (1 - c.postalveolar);
+  const ridge = clamp01((y - 9.35) / 0.15);
+  c.alveolar = ridge * clamp01((x - 5.9) / 0.1);
+  c.postalveolar = ridge * clamp01((x - 5.45) / 0.1) * clamp01((5.95 - x) / 0.1);
+  c.sibilant = bump(y, 9.1, 0.2) * clamp01((x - 6.0) / 0.15);
+  c.dental = bump(y, 8.2, 0.5) * clamp01((x - 6.55) / 0.2);
+  c.retroflex = clamp01((5.95 - x) / 0.2) * bump(y, 9.15, 0.5) * (1 - c.postalveolar);
   c.velar = clamp01((f.tongueBodyY - 7.95) / 0.35);
   return c;
 }
@@ -125,7 +129,7 @@ export function articulatoryFrame(f: ArticulatorFrame, out?: LipFrame & { channe
   const o = out ?? { visemes: new Float32Array(OCULUS_VISEMES.length), vowels: { aa: 0, ih: 0, ou: 0, ee: 0, oh: 0 }, open: 0, source: "silent", channels: {} as MouthChannels };
   const c = mouthChannels(f, o.channels);
   o.visemes.fill(0);
-  if (f.sounding === 0) {
+  if (f.sounding === 0 || f.sounding === false) {
     for (const k of VRM_VOWELS) o.vowels[k] = 0;
     o.open = 0;
     o.source = "silent";
@@ -177,16 +181,14 @@ export function arkitFromChannels(c: MouthChannels, out: Map<string, number> = n
   return out;
 }
 
-/** The bellows-voice `TractModel` methods this file reads. */
+/** The bellows-voice `TractModel` method this file reads. */
 export interface TractModelLike {
   postureByName(): Record<string, number>;
-  drawingNow(): { tipX: number; tipY: number };
 }
 
-/** An ArticulatorFrame from a bellows-voice `TractModel`'s current posture and tongue tip. */
+/** An ArticulatorFrame from a bellows-voice `TractModel`'s current posture, read as the probe reads the engine. */
 export function fromTractModel(m: TractModelLike, out?: ArticulatorFrame): ArticulatorFrame {
   const a = m.postureByName();
-  const d = m.drawingNow();
   const o = out ?? ({} as ArticulatorFrame);
   o.jaw = a.jaw ?? 0;
   o.lipAperture = a.lipAp ?? 0;
@@ -195,8 +197,25 @@ export function fromTractModel(m: TractModelLike, out?: ArticulatorFrame): Artic
   o.labiodental = a.labiodental ?? 0;
   o.tongueBodyX = a.tbX ?? 0;
   o.tongueBodyY = a.tbY ?? 0;
-  o.tongueTipX = d.tipX;
-  o.tongueTipY = d.tipY;
+  o.tongueTipX = a.ttX ?? 0;
+  o.tongueTipY = a.ttY ?? 0;
   o.velum = a.velum ?? 0;
   return o;
 }
+
+/** The parts of a bellows-voice `ArticulatorProbe` this file reads. */
+export interface ArticulatorProbeLike {
+  /** The frame playing out of the speakers now, null before the first. */
+  heard(): ArticulatorFrame | null;
+}
+
+/**
+ * A LipFrame from a live bellows-voice articulator probe at the time being
+ * heard; a silent frame before the probe has sent anything.
+ */
+export function fromProbe(probe: ArticulatorProbeLike, out?: LipFrame & { channels: MouthChannels }): LipFrame & { channels: MouthChannels } {
+  const f = probe.heard();
+  return articulatoryFrame(f ?? SILENT, out);
+}
+
+const SILENT: ArticulatorFrame = { jaw: 0, lipAperture: 0, lipProtrusion: 0, lipWidth: 0, labiodental: 0, tongueBodyX: 0, tongueBodyY: 0, tongueTipX: 0, tongueTipY: 0, velum: 0, sounding: 0 };

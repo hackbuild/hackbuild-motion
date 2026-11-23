@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { type ArticulatorFrame, arkitFromChannels, articulatoryFrame, fromTractModel, mouthChannels, vowelWeights } from "../src/articulatory.js";
+import { type ArticulatorFrame, arkitFromChannels, articulatoryFrame, fromProbe, fromTractModel, mouthChannels, vowelWeights } from "../src/articulatory.js";
 import { OCULUS_VISEMES, type OculusViseme, VRM_VOWELS } from "../src/index.js";
 
 // bellows-voice 0.7.3 TractModel postures, settled, for every sound it has.
@@ -71,10 +71,45 @@ describe("articulatory source", () => {
   it("reads a TractModel shaped object", () => {
     const a = frames.s!;
     const tract = {
-      postureByName: () => ({ jaw: a.jaw, lipAp: a.lipAperture, lipProt: a.lipProtrusion, lipWidth: a.lipWidth, labiodental: a.labiodental, tbX: a.tongueBodyX, tbY: a.tongueBodyY, velum: a.velum }),
-      drawingNow: () => ({ tipX: a.tongueTipX, tipY: a.tongueTipY }),
+      postureByName: () => ({ jaw: a.jaw, lipAp: a.lipAperture, lipProt: a.lipProtrusion, lipWidth: a.lipWidth, labiodental: a.labiodental, tbX: a.tongueBodyX, tbY: a.tongueBodyY, ttX: a.tongueTipX, ttY: a.tongueTipY, velum: a.velum }),
     };
     const { lipArea: _skip, ...want } = a as ArticulatorFrame & { lipArea?: number };
     expect(fromTractModel(tract)).toEqual(want);
+  });
+});
+
+// A real engine track: bellows-voice 0.8.0 renderSpeech, "Shall we meet at noon?".
+const real = JSON.parse(readFileSync(new URL("./fixtures/bellows-track.json", import.meta.url), "utf8")) as {
+  spans: { ipa: string; start: number; end: number }[];
+  track: (ArticulatorFrame & { time: number; phoneme: string })[];
+};
+
+describe("articulatory source on the engine's own track", () => {
+  const during = (ipa: string) => {
+    const s = real.spans.filter((x) => x.ipa === ipa);
+    return real.track.filter((f) => s.some((x) => f.time >= x.start + 0.01 && f.time <= x.end));
+  };
+
+  it("closes the lips on m and opens the jaw on the vowels", () => {
+    const m = during("m").map((f) => articulatoryFrame(f));
+    expect(m.length).toBeGreaterThan(0);
+    expect(Math.max(...m.map((o) => o.channels.closure))).toBeGreaterThan(0.9);
+    const u = during("u").map((f) => articulatoryFrame(f));
+    expect(Math.max(...u.map((o) => o.vowels.ou))).toBeGreaterThan(0.5);
+    const i = during("i").map((f) => articulatoryFrame(f));
+    expect(Math.max(...i.map((o) => o.vowels.ih))).toBeGreaterThan(0.5);
+  });
+
+  it("reads sh as CH and t as DD at their frames", () => {
+    expect(during("ʃ").some((f) => top(articulatoryFrame(f).visemes) === "CH")).toBe(true);
+    expect(during("t").some((f) => top(articulatoryFrame(f).visemes) === "DD")).toBe(true);
+  });
+
+  it("goes silent on frames that do not sound and through fromProbe before the first frame", () => {
+    const quiet = real.track.filter((f) => f.sounding === false);
+    for (const f of quiet) expect(articulatoryFrame(f).source).toBe("silent");
+    expect(fromProbe({ heard: () => null }).source).toBe("silent");
+    const f = real.track[30]!;
+    expect(fromProbe({ heard: () => f }).visemes).toEqual(articulatoryFrame(f).visemes);
   });
 });

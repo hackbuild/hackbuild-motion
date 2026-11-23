@@ -4,14 +4,16 @@
 // the exact sounds the engine plays, on the AudioContext clock; an offline
 // render returns the same spans from 0. The span shape is copied here
 // structurally, so this file imports nothing from bellows and the package
-// runs without it installed. Tested against bellows-voice 0.7.3 on
-// bellowsjs 0.5.0, the versions the optional peer dependencies pin.
+// runs without it installed. The span shape was read from bellows-voice
+// 0.7.3 and is unchanged in 0.8.0 (git ac30dc2, not on npm), the commit the
+// optional peer dependency pins, on bellowsjs 0.5.0.
 import type { OculusViseme } from "@hackbuild/rig/expressions";
 import type { SpeechEvent } from "./index.js";
 
-/** The bellows-voice version this adapter's span shape was read from. */
-export const BELLOWS_VOICE_VERSION = "0.7.3";
-/** The bellowsjs version bellows-voice 0.7.3 was tested on. */
+/** The bellows-voice release the optional peer pins, by git commit (0.8.0 is not on npm). */
+export const BELLOWS_VOICE_VERSION = "0.8.0";
+export const BELLOWS_VOICE_COMMIT = "ac30dc229f492ecb6bd80b2ea0f71c6a370b368c";
+/** The bellowsjs version bellows-voice 0.8.0 runs on. */
 export const BELLOWSJS_VERSION = "0.5.0";
 
 /** One timed sound, as bellows-voice's `SungSpan`: a single IPA phoneme or a `beat:` id, seconds. */
