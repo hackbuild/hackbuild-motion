@@ -1,0 +1,42 @@
+{
+  "repo": "hackbuild-motion",
+  "intro": "one page per package. the rigs are built in code; any model, clip or weight file comes from a url you give or a file you drop, and its licence is shown when it loads.",
+  "footer": "code mit. pages built from github.com/hackbuild/hackbuild-motion. no weights or model files are hosted here.",
+  "source": "https://github.com/hackbuild/hackbuild-motion",
+  "pages": [
+    {
+      "name": "gait",
+      "what": "procedural dog gait: froude gait choice, leg oscillators, posture springs, tail and ears."
+    },
+    {
+      "name": "ik",
+      "what": "two bone arm and leg, fabrik and ccd chain, clamped head look at, foot lock on a stepping foot."
+    },
+    {
+      "name": "retarget",
+      "what": "a bvh walk on another rig, in centimeters, retargeted onto the normalized humanoid. drop your own bvh."
+    },
+    {
+      "name": "motion-net",
+      "what": "the quadruped codebook network (cc by-nc 4.0 weights, loaded from upstream or a dropped file): webgpu against the cpu path, the worker, the gait host and its procedural fallback.",
+      "timeoutS": 120,
+      "localQuery": "bind=/local/bind.json"
+    },
+    {
+      "name": "motion-match",
+      "what": "motion matching over a synthetic gait clip database with inertialized transitions, following your speed and turn.",
+      "timeoutS": 60
+    },
+    {
+      "name": "avatar",
+      "what": "vrm, glb or fbx into the normalized humanoid: rig mapping, t pose fix, material repair, clips and the first person head hider.",
+      "timeoutS": 180
+    },
+    {
+      "name": "lipsync",
+      "what": "visemes from speech word timing (the system voice or timed text) or from audio level (microphone or a file).",
+      "stage": true,
+      "timeoutS": 60
+    }
+  ]
+}
