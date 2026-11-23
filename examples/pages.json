@@ -17,12 +17,6 @@
       "what": "a bvh walk on another rig, in centimeters, retargeted onto the normalized humanoid. drop your own bvh."
     },
     {
-      "name": "motion-net",
-      "what": "the quadruped codebook network (cc by-nc 4.0 weights, loaded from upstream or a dropped file): webgpu against the cpu path, the worker, the gait host and its procedural fallback.",
-      "timeoutS": 120,
-      "localQuery": "bind=/local/bind.json"
-    },
-    {
       "name": "motion-match",
       "what": "motion matching over a synthetic gait clip database with inertialized transitions, following your speed and turn.",
       "timeoutS": 60

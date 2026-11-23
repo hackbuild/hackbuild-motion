@@ -104,14 +104,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hackbuild-motion-net"
-version = "0.1.0"
-dependencies = [
- "libm",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "hackbuild-organic"
 version = "0.1.0"
 dependencies = [
