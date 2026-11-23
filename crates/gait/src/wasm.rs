@@ -49,7 +49,9 @@ impl GaitJs {
     #[wasm_bindgen(constructor)]
     pub fn new(legs: &[f64], leg_length: f64, seed: u32) -> GaitJs {
         let specs = legs
-            .chunks_exact(4)
+            .as_chunks::<4>()
+            .0
+            .iter()
             .map(|c| LegSpec {
                 x: c[0],
                 z: c[1],
@@ -281,7 +283,9 @@ pub fn steer(
     params: &[f64],
 ) -> Vec<f64> {
     let obs: Vec<Obstacle> = obstacles
-        .chunks_exact(3)
+        .as_chunks::<3>()
+        .0
+        .iter()
         .map(|c| Obstacle {
             x: c[0],
             z: c[1],

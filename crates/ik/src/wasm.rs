@@ -17,7 +17,11 @@ fn q4(s: &[f64]) -> Quat {
     Quat::from_slice(&s[0..4])
 }
 fn points(s: &[f64]) -> Vec<Vec3> {
-    s.chunks_exact(3).map(Vec3::from_slice).collect()
+    s.as_chunks::<3>()
+        .0
+        .iter()
+        .map(|c| Vec3::from_slice(c))
+        .collect()
 }
 fn write_points(p: &[Vec3], out: &mut [f64]) {
     for (i, x) in p.iter().enumerate() {
@@ -64,7 +68,9 @@ pub fn fabrik(
 ) -> Vec<f64> {
     let mut p = points(positions);
     let lim: Vec<Limit> = limits
-        .chunks_exact(4)
+        .as_chunks::<4>()
+        .0
+        .iter()
         .map(|c| match c[0] as i32 {
             1 => Limit::Cone { max: c[1] },
             2 => Limit::Hinge {

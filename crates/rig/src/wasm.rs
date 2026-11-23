@@ -108,7 +108,12 @@ pub fn map_rig_js(names: Vec<String>, parents: &[i32]) -> RigMapJs {
 #[wasm_bindgen(js_name = limbChains)]
 pub fn limb_chains_js(names: Vec<String>, parents: &[i32], positions: &[f64]) -> String {
     let ns = nodes(names, parents);
-    let pos: Vec<Vec3> = positions.chunks_exact(3).map(Vec3::from_slice).collect();
+    let pos: Vec<Vec3> = positions
+        .as_chunks::<3>()
+        .0
+        .iter()
+        .map(|c| Vec3::from_slice(c))
+        .collect();
     let rest = if pos.len() == ns.len() {
         Some(pos.as_slice())
     } else {

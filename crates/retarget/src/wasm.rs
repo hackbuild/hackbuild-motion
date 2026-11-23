@@ -22,10 +22,18 @@ use rig::bones::ALL;
 use wasm_bindgen::prelude::*;
 
 fn quats(s: &[f64]) -> Vec<Quat> {
-    s.chunks_exact(4).map(Quat::from_slice).collect()
+    s.as_chunks::<4>()
+        .0
+        .iter()
+        .map(|c| Quat::from_slice(c))
+        .collect()
 }
 fn vecs(s: &[f64]) -> Vec<Vec3> {
-    s.chunks_exact(3).map(Vec3::from_slice).collect()
+    s.as_chunks::<3>()
+        .0
+        .iter()
+        .map(|c| Vec3::from_slice(c))
+        .collect()
 }
 
 fn skeleton(names: Vec<String>, parents: &[i32], rest_t: &[f64], rest_r: &[f64]) -> Skeleton {
