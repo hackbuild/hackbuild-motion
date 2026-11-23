@@ -107,7 +107,7 @@ export function limbChains(nodes: readonly RigNodeInput[], rest?: readonly Vec3[
   return JSON.parse(wasm.limbChains(nodes.map((n) => n.name), parentsOf(nodes), pos)) as LimbChain[];
 }
 
-export type Units = "meters" | "centimeters" | "millimeters" | "unknown";
+export type Units = "meters" | "centimeters" | "millimeters" | "unknown" | "decimeters" | "inches";
 
 export interface RestReport {
   /** Rotation that turns the rig to face +Z with +Y up and its left on +X. */
@@ -129,7 +129,7 @@ export interface RestReport {
   aPose: boolean;
 }
 
-const UNITS: Units[] = ["meters", "centimeters", "millimeters", "unknown"];
+const UNITS: Units[] = ["meters", "centimeters", "millimeters", "unknown", "decimeters", "inches"];
 
 /** Rest analysis from world positions of mapped bones. Null without hips, head and arms. */
 export function analyzeRest(positions: Partial<Record<HumanBone, Vec3>>): RestReport | null {

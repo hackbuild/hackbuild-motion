@@ -12,6 +12,8 @@ pub enum Units {
     Centimeters,
     Millimeters,
     Unknown,
+    Decimeters,
+    Inches,
 }
 
 impl Units {
@@ -21,6 +23,8 @@ impl Units {
             Units::Centimeters => 1.0,
             Units::Millimeters => 2.0,
             Units::Unknown => 3.0,
+            Units::Decimeters => 4.0,
+            Units::Inches => 5.0,
         }
     }
 }
@@ -104,8 +108,14 @@ pub fn analyze_rest(pos: &[Option<Vec3>]) -> Option<RestReport> {
         tf(hips).y - (tf(head).y - tf(hips).y) * 1.55
     };
     let height = tf(head).y - low;
+    // head height is about 0.87 of stature; inches win over centimeters
+    // only where centimeters read under a 1 m adult and inches 1 to 2.3 m
     let (units, scale) = if (0.3..3.0).contains(&height) {
         (Units::Meters, 1.0)
+    } else if (3.0..30.0).contains(&height) {
+        (Units::Decimeters, 0.1)
+    } else if (1.0..2.3).contains(&(height * 0.0254 / 0.87)) && height * 0.01 / 0.87 < 1.0 {
+        (Units::Inches, 0.0254)
     } else if (30.0..300.0).contains(&height) {
         (Units::Centimeters, 0.01)
     } else if (300.0..3000.0).contains(&height) {
@@ -207,5 +217,27 @@ mod tests {
                 .normalize(),
         );
         assert!((lifted.x - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn decimeters_and_inches_are_read() {
+        let r = reference_rest();
+        for (k, want) in [
+            (10.0, Units::Decimeters),
+            (1.0 / 0.0254, Units::Inches),
+            (100.0, Units::Centimeters),
+        ] {
+            let pos: alloc::vec::Vec<Option<Vec3>> = r.iter().map(|v| Some(*v * k)).collect();
+            let rep = analyze_rest(&pos).unwrap();
+            assert_eq!(rep.units, want, "scale {k}");
+            assert!(
+                (rep.hips_height
+                    - analyze_rest(&r.iter().map(|v| Some(*v)).collect::<alloc::vec::Vec<_>>())
+                        .unwrap()
+                        .hips_height)
+                    .abs()
+                    < 1e-9
+            );
+        }
     }
 }

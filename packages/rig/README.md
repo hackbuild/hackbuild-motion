@@ -18,8 +18,9 @@ offers a three.js adapter under `/three`.
 - `limbChains(nodes, rest?)`: the chain model for non humanoids: legs
   `LF RF LH RH`, `tail`, `earL`, `earR`, `spine`, `neck`, `head`, each with
   a root, a tip and a pole measured from the rest pose.
-- `analyzeRest(positions)`: facing, units (meters, centimeters,
-  millimeters), floor, hips height and arm and leg pose, with the rotations
+- `analyzeRest(positions)`: facing, units (meters, decimeters,
+  centimeters, inches, millimeters; inches only where centimeters would
+  read a body under 1 m), floor, hips height and arm and leg pose, with the rotations
   that turn the rig to +Z and lift A pose arms into the T pose.
   `referenceRest()` is a 1.70 m reference humanoid in the normalized space.
 - The expression and viseme table: the 18 VRM 1.0 expressions, ARKit 52,

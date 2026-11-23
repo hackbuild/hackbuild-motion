@@ -564,7 +564,8 @@ export async function loadAvatar(src: AvatarSource, opts: LoadOptions = {}): Pro
     bones = humanoid.bones;
     dialect = humanoid.report.dialect;
     if (humanoid.rest.aPose) warnings.push("arms were in an a pose and were lifted to a t pose.");
-    if (humanoid.rest.units !== "meters") warnings.push(`model was in ${humanoid.rest.units} and was scaled to meters.`);
+    if (humanoid.rest.units === "unknown") warnings.push("model units are unknown and it was not scaled. check its size.");
+    else if (humanoid.rest.units !== "meters") warnings.push(`model was in ${humanoid.rest.units} and was scaled to meters.`);
     expressions = new ExpressionRig(model);
   }
   const wardrobe = Wardrobe.from(root);
