@@ -85,17 +85,22 @@ function frame(dt: number, cmd = { speed: 1.2, turnRate: 0 }) {
 - 2026-11-23: on the synthetic clip set, walk, run, arc, idle and turn in
   place commands settle on the matching clip; the root speed holds within
   0.05 m/s of a 3 m/s command (computed).
-- 2026-11-23: on transition frames the largest per frame step of the hip
-  and feet was 0.119 m against 0.186 m on plain frames, and the largest
-  change of step 0.060 m against 0.097 m, over 13 transitions in the Rust
-  run; 0.245 m against 0.226 m in the TypeScript run, a smaller clip set
-  (computed at 60 Hz). The tests allow 1.05 and 1.2 times the plain
-  frames' step.
-- 2026-11-23: foot slide while in contact, 60 Hz over 14 s with 14
-  transitions: mean 1.9 mm per frame, 0.8 mm per frame once the
-  transition offset has decayed, worst 39 mm (computed). Transitions cause
-  most of it; foot locking from `@hackbuild/ik` is the fix and is not
-  wired here.
+- 2026-11-23, after the inertializer velocity fix: on transition frames
+  the largest per frame step of the hip and feet was 0.080 m against
+  0.182 m on plain frames, and the largest change of step 0.056 m
+  against 0.094 m, over 13 transitions in the Rust run (before the fix
+  0.119 m and 0.060 m); 0.155 m against 0.182 m in the TypeScript run, a
+  smaller clip set (before 0.245 m against 0.226 m). Computed at 60 Hz.
+  The tests allow 1.05 and 1.2 times the plain frames' step.
+- 2026-11-23: a switch to a source moving the same way leaves the output
+  velocity unchanged to 1e-9 m/s (computed, organic test; before the fix
+  it read 0.817 and 1.522 m/s on the frames after a 1 m/s switch).
+- 2026-11-23: planted foot slide, 60 Hz over 14 s with 14 transitions:
+  mean 1.5 mm per frame (before 1.9), 0.8 mm per frame once the
+  transition offset has decayed, worst 39 mm (computed). Within 12
+  frames of a transition the worst is 26 mm, elsewhere 39 mm: the
+  synthetic clips slide on their own and nothing here locks feet. Foot
+  locking from `@hackbuild/ik` is the fix and is not wired here.
 - 2026-11-23: from contacts alone the motor state's stride frequency is
   within 5 percent of the clip cadence and its duty within 0.08 of 0.6
   (computed).

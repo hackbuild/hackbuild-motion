@@ -97,7 +97,7 @@ describe("matcher", () => {
       }
     }
     expect(m.last.transitions).toBeGreaterThan(3);
-    // measured 2026-11-23: 0.245 m on transition frames against 0.226 m on plain frames
+    // measured 2026-11-23: 0.155 m on transition frames against 0.182 m on plain frames
     expect(worstJump).toBeLessThanOrEqual(worstPlain * 1.2);
     m.dispose();
   });

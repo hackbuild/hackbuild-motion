@@ -2,9 +2,11 @@
 //! forward, moves the character root by the clip's root delta, searches
 //! the database on an interval (or at once when a one shot clip ends) and,
 //! when a better frame turns up, jumps there with an inertialized
-//! transition: the pose offset at the jump decays to zero by a critically
-//! damped spring, so neither the pose nor its velocity pops. The root never
-//! jumps since it only ever moves by deltas.
+//! transition: the pose offset at the jump, with the velocity difference
+//! between the old output and the new clip, decays to zero by a critically
+//! damped spring, so neither the pose nor its velocity steps at a switch.
+//! The root never jumps since it only ever moves by deltas. Feet are not
+//! locked; a clip's own slide passes through.
 
 use crate::clip::{Pose, Root};
 use crate::db::{Database, Exclude, Hit};
@@ -341,7 +343,10 @@ mod tests {
         let (mut total, mut count) = (0.0, 0);
         let mut worst: f64 = 0.0;
         let (mut settled, mut settled_n) = (0.0, 0);
-        let m = run(&schedule, |m, _| {
+        let (mut near, mut far): (f64, f64) = (0.0, 0.0);
+        let mut since = 99;
+        let m = run(&schedule, |m, j| {
+            since = if j { 0 } else { since + 1 };
             let w = m.world_feet();
             if let Some((pw, pc)) = &prev {
                 for k in 0..w.len() {
@@ -350,6 +355,12 @@ mod tests {
                         total += s;
                         count += 1;
                         worst = worst.max(s);
+                        // planted feet only: swing feet never enter this measure
+                        if since < 12 {
+                            near = near.max(s);
+                        } else {
+                            far = far.max(s);
+                        }
                         if !m.blending() {
                             settled += s;
                             settled_n += 1;
@@ -362,7 +373,14 @@ mod tests {
         assert!(m.transitions >= 4, "{}", m.transitions);
         let mean = total / count as f64;
         let settled = settled / settled_n as f64;
-        // measured 2026-11-23: mean 0.0019, settled 0.0008, worst 0.039 m per frame at 60 Hz
+        // measured 2026-11-23 after the inertializer velocity fix: mean 1.5 mm,
+        // settled 0.8 mm, worst 39 mm per frame at 60 Hz; planted feet within
+        // 12 frames of a transition 26 mm, elsewhere 39 mm (the synthetic
+        // clips slide on their own; nothing locks feet here)
+        assert!(
+            near <= far,
+            "transition slide {near} m against {far} m elsewhere"
+        );
         assert!(mean < 0.0025, "mean slide {mean} m per frame");
         assert!(settled < 0.0012, "settled slide {settled} m per frame");
         assert!(worst < 0.05, "worst slide {worst}");

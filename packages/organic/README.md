@@ -111,6 +111,12 @@ first on PATH.
   and bad input (computed). The golden trace grew to 157 values with a
   two channel cascade and stays bit identical between native and wasm
   (measured); `npx vitest run packages/organic` passed 18 of 18.
+- 2026-11-23: the inertializer offset carries the output velocity minus
+  the new source's velocity. A switch to a source moving the same way
+  leaves the output velocity at 1 m/s to 1e-9 (computed; before, 0.817
+  and 1.522 m/s on the frames after the switch). `cargo test -p
+  hackbuild-organic` passes 32 unit tests; the golden trace changed in its
+  inertializer values and was regenerated.
 
 ### Not verified by anything
 
