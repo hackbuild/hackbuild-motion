@@ -30,6 +30,8 @@
     "./wasm": "./dist/wasm/organic_bg.wasm",
     "./iife": "./dist/organic.iife.js"
   },
+  "unpkg": "dist/organic.iife.js",
+  "jsdelivr": "dist/organic.iife.js",
   "files": [
     "dist",
     "README.md",

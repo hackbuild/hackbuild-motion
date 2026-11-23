@@ -30,6 +30,8 @@
     "./wasm": "./dist/wasm/ik_bg.wasm",
     "./iife": "./dist/ik.iife.js"
   },
+  "unpkg": "dist/ik.iife.js",
+  "jsdelivr": "dist/ik.iife.js",
   "files": [
     "dist",
     "README.md",

@@ -30,6 +30,8 @@
     "./wasm": "./dist/wasm/gait_bg.wasm",
     "./iife": "./dist/gait.iife.js"
   },
+  "unpkg": "dist/gait.iife.js",
+  "jsdelivr": "dist/gait.iife.js",
   "files": [
     "dist",
     "README.md",

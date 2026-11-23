@@ -26,6 +26,8 @@
     "./wasm": "./dist/wasm/motion_net_bg.wasm",
     "./iife": "./dist/motion-net.iife.js"
   },
+  "unpkg": "dist/motion-net.iife.js",
+  "jsdelivr": "dist/motion-net.iife.js",
   "files": [
     "dist",
     "README.md",

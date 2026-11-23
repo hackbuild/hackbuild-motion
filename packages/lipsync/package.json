@@ -29,6 +29,8 @@
     },
     "./iife": "./dist/lipsync.iife.js"
   },
+  "unpkg": "dist/lipsync.iife.js",
+  "jsdelivr": "dist/lipsync.iife.js",
   "files": [
     "dist",
     "README.md",

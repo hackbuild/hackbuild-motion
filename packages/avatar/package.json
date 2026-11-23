@@ -29,6 +29,8 @@
     },
     "./iife": "./dist/avatar.iife.js"
   },
+  "unpkg": "dist/avatar.iife.js",
+  "jsdelivr": "dist/avatar.iife.js",
   "files": [
     "dist",
     "README.md",

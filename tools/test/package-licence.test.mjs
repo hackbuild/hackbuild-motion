@@ -16,3 +16,12 @@ for (const pkg of readdirSync(join(root, "packages"))) {
     assert.equal(readFileSync(join(dir, "LICENSE"), "utf8"), licence);
   });
 }
+
+for (const pkg of readdirSync(join(root, "packages"))) {
+  test(`${pkg} points unpkg and jsdelivr at its single file build`, () => {
+    const meta = JSON.parse(readFileSync(join(root, "packages", pkg, "package.json"), "utf8"));
+    const iife = meta.exports["./iife"].replace(/^\.\//, "");
+    assert.equal(meta.unpkg, iife);
+    assert.equal(meta.jsdelivr, iife);
+  });
+}

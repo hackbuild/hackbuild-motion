@@ -38,6 +38,8 @@
     "./wasm": "./dist/wasm/rig_bg.wasm",
     "./iife": "./dist/rig.iife.js"
   },
+  "unpkg": "dist/rig.iife.js",
+  "jsdelivr": "dist/rig.iife.js",
   "files": [
     "dist",
     "README.md",

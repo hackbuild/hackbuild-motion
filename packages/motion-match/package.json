@@ -26,6 +26,8 @@
     "./wasm": "./dist/wasm/motion_match_bg.wasm",
     "./iife": "./dist/motion-match.iife.js"
   },
+  "unpkg": "dist/motion-match.iife.js",
+  "jsdelivr": "dist/motion-match.iife.js",
   "files": [
     "dist",
     "README.md",

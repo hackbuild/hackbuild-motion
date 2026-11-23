@@ -26,6 +26,8 @@
     "./wasm": "./dist/wasm/bake_bg.wasm",
     "./iife": "./dist/bake.iife.js"
   },
+  "unpkg": "dist/bake.iife.js",
+  "jsdelivr": "dist/bake.iife.js",
   "files": [
     "dist",
     "README.md",

@@ -30,6 +30,8 @@
     "./wasm": "./dist/wasm/retarget_bg.wasm",
     "./iife": "./dist/retarget.iife.js"
   },
+  "unpkg": "dist/retarget.iife.js",
+  "jsdelivr": "dist/retarget.iife.js",
   "files": [
     "dist",
     "README.md",

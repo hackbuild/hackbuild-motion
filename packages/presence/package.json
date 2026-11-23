@@ -25,6 +25,8 @@
     },
     "./iife": "./dist/presence.iife.js"
   },
+  "unpkg": "dist/presence.iife.js",
+  "jsdelivr": "dist/presence.iife.js",
   "files": [
     "dist",
     "README.md",
