@@ -8,6 +8,7 @@ $("#controls").innerHTML = `
 <p id="licence"></p>
 <label>manifest url <input id="murl" type="url" size="60"></label>
 <label>weights url <input id="burl" type="url" size="60"></label>
+<button id="upstream">fill in the published weights (cc by-nc 4.0, non-commercial use only)</button>
 <button id="fetch">download and load</button>
 <div class="drop" id="drop">or drop quadruped.json and quadruped.bin here <input id="files" type="file" multiple accept=".json,.bin"></div>
 <label>speed m/s <input id="speed" type="range" min="0" max="3.5" step="0.05" value="1"><span id="speedv">1.00</span></label>
@@ -18,9 +19,16 @@ $("#controls").innerHTML = `
 $("#licence").textContent = `${WEIGHT_LICENCE} nothing downloads until you press the button or drop the files. the weights are about ${mb(UPSTREAM.binBytes)}.`;
 const murl = $("#murl") as HTMLInputElement;
 const burl = $("#burl") as HTMLInputElement;
-// url parameters go into value properties, never into markup
-murl.value = params.get("manifest") ?? UPSTREAM.manifest;
-burl.value = params.get("bin") ?? UPSTREAM.bin;
+// url parameters go into value properties, never into markup. the fields
+// start empty: the examples use cc0 or mit assets, so the cc by-nc weights
+// are filled in only by the button that names their licence
+murl.value = params.get("manifest") ?? "";
+burl.value = params.get("bin") ?? "";
+$("#upstream").addEventListener("click", () => {
+  murl.value = UPSTREAM.manifest;
+  burl.value = UPSTREAM.bin;
+  status(`${WEIGHT_LICENCE} press download and load to fetch them.`, "warn");
+});
 const speed = $("#speed") as HTMLInputElement;
 const turn = $("#turn") as HTMLInputElement;
 const style = $("#style") as HTMLSelectElement;
@@ -78,7 +86,10 @@ async function start(manifest: string | File, bin: string | File): Promise<void>
   }
 }
 
-$("#fetch").addEventListener("click", () => void start(murl.value, burl.value));
+$("#fetch").addEventListener("click", () => {
+  if (!murl.value || !burl.value) status("no urls. enter both, drop the files, or fill in the published weights first.", "warn");
+  else void start(murl.value, burl.value);
+});
 onDrop(
   $("#drop"),
   (files) => {
@@ -157,8 +168,11 @@ function frame(now: number) {
 }
 requestAnimationFrame(frame);
 
-if (auto) {
-  // the harness loads from a local copy when it serves one, else from upstream
+if (auto && (!murl.value || !burl.value)) {
+  check(r, "motion-net: published weights load and run", "not run", "no manifest and bin parameters; the page never fetches the cc by-nc weights on its own");
+  finish(r, "not run", "no weights given");
+} else if (auto) {
+  // the harness passes a local copy through the manifest and bin parameters
   await start(murl.value, burl.value);
   // start() assigns host; read it through a widened type
   const live = host as QuadrupedHost | null;
