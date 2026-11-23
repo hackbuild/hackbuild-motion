@@ -27,15 +27,15 @@ pub fn f16_to_f32(h: u16) -> f32 {
 
 /// Decodes little endian binary16 bytes into `out`.
 pub fn decode_f16(bytes: &[u8], out: &mut [f32]) {
-    for (o, b) in out.iter_mut().zip(bytes.chunks_exact(2)) {
-        *o = f16_to_f32(u16::from_le_bytes([b[0], b[1]]));
+    for (o, b) in out.iter_mut().zip(bytes.as_chunks::<2>().0) {
+        *o = f16_to_f32(u16::from_le_bytes(*b));
     }
 }
 
 /// Decodes little endian binary32 bytes into `out`.
 pub fn decode_f32(bytes: &[u8], out: &mut [f32]) {
-    for (o, b) in out.iter_mut().zip(bytes.chunks_exact(4)) {
-        *o = f32::from_le_bytes([b[0], b[1], b[2], b[3]]);
+    for (o, b) in out.iter_mut().zip(bytes.as_chunks::<4>().0) {
+        *o = f32::from_le_bytes(*b);
     }
 }
 

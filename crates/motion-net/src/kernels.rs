@@ -40,7 +40,12 @@ fn body(a: &[f32], b: &[f32], acc: &mut [f32; LANES]) -> usize {
 #[cfg(not(all(target_arch = "wasm32", target_feature = "simd128")))]
 fn body(a: &[f32], b: &[f32], acc: &mut [f32; LANES]) -> usize {
     let n = a.len() / LANES * LANES;
-    for (ca, cb) in a[..n].chunks_exact(LANES).zip(b[..n].chunks_exact(LANES)) {
+    for (ca, cb) in a[..n]
+        .as_chunks::<LANES>()
+        .0
+        .iter()
+        .zip(b[..n].as_chunks::<LANES>().0)
+    {
         for l in 0..LANES {
             acc[l] += ca[l] * cb[l];
         }
