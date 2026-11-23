@@ -3,14 +3,14 @@ import { type Avatar, loadAvatar } from "@hackbuild/avatar/three";
 import { vrmHook } from "@hackbuild/avatar/vrm";
 import * as THREE from "three";
 import { stage } from "../shared/scene.js";
-import { $, FrameTimer, auto, check, finish, loadWeight, mb, onDrop, params, readout, result, sleep, status } from "../shared/ui.js";
+import { $, FrameTimer, auto, check, finish, loadWeight, mb, onDrop, params, readout, result, sleep, status, attr } from "../shared/ui.js";
 
 const r = result("avatar");
 // Quaternius Universal Animation Library, standard pack: CC0 1.0. A mirror on
 // GitHub pinned to one commit; the pack's home is quaternius.com.
 const UAL = "https://raw.githubusercontent.com/IAFahim/quaternius.universalAnimationLibrary.standard/8456155dbae7eb861f553a2341871ccae633c857/UAL1_Standard.fbx";
 $("#controls").innerHTML = `
-<label style="flex:1 1 100%">model url <input id="url" type="url" value="${params.get("url") ?? UAL}"></label>
+<label style="flex:1 1 100%">model url <input id="url" type="url" value="${attr(params.get("url") ?? UAL)}"></label>
 <div class="drop" id="drop">or drop a .vrm, .glb or .fbx here <input id="file" type="file" accept=".vrm,.glb,.gltf,.fbx"></div>
 <button id="go">load</button>
 <label>clip <select id="clip" disabled></select></label>

@@ -23,6 +23,11 @@ declare global {
 }
 
 export const params = new URLSearchParams(location.search);
+
+/** Escapes text for an HTML attribute or text node written through innerHTML. */
+export function attr(s: string): string {
+  return s.replace(/[&"'<>]/g, (c) => `&#${c.charCodeAt(0)};`);
+}
 /** true when the check harness opened the page (?auto) */
 export const auto = params.has("auto");
 

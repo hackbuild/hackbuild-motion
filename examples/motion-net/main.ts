@@ -13,7 +13,7 @@ import {
 import * as THREE from "three";
 import { parityInputs } from "../../packages/motion-net/scripts/inputs.mjs";
 import { lcg, stage } from "../shared/scene.js";
-import { $, FrameTimer, auto, check, finish, gpuInfo, loadWeight, mb, onDrop, params, quantile, readout, result, sleep, status } from "../shared/ui.js";
+import { $, FrameTimer, auto, check, finish, gpuInfo, loadWeight, mb, onDrop, params, quantile, readout, result, sleep, status, attr } from "../shared/ui.js";
 
 const r = result("motion-net");
 const UPSTREAM = "https://raw.githubusercontent.com/sweriko/ai4anim-webgpu/b539455f849f284a1e814eb11ab649eb594319dc/public";
@@ -23,9 +23,9 @@ const KNOWN = {
   bin: "9568debf4a41da54f62d19bd7a29fbaf7dcc34c32d4ee472ab8560caefbcb372",
 };
 $("#controls").innerHTML = `
-<label style="flex:1 1 100%">network json <input id="json" type="url" value="${params.get("json") ?? `${UPSTREAM}/quadruped.json`}"></label>
-<label style="flex:1 1 100%">weights <input id="bin" type="url" value="${params.get("bin") ?? `${UPSTREAM}/quadruped.bin`}"></label>
-<label style="flex:1 1 100%">bind pose json <input id="bind" type="url" placeholder="the 27 bind matrices of your dog rig" value="${params.get("bind") ?? ""}"></label>
+<label style="flex:1 1 100%">network json <input id="json" type="url" value="${attr(params.get("json") ?? `${UPSTREAM}/quadruped.json`)}"></label>
+<label style="flex:1 1 100%">weights <input id="bin" type="url" value="${attr(params.get("bin") ?? `${UPSTREAM}/quadruped.bin`)}"></label>
+<label style="flex:1 1 100%">bind pose json <input id="bind" type="url" placeholder="the 27 bind matrices of your dog rig" value="${attr(params.get("bind") ?? "")}"></label>
 <div class="drop" id="drop">or drop quadruped.json, quadruped.bin and bind.json here <input id="files" type="file" multiple></div>
 <button id="go">load (17.7 MB, CC BY-NC 4.0)</button>
 <label>speed m/s <input id="speed" type="range" min="0" max="3" step="0.05" value="1" disabled></label>
