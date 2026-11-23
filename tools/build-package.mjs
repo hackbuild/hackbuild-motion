@@ -1,5 +1,6 @@
-// build-package: wasm (when the package has a crate), tsc, a copy of the wasm
-// glue into dist/wasm, and a single file IIFE bundle with the wasm inlined
+// build-package: wasm (when the package has a crate), the package's own
+// scripts/prebuild.mjs when it has one, tsc, a copy of the wasm glue into
+// dist/wasm and of src/generated into dist/generated, and a single file IIFE bundle with the wasm inlined
 // for pages opened from file://.
 // Usage: node tools/build-package.mjs <package-name> [GlobalName]
 import { spawnSync } from "node:child_process";
@@ -20,8 +21,9 @@ const step = (cmd, args) => {
   if (r.status !== 0) process.exit(r.status ?? 1);
 };
 if (existsSync(join(root, "crates", name))) step("node", ["tools/build-wasm.mjs", name]);
+if (existsSync(join(pkg, "scripts", "prebuild.mjs"))) step("node", [join(pkg, "scripts", "prebuild.mjs")]);
 step("npx", ["tsc", "-p", join(pkg, "tsconfig.json")]);
-if (existsSync(join(pkg, "src", "wasm"))) cpSync(join(pkg, "src", "wasm"), join(pkg, "dist", "wasm"), { recursive: true });
+for (const dir of ["wasm", "generated"]) if (existsSync(join(pkg, "src", dir))) cpSync(join(pkg, "src", dir), join(pkg, "dist", dir), { recursive: true });
 const global = globalName ?? `Hackbuild${name.replace(/(^|-)(\w)/g, (_, _d, c) => c.toUpperCase())}`;
 await build({
   input: join(pkg, "src", "single.ts"),
