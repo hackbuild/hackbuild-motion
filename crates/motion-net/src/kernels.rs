@@ -130,7 +130,12 @@ mod lanes {
         let n = w.len().min(x.len());
         let n4 = n & !3;
         let (mut a0, mut a1, mut a2, mut a3) = (init, 0.0f64, 0.0f64, 0.0f64);
-        for (a, b) in w[..n4].chunks_exact(4).zip(x[..n4].chunks_exact(4)) {
+        for (a, b) in w[..n4]
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .zip(x[..n4].as_chunks::<4>().0)
+        {
             a0 += a[0] as f64 * b[0] as f64;
             a1 += a[1] as f64 * b[1] as f64;
             a2 += a[2] as f64 * b[2] as f64;
@@ -147,7 +152,12 @@ mod lanes {
         let n = w.len().min(x.len());
         let n4 = n & !3;
         let (mut a0, mut a1, mut a2, mut a3) = (init, 0.0f32, 0.0f32, 0.0f32);
-        for (a, b) in w[..n4].chunks_exact(4).zip(x[..n4].chunks_exact(4)) {
+        for (a, b) in w[..n4]
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .zip(x[..n4].as_chunks::<4>().0)
+        {
             a0 += a[0] * b[0];
             a1 += a[1] * b[1];
             a2 += a[2] * b[2];
