@@ -10,7 +10,7 @@
 import { createReadStream, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { createServer } from "node:http";
-import { extname, join, resolve } from "node:path";
+import { extname, join, resolve, sep } from "node:path";
 import puppeteer from "puppeteer-core";
 
 const root = resolve(import.meta.dirname, "..");
@@ -29,7 +29,7 @@ const server = createServer((req, res) => {
   const local = process.env.HB_LOCAL_DIR && path.startsWith("/local/") ? resolve(process.env.HB_LOCAL_DIR) : null;
   const dir = local ?? siteDir;
   const file = join(dir, local ? path.slice("/local".length) : path);
-  if (!file.startsWith(dir) || !existsSync(file) || statSync(file).isDirectory()) {
+  if (!file.startsWith(dir + sep) || !existsSync(file) || statSync(file).isDirectory()) {
     res.writeHead(404).end("not found");
     return;
   }

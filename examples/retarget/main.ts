@@ -165,9 +165,10 @@ onDrop(
   $("#file") as HTMLInputElement,
 );
 
-const clock = new THREE.Clock();
+const clock = new THREE.Timer();
 function frame(now: number) {
   timer.tick(now);
+  clock.update(now);
   const dt = clock.getDelta();
   timer.time(() => {
     mixer.update(dt);

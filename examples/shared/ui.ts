@@ -206,6 +206,7 @@ export async function loadWeight(
   onProgress: (loaded: number, total: number) => void = () => {},
 ): Promise<{ bytes: ArrayBuffer; sha256: string; ms: number }> {
   const t = performance.now();
+  status(`${src.label}: licence ${src.licence || "unknown, check it before you use the file"}.`);
   let bytes: ArrayBuffer;
   if (typeof from === "string") {
     const res = await fetch(from);

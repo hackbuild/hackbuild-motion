@@ -32,7 +32,7 @@ await build({
 });
 
 const head = (title, css) =>
-  `<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>${esc(title)}</title>\n<link rel="stylesheet" href="${css}">\n</head>\n`;
+  `<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>${esc(title)}</title>\n<link rel="stylesheet" href="${css}">\n<link rel="icon" href="data:,">\n</head>\n`;
 const footer = `<footer><p>${esc(site.footer)}</p></footer>`;
 
 for (const p of site.pages) {

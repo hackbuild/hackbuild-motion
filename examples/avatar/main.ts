@@ -61,11 +61,12 @@ $("#go").addEventListener("click", () => open(($("#url") as HTMLInputElement).va
 onDrop($("#drop"), ([f]) => f && open(f).catch((e) => status(`could not load ${f.name}: ${(e as Error).message}`, "bad")), $("#file") as HTMLInputElement);
 if (!auto) status("press load for the cc0 mannequin, or drop your own model.");
 
-const clock = new THREE.Clock();
+const clock = new THREE.Timer();
 const head = new THREE.Vector3();
 let headHiddenInFp = false;
 function frame(now: number) {
   timer.tick(now);
+  clock.update(now);
   const dt = clock.getDelta();
   timer.time(() => {
     mixer?.update(dt);
