@@ -112,6 +112,10 @@ export function sampleLoop(c: Clip, plan: LoopPlan, t: number, out: Pose, mask?:
   if (plan.blend > 0 && ct > d - plan.blend) {
     const u = (ct - (d - plan.blend)) / plan.blend;
     const head = scratchPose(c.bones, 0);
+    // start from this frame's output, so a field the clip does not write
+    // (a root on a clip with no root track) blends with itself, never with
+    // what an earlier clip left in the shared scratch pose
+    copyPose(out, head);
     sampleClip(c, ct - (d - plan.blend), head, mask);
     blendPose(out, head, minimumJerk(u), out, mask);
   }

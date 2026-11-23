@@ -288,6 +288,20 @@ function synthClip(name: string, bones: number, frames: number, fps: number, f: 
 const yawOf = (r: Float32Array, b: number) => 2 * Math.atan2(r[b * 4 + 1]!, r[b * 4 + 3]!);
 
 describe("clip player", () => {
+  it("one clip's root never leaks into another clip's seam blend", () => {
+    const drift = (b: number, t: number) => 0.15 * t + 0.02 * Math.sin(t * 3) * (b + 1);
+    const moving = synthClip("walk", 2, 61, 30, drift);
+    moving.root = new Float32Array(61 * 3).map((_, i) => (i % 3 === 1 ? 1 : i * 0.05));
+    const still = synthClip("idle", 2, 61, 30, drift);
+    const out = createPose(2);
+    sampleLoop(still, planLoop(still), 1.9, out);
+    const alone = Array.from(out.root);
+    sampleLoop(moving, planLoop(moving), 1.9, createPose(2));
+    const after = createPose(2);
+    sampleLoop(still, planLoop(still), 1.9, after);
+    expect(Array.from(after.root)).toEqual(alone);
+  });
+
   it("blends a loop seam so the wrap step matches an ordinary frame step", () => {
     // a drift of 0.3 rad over 2 s: first and last frames differ by about 17 degrees
     const c = synthClip("idle", 2, 61, 30, (b, t) => 0.15 * t + 0.02 * Math.sin(t * 3) * (b + 1));
