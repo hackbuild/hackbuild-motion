@@ -96,6 +96,12 @@ impl PhaseEstimator {
         }
         self.prev.clear();
         self.prev.extend_from_slice(contacts);
+        // no touchdown for two periods: the stride has stopped
+        if let (Some(t0), Some(p)) = (self.last_touchdown, self.period)
+            && self.time - t0 > 2.0 * p
+        {
+            self.period = None;
+        }
         let (phase, freq) = match (self.last_touchdown, self.period) {
             (Some(t0), Some(p)) => (((self.time - t0) / p).min(0.999), 1.0 / p),
             _ => (0.0, 0.0),
@@ -150,5 +156,29 @@ mod tests {
         );
         assert!((m.duty - g.duty).abs() < 0.06, "{} vs {}", m.duty, g.duty);
         assert!(worst_phase < 0.05, "{worst_phase}");
+    }
+
+    #[test]
+    fn standing_still_reports_no_stride() {
+        let mut g = Gait::quadruped(dog_legs(), 0.42);
+        let mut r = Mulberry32::new(9);
+        let mut est = PhaseEstimator::new(4, 0);
+        let dt = 1.0 / 60.0;
+        let mut body = BodyMotion {
+            v: 1.2,
+            ..Default::default()
+        };
+        let mut m = None;
+        for k in 0..600 {
+            if k == 240 {
+                body.v = 0.0;
+            }
+            body.z += body.v * dt;
+            g.update(dt, body, &mut r);
+            let contacts: Vec<bool> = g.feet.iter().map(|f| f.stance).collect();
+            m = Some(est.update(dt, &contacts, MotorSource::Procedural));
+        }
+        // 6 s standing after 4 s of walking (it read 1.091 Hz before)
+        assert_eq!(m.unwrap().stride_frequency, 0.0);
     }
 }
