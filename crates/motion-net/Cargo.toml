@@ -1,0 +1,21 @@
+[package]
+name = "hackbuild-motion-net"
+version = "0.1.0"
+description = "A runtime for small motion networks: dense layers, FiLM decoders and codebook matching, with SIMD128 kernels"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+name = "motion_net"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["std"]
+std = []
+wasm = ["std", "dep:wasm-bindgen"]
+
+[dependencies]
+libm = "0.2.16"
+wasm-bindgen = { version = "=0.2.129", optional = true }
