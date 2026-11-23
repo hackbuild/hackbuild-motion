@@ -145,6 +145,18 @@ describe("readers", () => {
     rig.dispose();
   });
 
+  it("keeps a zero offset BVH root on the floor its channels walk on", () => {
+    // the root OFFSET is 0 0 0 and the hips height (95, 96, 97) is in the
+    // channels only; before the fix the hips rose by one hip height
+    const { skeleton, clip } = parseBvh(BVH);
+    expect(skeleton.restT[1]).toBe(95);
+    const rig = new RetargetRig(skeleton);
+    const m = rig.toHumanoid(clip, { startAtOrigin: false });
+    expect(Math.abs(m.hips![1]!)).toBeLessThan(1e-9);
+    expect(m.hips![2 * 3 + 1]! * rig.hipsHeight).toBeCloseTo(0.02, 6);
+    rig.dispose();
+  });
+
   it("parses VMD with Shift-JIS names and corrects the A pose", () => {
     const sjis = { arm: [0x8d, 0xb6, 0x98, 0x72], center: [0x83, 0x5a, 0x83, 0x93, 0x83, 0x5e, 0x81, 0x5b] };
     const header = new Uint8Array(50);

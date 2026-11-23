@@ -2,6 +2,14 @@
 //! named after its parent with `End` appended, which the mapper treats as a
 //! helper). Rotation channels compose in the order the file lists them, in
 //! degrees; position channels replace the joint's offset.
+//!
+//! Position channels are where the joint is in the file's world. Many
+//! capture files (CMU style) give the root an OFFSET of 0 0 0 and carry the
+//! hips height only in the channels; their rest then stands one hip height
+//! under the floor the motion walks on, and a retarget measured against
+//! that rest floats the clip by the same height. A root with a zero OFFSET
+//! and a Y position channel takes the first frame's height as its rest
+//! height, so rest and motion share one floor.
 
 use crate::skeleton::{Clip, Skeleton};
 use alloc::format;
@@ -135,10 +143,19 @@ pub fn parse_bvh(text: &str) -> Result<(Skeleton, Clip), BvhError> {
         clip.rotations.push(rot);
         clip.translations.push(tr);
     }
+    let mut rest_t = offsets;
+    if let Some(first) = clip.translations.first() {
+        for j in 0..n {
+            let zero = rest_t[j].x == 0.0 && rest_t[j].y == 0.0 && rest_t[j].z == 0.0;
+            if parents[j].is_none() && zero && channels[j].contains(&Ch::Py) {
+                rest_t[j].y = first[j].y;
+            }
+        }
+    }
     let skel = Skeleton {
         names,
         parents,
-        rest_t: offsets,
+        rest_t,
         rest_r: alloc::vec![Quat::IDENTITY; n],
     };
     Ok((skel, clip))
@@ -177,6 +194,9 @@ Frame Time: 0.033333
         assert_eq!(c.frames(), 2);
         assert!(c.moves[0] && !c.moves[1]);
         assert_eq!(c.translations[1][0], Vec3::new(1.0, 90.0, 0.0));
+        // a zero root OFFSET takes the first frame's height as its rest height
+        assert_eq!(s.rest_t[0], Vec3::new(0.0, 90.0, 0.0));
+        assert_eq!(s.rest_t[1], Vec3::new(0.0, 10.0, 0.0));
         // hips Yrotation 90 turns +Z onto +X
         let z = c.rotations[1][0].rotate(Vec3::Z);
         assert!((z.x - 1.0).abs() < 1e-9);
