@@ -43,8 +43,6 @@ export interface QuadrupedRig {
   rest: Map<Object3D, { p: Vector3; q: Quaternion; s: Vector3 }>;
 }
 
-const UP = new Vector3(0, 1, 0);
-
 /**
  * Measures leg spots, toe heights, leg length and track width from the rest
  * pose. `root` must sit at the origin with identity rotation and face +Z
@@ -136,6 +134,7 @@ export function driveQuadruped(rig: QuadrupedRig, pose: { x: number; z: number; 
     o.scale.copy(r.s);
   }
   const { root } = rig;
+  const UP = new Vector3(0, 1, 0);
   root.position.set(pose.x, body.rootY, pose.z);
   root.quaternion.setFromAxisAngle(UP, pose.yaw);
   root.updateMatrixWorld(true);

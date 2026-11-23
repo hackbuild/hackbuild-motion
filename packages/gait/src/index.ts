@@ -79,9 +79,65 @@ export interface GaitState {
   froude: number;
   /** Legs that touched down this frame. */
   touchdowns: number[];
+  /** Phase per leg, 0 at touchdown. */
+  legPhases: number[];
 }
 
 export type Ground = (x: number, z: number) => number;
+
+/** Which source drives the body: show it wherever motion is diagnosed. */
+export type MotorSource = "procedural" | "neural" | "motion-match" | "clip" | "other";
+
+/**
+ * The one motor state every source fills. Diagnostics, ear bounce,
+ * footprints and sounds read this, never a particular source, so they
+ * follow whatever actually moves the body.
+ */
+export interface MotorState {
+  source: MotorSource;
+  /** Stride phase of the reference leg (LF), 0 at its touchdown. */
+  phase: number;
+  duty: number;
+  strideFrequency: number;
+  contacts: boolean[];
+}
+
+/**
+ * Phase, duty and stride frequency from foot contacts alone, by touchdown
+ * to touchdown timing of a reference leg; for sources without an
+ * oscillator (a neural network, a clip, a motion matcher).
+ */
+export class PhaseEstimator {
+  private readonly core: wasm.PhaseEstimator;
+  constructor(
+    legs: number,
+    readonly source: MotorSource,
+    reference = 0,
+  ) {
+    assertReady(PKG);
+    this.core = new wasm.PhaseEstimator(legs, reference);
+  }
+  /** `contacts` per leg: booleans, or contact values above `threshold`. */
+  update(dt: number, contacts: readonly (boolean | number)[], threshold = 0.55): MotorState {
+    const c = contacts.map((x) => (typeof x === "number" ? x > threshold : x));
+    const o = this.core.update(dt, Uint8Array.from(c, (x) => (x ? 1 : 0)));
+    return { source: this.source, phase: o[0]!, duty: o[1]!, strideFrequency: o[2]!, contacts: c };
+  }
+  dispose(): void {
+    this.core.free();
+  }
+}
+
+/** The motor state of a procedural gait frame. */
+export function motorStateOf(s: GaitState): MotorState {
+  return {
+    source: "procedural",
+    phase: s.feet[0] ? s.legPhases[0]! : s.phase,
+    duty: s.duty,
+    strideFrequency: s.standing ? 0 : s.frequency,
+    contacts: s.feet.map((f) => f.stance),
+  };
+}
 
 const seedOf = (rng: Rng): number => Math.floor(rng() * 4294967296) >>> 0;
 
@@ -130,6 +186,7 @@ export class QuadrupedGait {
       duty: this.core.duty(),
       froude: this.core.froude(),
       touchdowns: this.legs.map((_, i) => i).filter((i) => touch & (1 << i)),
+      legPhases: Array.from(this.core.legPhases()),
     };
   }
   dispose(): void {
@@ -295,6 +352,8 @@ export interface RootMotion {
 export interface LocomotionBackend {
   readonly capabilities: Capabilities;
   update(dt: number, cmd: GaitCommand): RootMotion;
+  /** The common motor state after the last update. */
+  motorState(): MotorState;
 }
 
 /** The procedural gait as a backend: integrates the command into root motion and steps the legs. */
@@ -312,6 +371,9 @@ export class ProceduralBackend implements LocomotionBackend {
     r.z += Math.cos(r.yaw) * cmd.speed * dt;
     this.state = this.gait.update(dt, r, cmd);
     return { ...r };
+  }
+  motorState(): MotorState {
+    return this.state ? motorStateOf(this.state) : { source: "procedural", phase: 0, duty: 0, strideFrequency: 0, contacts: this.gait.legs.map(() => true) };
   }
 }
 

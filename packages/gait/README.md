@@ -21,7 +21,13 @@ under `/three`.
   fore and hind load shift, breathing, standing sway.
 - `TailWag` (a spring chain with eight wag modes, Ren 2022), `Ears`,
   `steer` (potential field around obstacles and a fence).
-- `LocomotionBackend` with declared `capabilities` (turn in place, minimum
+- One `MotorState` (source label, phase, duty, stride frequency,
+  contacts) that every motor source fills: `motorStateOf(gaitState)` for
+  the oscillator, `PhaseEstimator` for sources without one (a neural
+  network, a clip, a motion matcher), which derives phase from touchdown to
+  touchdown timing of a reference leg. Diagnostics read this state, never a
+  particular source, and show the source label.
+- `LocomotionBackend` with declared `capabilities` and `motorState()` (turn in place, minimum
   stop distance, head pitch bias) and `ProceduralBackend`, so a neural or
   motion matching backend can stand in and the caller asks it how close it
   can stop.
@@ -74,9 +80,9 @@ inlined, `THREE` read from the page).
 
 ### Verified on this machine
 
-- 2026-11-22: `cargo test -p hackbuild-gait` passed 14 of 14 tests
+- 2026-11-22: `cargo test -p hackbuild-gait` passed 15 of 15 tests
   (counted), clippy clean natively and for wasm32.
-- 2026-11-22: `npx vitest run packages/gait` passed 7 of 7 tests (counted),
+- 2026-11-22: `npx vitest run packages/gait` passed 8 of 8 tests (counted),
   one a fast-check property over seed and speed.
 - 2026-11-22: footfall tables validate; trot pairs diagonals and pace
   pairs sides at every sampled phase; the walk keeps two or more feet down;
@@ -89,10 +95,20 @@ inlined, `THREE` read from the page).
   tips landed within 1 mm of the gait's targets on every reached frame and
   planted toes moved less than 1 mm; 1 of 960 leg frames was out of reach
   (measured in the three.js adapter test).
+- 2026-11-22: from contacts alone, `PhaseEstimator` tracked the
+  oscillator's phase within 0.05 of a stride and its stride frequency
+  within 3 percent at 1.6 m/s (computed over 720 frames at 120 Hz, Rust and
+  TypeScript).
 - 2026-11-22: the golden trace (gait, body, tail, ears, steering) is bit
   identical between the native and the wasm build (measured).
 
 ### Not verified by anything
+
+- No neural source fills `MotorState` yet. For `@hackbuild/motion-net`:
+  stamp each prediction with its request time, blend the previous
+  prediction into the current one, match playback speed to the requested
+  trajectory, and offer a turn in place mode (HACKLE lessons, owner
+  supplied).
 
 - Motion on the HACKLE Meshy dog or any real rig, in a real browser at real
   frame rate. Nobody has looked at it yet.
@@ -105,8 +121,8 @@ inlined, `THREE` read from the page).
 
 | file | raw | gzip |
 |---|---|---|
-| `gait_bg.wasm` | 84,774 bytes | 38,583 bytes |
-| `gait.iife.js` (wasm inlined as base64) | 142,959 bytes | 59,554 bytes |
+| `gait_bg.wasm` | 87,466 bytes | 39,721 bytes |
+| `gait.iife.js` (wasm inlined as base64) | 149,918 bytes | 62,063 bytes |
 
 Measured 2026-11-22. Budget: wasm under 100 KB raw.
 

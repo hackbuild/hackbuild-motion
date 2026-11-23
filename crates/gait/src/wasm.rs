@@ -2,6 +2,7 @@
 
 use crate::body::{BodyDynamics, BodyInput, BodyParams, dog_postures};
 use crate::gait::{BodyMotion, Gait, LegSpec};
+use crate::motor::{MotorSource, PhaseEstimator};
 use crate::secondary::{EarPair, Wag, WagInput};
 use crate::steer::{Obstacle, SteerParams, steer as steer_core};
 use crate::table::quadruped;
@@ -111,6 +112,11 @@ impl GaitJs {
     }
     pub fn weights(&self) -> Vec<f64> {
         self.gait.weights.clone()
+    }
+    /// Phase per leg, 0 at touchdown.
+    #[wasm_bindgen(js_name = legPhases)]
+    pub fn leg_phases(&self) -> Vec<f64> {
+        self.gait.feet.iter().map(|f| f.phase).collect()
     }
     pub fn phase(&self) -> f64 {
         self.gait.phase
@@ -328,4 +334,23 @@ pub fn solve_leg(abc: &[f64], target: &[f64], pole: &[f64]) -> Vec<f64> {
     s.lower.write(&mut o[10..14]);
     o[14] = if s.reached { 1.0 } else { 0.0 };
     o
+}
+
+/// Phase, duty and stride frequency from foot contacts, for motor sources
+/// without an oscillator.
+#[wasm_bindgen(js_name = PhaseEstimator)]
+pub struct PhaseJs(PhaseEstimator);
+
+#[wasm_bindgen(js_class = PhaseEstimator)]
+impl PhaseJs {
+    #[wasm_bindgen(constructor)]
+    pub fn new(legs: usize, reference: usize) -> PhaseJs {
+        PhaseJs(PhaseEstimator::new(legs, reference))
+    }
+    /// `contacts` is 1 or 0 per leg. Returns `[phase, duty, strideFrequency]`.
+    pub fn update(&mut self, dt: f64, contacts: &[u8]) -> Vec<f64> {
+        let c: Vec<bool> = contacts.iter().map(|x| *x != 0).collect();
+        let m = self.0.update(dt, &c, MotorSource::Other);
+        alloc::vec![m.phase, m.duty, m.stride_frequency]
+    }
 }

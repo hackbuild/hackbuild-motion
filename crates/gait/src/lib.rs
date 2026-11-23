@@ -11,6 +11,9 @@
 //!   and load shift.
 //! - [`secondary`]: spring chains for tails, wag modes, ear springs.
 //! - [`steer`]: potential field steering toward a goal around obstacles.
+//! - [`motor`]: the one motor state every source fills (phase, duty,
+//!   stride frequency, contacts, source label), and phase from touchdown
+//!   timing for sources without an oscillator.
 //! - [`backend`]: the locomotion backend interface with declared
 //!   capabilities, so callers ask a backend for its stop distance.
 //!
@@ -28,6 +31,7 @@ pub mod body;
 pub mod froude;
 pub mod gait;
 pub mod golden;
+pub mod motor;
 pub mod secondary;
 pub mod steer;
 pub mod table;

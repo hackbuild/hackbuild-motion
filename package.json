@@ -8,7 +8,7 @@
   "engines": { "node": "^22.18.0 || >=24.11.0" },
   "scripts": {
     "prepare": "git config core.hooksPath .githooks || true",
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build -w @hackbuild/organic -w @hackbuild/rig -w @hackbuild/ik -w @hackbuild/gait -w @hackbuild/retarget",
     "test": "vitest run --passWithNoTests && node --test tools/test/*.test.mjs",
     "typecheck": "tsc -b && tsc -p tsconfig.tests.json",
     "lint:voice": "git ls-files | grep -Ev '\\.(png|jpe?g|glb|bin|wasm|wav)$|^(LICENSES/|RULES.md|CLAUDE.md|tools/)|package-lock.json|Cargo.lock' | xargs node tools/lint-voice.mjs"

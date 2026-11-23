@@ -12,7 +12,11 @@ skeleton, a raw bone array or a test.
   `segmentDeltas` to carry a solved position chain back onto bones.
 - `lookAngles` and `lookChain`: look at with yaw and pitch clamps shared
   over a spine, neck and head chain; `clampDirection` keeps eye aim within
-  a cone of the head.
+  a cone of the head. Past 2.2 rad a yaw sign flip keeps the previous side
+  (pass last frame's `yaw + bodyYaw` as `prevYaw`), so a target crossing
+  behind does not whip the head across the atan2 seam; past the yaw limit
+  the result says `behind` and hands the rest to body turning as
+  `bodyYaw`.
 - `handCurl`: palm frame and grip point from the index and little finger
   knuckles (3.5 cm off the palm), with finger and thumb curl axes and
   angles.
@@ -59,9 +63,9 @@ function frame(dt: number) {
 
 ### Verified on this machine
 
-- 2026-11-22: `cargo test -p hackbuild-ik` passed 12 of 12 tests
+- 2026-11-22: `cargo test -p hackbuild-ik` passed 13 of 13 tests
   (counted), clippy clean natively and for wasm32.
-- 2026-11-22: `npx vitest run packages/ik` passed 10 of 10 tests (counted),
+- 2026-11-22: `npx vitest run packages/ik` passed 11 of 11 tests (counted),
   two of them fast-check properties.
 - 2026-11-22: two bone reach: on 2,000 seeded chains in Rust and 500
   property cases in TypeScript, every target inside the reach band was met
@@ -69,6 +73,10 @@ function frame(dt: number) {
 - 2026-11-22: FABRIK met 98 percent or more of 500 seeded reachable
   targets within 1e-6 m in 64 iterations, and every property case within
   1e-4 m in 128 iterations, with root and lengths kept (computed).
+- 2026-11-22: a target sweeping from 1 rad to 3.95 rad around the body
+  keeps the head yaw on the side it started (60 steps) and reports
+  `behind` with positive `bodyYaw` past the 1.25 rad limit (computed, Rust
+  and TypeScript).
 - 2026-11-22: the golden trace over every solver is bit identical between
   the native and the wasm build (measured).
 
@@ -85,8 +93,8 @@ function frame(dt: number) {
 
 | file | raw | gzip |
 |---|---|---|
-| `ik_bg.wasm` | 72,397 bytes | 32,454 bytes |
-| `ik.iife.js` (wasm inlined as base64) | 120,258 bytes | 50,465 bytes |
+| `ik_bg.wasm` | 72,214 bytes | 32,420 bytes |
+| `ik.iife.js` (wasm inlined as base64) | 120,518 bytes | 50,586 bytes |
 
 Measured 2026-11-22. Budget: wasm under 90 KB raw.
 

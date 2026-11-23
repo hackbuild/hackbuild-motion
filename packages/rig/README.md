@@ -108,8 +108,8 @@ face.aa?.binds; // [{ morph: "viseme_aa", weight: 1 }] on a Ready Player Me styl
 
 | file | raw | gzip |
 |---|---|---|
-| `rig_bg.wasm` | 146,997 bytes | 57,529 bytes |
-| `rig.iife.js` (wasm inlined as base64) | 228,737 bytes | 92,545 bytes |
+| `rig_bg.wasm` | 146,959 bytes | 57,510 bytes |
+| `rig.iife.js` (wasm inlined as base64) | 228,689 bytes | 92,483 bytes |
 
 Measured 2026-11-22. Budget: wasm under 160 KB raw. String handling and
 formatting take most of it; a size pass is open.

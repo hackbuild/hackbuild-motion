@@ -4,7 +4,7 @@
 use crate::chain::{Limit, ccd as ccd_solve, fabrik as fabrik_solve, segment_deltas};
 use crate::contact::{ContactLock, pelvis_drop};
 use crate::hand::{finger_curl, hand_frame};
-use crate::look::{LookLimits, clamp_direction, look_angles, look_chain};
+use crate::look::{LookLimits, clamp_direction, look_angles_from, look_chain};
 use crate::two_bone::two_bone;
 use alloc::vec::Vec;
 use organic::{Quat, Vec3};
@@ -114,10 +114,17 @@ pub fn segment_deltas_js(old: &[f64], new: &[f64]) -> Vec<f64> {
         .collect()
 }
 
-/// Clamped look angles `[yaw, pitch, clamped]`. `limits` is `[yawMin,
-/// yawMax, pitchMin, pitchMax]` or empty for the defaults.
+/// Clamped look angles `[yaw, pitch, clamped, behind, bodyYaw]`. `limits`
+/// is `[yawMin, yawMax, pitchMin, pitchMax]` or empty for the defaults;
+/// `prev_yaw` is last frame's `yaw + bodyYaw` (0 for none).
 #[wasm_bindgen(js_name = lookAngles)]
-pub fn look_angles_js(frame: &[f64], origin: &[f64], target: &[f64], limits: &[f64]) -> Vec<f64> {
+pub fn look_angles_js(
+    frame: &[f64],
+    origin: &[f64],
+    target: &[f64],
+    limits: &[f64],
+    prev_yaw: f64,
+) -> Vec<f64> {
     let lim = if limits.len() >= 4 {
         LookLimits {
             yaw_min: limits[0],
@@ -128,8 +135,14 @@ pub fn look_angles_js(frame: &[f64], origin: &[f64], target: &[f64], limits: &[f
     } else {
         LookLimits::default()
     };
-    let a = look_angles(q4(frame), v3(origin, 0), v3(target, 0), lim);
-    alloc::vec![a.yaw, a.pitch, if a.clamped { 1.0 } else { 0.0 }]
+    let a = look_angles_from(q4(frame), v3(origin, 0), v3(target, 0), lim, prev_yaw);
+    alloc::vec![
+        a.yaw,
+        a.pitch,
+        a.clamped as u8 as f64,
+        a.behind as u8 as f64,
+        a.body_yaw
+    ]
 }
 
 /// World deltas, `x y z w` per weight.

@@ -121,6 +121,20 @@ describe("look, hand and contact", () => {
     expect(Math.abs(a.yaw)).toBeLessThan(1.25);
   });
 
+  it("a target sweeping behind keeps the head on one side and hands off to the body", () => {
+    let prev = 0;
+    for (let k = 0; k < 60; k++) {
+      const a = 1 + k * 0.05;
+      const r = lookAngles([0, 0, 0, 1], [0, 0, 0], [Math.sin(a), 0, Math.cos(a)], undefined, prev);
+      prev = r.yaw + r.bodyYaw;
+      expect(r.yaw).toBeGreaterThan(0);
+      if (a > 1.25) {
+        expect(r.behind).toBe(true);
+        expect(r.bodyYaw).toBeGreaterThan(0);
+      }
+    }
+  });
+
   it("look angles clamp and eye directions clamp", () => {
     const a = lookAngles([0, 0, 0, 1], [0, 0, 0], [0, 0, -1]);
     expect(a.clamped).toBe(true);

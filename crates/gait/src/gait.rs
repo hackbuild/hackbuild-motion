@@ -193,6 +193,17 @@ impl Gait {
         }
     }
 
+    /// The common motor state of this oscillator.
+    pub fn motor_state(&self) -> crate::motor::MotorState {
+        crate::motor::MotorState {
+            source: crate::motor::MotorSource::Procedural,
+            phase: self.feet.first().map_or(self.phase, |f| f.phase),
+            duty: self.duty,
+            stride_frequency: if self.standing { 0.0 } else { self.freq },
+            contacts: self.feet.iter().map(|f| f.stance).collect(),
+        }
+    }
+
     /// Advances one frame. Returns a bit per leg that touched down.
     pub fn update(&mut self, dt: f64, body: BodyMotion, rng: &mut dyn Rng) -> u32 {
         let v = libm::fabs(body.v);

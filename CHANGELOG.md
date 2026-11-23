@@ -36,3 +36,9 @@ Versions follow semver per package. Nothing is published to npm yet.
   readers, motion tags, three.js `retargetAnimation`, `LiveRetarget`,
   `skeletonFromObject3D`, `sampleAnimationClip`, `toAnimationClip`.
 - `@hackbuild/rig`: `./bones` and `./expressions` subpath exports.
+- `@hackbuild/ik`: look at keeps its side past 2.2 rad on an atan2 sign
+  flip and hands targets behind to body turning (`behind`, `bodyYaw`).
+- `@hackbuild/gait`: one `MotorState` filled by every motor source, with a
+  source label, and `PhaseEstimator` for phase from touchdown timing.
+- build order fixed (rig before retarget), tsbuildinfo kept in `dist`, and
+  a test that no package source keeps module scope three.js scratch objects.

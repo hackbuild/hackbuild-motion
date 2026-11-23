@@ -27,6 +27,8 @@ pub trait LocomotionBackend {
     fn capabilities(&self) -> Capabilities;
     /// Advances one frame toward the commanded speed and turn rate.
     fn step(&mut self, dt: f64, v: f64, w: f64, rng: &mut dyn organic::Rng) -> RootMotion;
+    /// The common motor state after the last step.
+    fn motor_state(&self) -> crate::motor::MotorState;
 }
 
 /// The procedural gait as a backend: integrates the commands into root
@@ -62,5 +64,8 @@ impl LocomotionBackend for ProceduralBackend {
         };
         self.gait.update(dt, body, rng);
         *r
+    }
+    fn motor_state(&self) -> crate::motor::MotorState {
+        self.gait.motor_state()
     }
 }

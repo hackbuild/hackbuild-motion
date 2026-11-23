@@ -113,8 +113,8 @@ wasm inlined, `THREE` read from the page).
 
 | file | raw | gzip |
 |---|---|---|
-| `retarget_bg.wasm` | 246,282 bytes | 106,788 bytes |
-| `retarget.iife.js` (wasm inlined as base64) | 371,005 bytes | 153,379 bytes |
+| `retarget_bg.wasm` | 245,748 bytes | 106,447 bytes |
+| `retarget.iife.js` (wasm inlined as base64) | 370,293 bytes | 153,181 bytes |
 
 Measured 2026-11-22. Budget: wasm under 260 KB raw. It carries the rig
 mapper and both readers; a size pass (opt level s, fewer format strings) is

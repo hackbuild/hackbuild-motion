@@ -90,11 +90,26 @@ export interface LookLimits {
 
 export const DEFAULT_LOOK_LIMITS: LookLimits = { yawMin: -1.25, yawMax: 1.25, pitchMin: -0.8, pitchMax: 0.6 };
 
-/** Clamped yaw and pitch of `target` from `origin` in `frame` (+Z forward, +X left). */
-export function lookAngles(frame: Quat, origin: Vec3, target: Vec3, limits: LookLimits = DEFAULT_LOOK_LIMITS): { yaw: number; pitch: number; clamped: boolean } {
+export interface LookResult {
+  yaw: number;
+  pitch: number;
+  clamped: boolean;
+  /** The target lies past the yaw limit: turn the body. */
+  behind: boolean;
+  /** Yaw the chain cannot take, for body turning. */
+  bodyYaw: number;
+}
+
+/**
+ * Clamped yaw and pitch of `target` from `origin` in `frame` (+Z forward,
+ * +X left). Pass last frame's `yaw + bodyYaw` as `prevYaw`: past 2.2 rad a
+ * sign flip keeps the previous side, so a target crossing behind does not
+ * whip the head across.
+ */
+export function lookAngles(frame: Quat, origin: Vec3, target: Vec3, limits: LookLimits = DEFAULT_LOOK_LIMITS, prevYaw = 0): LookResult {
   assertReady(PKG);
-  const o = wasm.lookAngles(f64(frame), f64(origin), f64(target), f64([limits.yawMin, limits.yawMax, limits.pitchMin, limits.pitchMax]));
-  return { yaw: o[0]!, pitch: o[1]!, clamped: o[2] === 1 };
+  const o = wasm.lookAngles(f64(frame), f64(origin), f64(target), f64([limits.yawMin, limits.yawMax, limits.pitchMin, limits.pitchMax]), prevYaw);
+  return { yaw: o[0]!, pitch: o[1]!, clamped: o[2] === 1, behind: o[3] === 1, bodyYaw: o[4]! };
 }
 
 /** World deltas that share yaw and pitch over a chain by weight; apply parent first. */

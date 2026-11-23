@@ -3,7 +3,7 @@ import { join } from "node:path";
 import fc from "fast-check";
 import * as THREE from "three";
 import { beforeAll, describe, expect, it } from "vitest";
-import { BodyDynamics, Ears, ProceduralBackend, QuadrupedGait, TailWag, goldenTrace, load, quadrupedTables, steer } from "../src/index.js";
+import { BodyDynamics, Ears, PhaseEstimator, ProceduralBackend, QuadrupedGait, TailWag, goldenTrace, load, motorStateOf, quadrupedTables, steer } from "../src/index.js";
 import { driveQuadruped, measureQuadruped } from "../src/three.js";
 
 const here = import.meta.dirname;
@@ -113,12 +113,38 @@ describe("oscillator", () => {
     );
   });
 
+  it("contacts alone give the same motor state as the oscillator, labelled by source", () => {
+    const g = new QuadrupedGait(DOG_LEGS, 0.42, { rng: lcg(3) });
+    const est = new PhaseEstimator(4, "neural");
+    const pose = { x: 0, z: 0, yaw: 0 };
+    let worst = 0;
+    let m = null;
+    let truth = null;
+    for (let k = 0; k < 1200; k++) {
+      pose.z += 1.6 / 120;
+      const s = g.update(1 / 120, pose, { speed: 1.6, turnRate: 0 });
+      truth = motorStateOf(s);
+      m = est.update(1 / 120, s.feet.map((f) => f.stance));
+      if (k > 480) {
+        const d = Math.abs(((m.phase - truth.phase + 1.5) % 1) - 0.5);
+        worst = Math.max(worst, d);
+      }
+    }
+    expect(m!.source).toBe("neural");
+    expect(truth!.source).toBe("procedural");
+    expect(worst).toBeLessThan(0.05);
+    expect(Math.abs(m!.strideFrequency - truth!.strideFrequency) / truth!.strideFrequency).toBeLessThan(0.03);
+    expect(m!.contacts).toEqual(truth!.contacts);
+  });
+
   it("procedural backend declares its capabilities and moves", () => {
     const b = new ProceduralBackend(new QuadrupedGait(DOG_LEGS, 0.42, { rng: lcg(1) }));
     expect(b.capabilities.turnInPlace).toBe(true);
     for (let i = 0; i < 60; i++) b.update(1 / 60, { speed: 1, turnRate: 0 });
     expect(b.root.z).toBeCloseTo(1, 6);
     expect(b.state!.feet.length).toBe(4);
+    expect(b.motorState().source).toBe("procedural");
+    expect(b.motorState().strideFrequency).toBeGreaterThan(0);
   });
 
   it("steer heads for the goal", () => {

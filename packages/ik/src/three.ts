@@ -1,6 +1,6 @@
 // three.js adapter: solvers applied to bones.
 import { type Object3D, Quaternion, Vector3 } from "three";
-import { type JointLimit, type LookLimits, type Quat, type Vec3, ContactLock, DEFAULT_LOOK_LIMITS, ccd, fabrik, handCurl, lookAngles, lookChain, segmentDeltas, twoBone } from "./index.js";
+import { type JointLimit, type LookLimits, type LookResult, type Quat, type Vec3, ContactLock, DEFAULT_LOOK_LIMITS, ccd, fabrik, handCurl, lookAngles, lookChain, segmentDeltas, twoBone } from "./index.js";
 
 const tv = (v: Vector3): Vec3 => [v.x, v.y, v.z];
 const pos = (o: Object3D): Vec3 => tv(o.getWorldPosition(new Vector3()));
@@ -49,12 +49,14 @@ export function solveChain(bones: Object3D[], target: Vector3, opts: { method?: 
 /**
  * Turns a chain (for example neck then head) toward `target`, with yaw and
  * pitch clamped and shared by `weights`. `frame` is the body's world
- * rotation in the normalized space (+Z forward).
+ * rotation in the normalized space (+Z forward). Keep `yaw + bodyYaw` from
+ * the result and pass it back as `prevYaw`; when `behind` is set, turn the
+ * body by `bodyYaw`.
  */
-export function lookAtChain(bones: Object3D[], weights: number[], target: Vector3, frame: Quaternion, limits: LookLimits = DEFAULT_LOOK_LIMITS, amount = 1): { yaw: number; pitch: number } {
+export function lookAtChain(bones: Object3D[], weights: number[], target: Vector3, frame: Quaternion, limits: LookLimits = DEFAULT_LOOK_LIMITS, amount = 1, prevYaw = 0): LookResult {
   const origin = pos(bones[bones.length - 1]!);
   const fq: Quat = [frame.x, frame.y, frame.z, frame.w];
-  const a = lookAngles(fq, origin, tv(target), limits);
+  const a = lookAngles(fq, origin, tv(target), limits, prevYaw);
   const deltas = lookChain(fq, a.yaw * amount, a.pitch * amount, weights);
   bones.forEach((b, i) => rotateWorld(b, deltas[i]!));
   return a;

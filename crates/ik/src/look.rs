@@ -33,12 +33,46 @@ pub struct LookAngles {
     /// Positive looks up.
     pub pitch: f64,
     pub clamped: bool,
+    /// The target lies past the yaw limit: the body should turn.
+    pub behind: bool,
+    /// Yaw the head chain cannot take; hand it to body turning.
+    pub body_yaw: f64,
+}
+
+/// Past this yaw a target sits near the atan2 seam directly behind.
+pub const SEAM: f64 = 2.2;
+
+/// Raw yaw with hysteresis at the seam: when the target is past [`SEAM`]
+/// and the sign flipped against a previous yaw of real size, keep the
+/// previous side (pi on that side), so the head does not whip across.
+pub fn seam_yaw(yaw: f64, prev_yaw: f64) -> f64 {
+    if libm::fabs(yaw) > SEAM && libm::fabs(prev_yaw) > 0.4 && (yaw > 0.0) != (prev_yaw > 0.0) {
+        if prev_yaw > 0.0 {
+            core::f64::consts::PI
+        } else {
+            -core::f64::consts::PI
+        }
+    } else {
+        yaw
+    }
 }
 
 /// Yaw and pitch of `target` from `origin`, in the frame `frame`, clamped.
 pub fn look_angles(frame: Quat, origin: Vec3, target: Vec3, lim: LookLimits) -> LookAngles {
+    look_angles_from(frame, origin, target, lim, 0.0)
+}
+
+/// [`look_angles`] with seam hysteresis against the previous frame's raw yaw
+/// (`prev_yaw`, 0 for none). Pass back `yaw + body_yaw` next frame.
+pub fn look_angles_from(
+    frame: Quat,
+    origin: Vec3,
+    target: Vec3,
+    lim: LookLimits,
+    prev_yaw: f64,
+) -> LookAngles {
     let l = frame.inverse().rotate(target - origin);
-    let yaw = libm::atan2(l.x, l.z);
+    let yaw = seam_yaw(libm::atan2(l.x, l.z), prev_yaw);
     let pitch = libm::atan2(l.y, libm::sqrt(l.x * l.x + l.z * l.z));
     let cy = yaw.clamp(lim.yaw_min, lim.yaw_max);
     let cp = pitch.clamp(lim.pitch_min, lim.pitch_max);
@@ -46,6 +80,8 @@ pub fn look_angles(frame: Quat, origin: Vec3, target: Vec3, lim: LookLimits) -> 
         yaw: cy,
         pitch: cp,
         clamped: cy != yaw || cp != pitch,
+        behind: cy != yaw,
+        body_yaw: yaw - cy,
     }
 }
 
@@ -107,6 +143,31 @@ mod tests {
         }
         let f = q.rotate(Vec3::Z);
         assert!((f - target.normalize()).length() < 1e-9, "{f:?}");
+    }
+
+    #[test]
+    fn seam_keeps_the_side_it_turned_to() {
+        let lim = LookLimits::default();
+        // a target sweeping behind from the left: raw yaw crosses +pi to -pi
+        let mut prev = 0.0;
+        let mut sides = alloc::vec::Vec::new();
+        for k in 0..60 {
+            let a = 1.0 + k as f64 * 0.05;
+            let t = Vec3::new(libm::sin(a), 0.0, libm::cos(a));
+            let r = look_angles_from(Quat::IDENTITY, Vec3::ZERO, t, lim, prev);
+            prev = r.yaw + r.body_yaw;
+            sides.push(r.yaw);
+            if a > 1.25 {
+                assert!(r.behind && r.body_yaw > 0.0);
+            }
+        }
+        assert!(
+            sides.iter().all(|y| *y > 0.0),
+            "head crossed the seam: {sides:?}"
+        );
+        // without history it whips to the other side
+        let t = Vec3::new(libm::sin(3.3), 0.0, libm::cos(3.3));
+        assert!(look_angles(Quat::IDENTITY, Vec3::ZERO, t, lim).yaw < 0.0);
     }
 
     #[test]
