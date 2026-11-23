@@ -19,6 +19,14 @@ they pass their tests; the table below grows with them.
 | [`@hackbuild/lipsync`](packages/lipsync) | | viseme driver from speech timing events or audio level |
 | [`@hackbuild/bake`](packages/bake) | `hackbuild-bake` | GLB optimize, clip packs, assets.lock.json; CLI and wasm |
 
+Examples: https://hackbuild.github.io/hackbuild-motion/ (one page per
+package, built from `examples/` by `.github/workflows/pages.yml`). The
+rigs are built in code; models, clips and weights come from a URL you give
+or a file you drop, and the pages state each weight licence on load.
+`npm run examples` builds the site into `_site/`; `npm run examples:check`
+opens every page in the system Chrome on the real GPU and writes results
+and screenshots to `.local/` (see `docs/browser-checks.md`).
+
 Every package works in one normalized humanoid space (VRM 1.0 bone names,
 T pose, +Z forward, meters, feet at y = 0), takes an injected
 `Rng = () => number`, loads its wasm from a URL, bytes or an inlined copy so
@@ -46,13 +54,15 @@ Each package README carries its own dated list. Across the repository:
 - 2026-11-22: native and wasm builds give bit identical numbers for one
   seed, per crate, through a committed golden trace that `cargo test` and
   vitest both check.
+- 2026-11-23: the example pages in Chrome 150 on an Apple M1 with the real
+  GPU, measured by the automated pass: 13 checks pass, 12 not run, 0 fail
+  (`docs/browser-checks.md`). The motion-net WebGPU path matches the CPU
+  f32 path within 5.07e-7 (measured).
 
 ### Not verified by anything
 
-- CI on GitHub: the wasm-pack step in the unit job has not run there yet.
-- Motion in a real browser at real frame rate. `docs/browser-checks.md`
-  lists each check that is waiting.
-- The WebGPU path of `@hackbuild/motion-net` has never run.
+- A person looking at motion at real frame rate. The owner has not looked
+  at any example page yet; `docs/browser-checks.md` lists what waits.
 
 ## Licence
 
