@@ -9,7 +9,11 @@ expression and viseme table in `@hackbuild/rig`.
 - `SpeechEvent`: `word`, `phoneme`, `viseme` and `end` events on the
   caller's clock in seconds, the shape `@hackbuild/speak` style engines
   report. Phonemes may be ARPAbet (stress digits allowed), IPA or Oculus
-  names.
+  names. The IPA table covers every sound bellows-voice emits (the dark
+  coda l `ɫ`, the flap `ɾ`, the glottal stop `ʔ` and its non General
+  American vowels) and the common IPA consonant and vowel charts; stress,
+  length, nasal, syllabic, aspiration and tie marks are stripped. Only
+  bellows' pause `_` and unknown symbols give `sil`.
 - Words without phonemes are spelled into visemes by English letter rules.
   A word with no end time gets a length from its letters at once, so the
   mouth moves in real time; when the next word arrives sooner, the word's
@@ -75,6 +79,12 @@ uses only the rig's plain data tables, so it carries no wasm.
 - 2026-11-22: synthetic spectra with energy at 2.5 to 4 kHz pick ee over
   aa, at 300 to 500 Hz pick oh and ou over aa, at 0.5 to 1.5 kHz pick aa
   above 0.9 (computed).
+
+- 2026-11-23: `packages/lipsync/test/ipa.test.ts` maps the 53 sounds on
+  bellows-voice 0.7.3's phoneme list besides its pause, its 5 aliases and 97 IPA
+  symbols, to a viseme other than sil (counted); a "little bottle" span
+  list with flaps and dark l keeps sil at 0 from its first to its last
+  span (computed).
 
 ### Not verified by anything
 

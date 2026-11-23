@@ -40,20 +40,56 @@ const ARPABET: Record<string, OculusViseme> = {
   CH: "CH", JH: "CH", SH: "CH", ZH: "CH", S: "SS", Z: "SS", N: "nn", L: "nn", R: "RR", W: "U", Y: "I",
 };
 
+/**
+ * IPA symbols to visemes. Covers every sound bellows-voice emits (its
+ * VOCAL_PHONEMES list and aliases, including the dark coda l, the flap and
+ * the glottal stop) and the common IPA consonant and vowel charts, so no
+ * sound inside a word falls through to sil. Choices by place of
+ * articulation and lip shape (inferred): rounded vowels to O or U by
+ * height, spread and central vowels to I, E or aa, laryngeal sounds to the
+ * neutral kk that yields to the vowels around it.
+ */
 const IPA: Record<string, OculusViseme> = {
-  "ɑ": "aa", a: "aa", "æ": "aa", "ʌ": "aa", "ə": "aa", "ɐ": "aa", "ɛ": "E", e: "E", "ɝ": "RR", "ɚ": "RR", i: "I", "ɪ": "I", o: "O", "ɔ": "O", "ɒ": "O", u: "U", "ʊ": "U", y: "U",
-  p: "PP", b: "PP", m: "PP", f: "FF", v: "FF", "θ": "TH", "ð": "TH", t: "DD", d: "DD", k: "kk", g: "kk", "ɡ": "kk", "ŋ": "kk", h: "kk",
-  "ʃ": "CH", "ʒ": "CH", "tʃ": "CH", "dʒ": "CH", s: "SS", z: "SS", n: "nn", l: "nn", "ɹ": "RR", r: "RR", w: "U", j: "I",
+  // vowels
+  "ɑ": "aa", a: "aa", "æ": "aa", "ʌ": "aa", "ə": "aa", "ɐ": "aa", "ɶ": "aa", "ä": "aa",
+  "ɛ": "E", e: "E", "ɜ": "E", "ɘ": "E", "ɤ": "E", "ɞ": "O",
+  "ɝ": "RR", "ɚ": "RR",
+  i: "I", "ɪ": "I", "ɨ": "I", "ɯ": "I",
+  o: "O", "ɔ": "O", "ɒ": "O", "ɵ": "O", "ø": "O", "œ": "O",
+  u: "U", "ʊ": "U", y: "U", "ʏ": "U", "ʉ": "U",
+  // lips
+  p: "PP", b: "PP", m: "PP", "ɸ": "PP", "β": "PP", "ʙ": "PP",
+  f: "FF", v: "FF", "ʋ": "FF", "ɱ": "FF",
+  // teeth and ridge
+  "θ": "TH", "ð": "TH",
+  t: "DD", d: "DD", "ɾ": "DD", "ʈ": "DD", "ɖ": "DD", "ɽ": "DD", "ɗ": "DD",
+  n: "nn", l: "nn", "ɫ": "nn", "ɬ": "nn", "ɮ": "nn", "ɭ": "nn", "ɳ": "nn", "ɲ": "nn", "ʎ": "nn", "ɺ": "nn",
+  s: "SS", z: "SS", ts: "SS", dz: "SS", "ʦ": "SS", "ʣ": "SS",
+  "ʃ": "CH", "ʒ": "CH", "tʃ": "CH", "dʒ": "CH", "ʧ": "CH", "ʤ": "CH", "ʂ": "CH", "ʐ": "CH", "ɕ": "CH", "ʑ": "CH", "tɕ": "CH", "dʑ": "CH",
+  "ɹ": "RR", r: "RR", "ɻ": "RR", "ʀ": "RR",
+  // back of the mouth and throat
+  k: "kk", g: "kk", "ɡ": "kk", "ŋ": "kk", c: "kk", "ɟ": "kk", q: "kk", "ɢ": "kk", "ɴ": "kk", x: "kk", "ɣ": "kk", "χ": "kk", "ʁ": "kk", "ç": "kk", "ʝ": "kk", "ɰ": "kk",
+  h: "kk", "ɦ": "kk", "ʔ": "kk", "ħ": "kk", "ʕ": "kk", "ʜ": "kk", "ʢ": "kk", "ʡ": "kk",
+  // glides
+  w: "U", "ʍ": "U", "ɥ": "U", j: "I",
 };
 
-/** ARPAbet (stress digits allowed), IPA, or an Oculus viseme name, to a viseme. Unknown gives sil. */
+/** Marks that change nothing visible: stress, length, nasal, syllabic, aspiration, release and tie bars. */
+const IPA_MARKS = /[ˈˌːˑ\u0303\u0329\u032F\u0325\u032C\u032A\u031A\u0361\u035Cʰʷʲˠˤʼˀ.\u0334]/gu;
+
+/**
+ * ARPAbet (stress digits allowed), IPA, or an Oculus viseme name, to a
+ * viseme. Upper case ARPAbet wins, then an exact IPA symbol (so IPA y is
+ * the rounded vowel), then lower case ARPAbet, then the first IPA letter.
+ * Unknown gives sil.
+ */
 export function phonemeToViseme(p: string): OculusViseme {
   const s = p.trim();
   if ((OCULUS_VISEMES as readonly string[]).includes(s)) return s as OculusViseme;
-  const arpa = ARPABET[s.toUpperCase().replace(/\d$/, "")];
-  if (arpa) return arpa;
-  const ipa = s.replace(/[ˈˌːˑ̃]/g, "");
-  return IPA[ipa] ?? IPA[ipa[0] ?? ""] ?? "sil";
+  const bare = s.replace(/\d$/, "");
+  if (bare === bare.toUpperCase() && ARPABET[bare]) return ARPABET[bare];
+  const ipa = s.normalize("NFD").replace(IPA_MARKS, "").normalize("NFC");
+  return IPA[ipa] ?? ARPABET[bare.toUpperCase()] ?? IPA[[...ipa][0] ?? ""] ?? "sil";
 }
 
 const VOWEL_V = new Set<OculusViseme>(["aa", "E", "I", "O", "U"]);
