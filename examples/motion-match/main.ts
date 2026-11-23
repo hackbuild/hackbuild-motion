@@ -135,7 +135,10 @@ if (auto) {
     "contact foot slide mm per frame p95 (measured)": Math.round(p95 * 1e5) / 100,
     "contact foot slide mm per frame max (measured)": Math.round(quantile(slides, 1) * 1e5) / 100,
   });
-  check(r, "motion-match: synthetic clip database at real frame rate", r.notes.length === 0 ? "pass" : "fail", `transitions ${mm.last.transitions - transitions0} in 12 s, slide p95 ${(p95 * 1000).toFixed(2)} mm per frame`);
-  check(r, "motion-match: matching over real CC0 UAL clips on a humanoid", "not run", "the UAL clips have no stable upstream url to fetch; needs the owner's copy");
-  finish(r, r.notes.length === 0 ? "pass" : "fail");
+  // bounds: the Rust test's worst planted slide (50 mm per frame) and a 10 mm p95; nothing locks feet here
+  const max = quantile(slides, 1);
+  const ok = r.notes.length === 0 && p95 < 0.01 && max < 0.05;
+  check(r, "motion-match: synthetic clip database at real frame rate", ok ? "pass" : "fail", `transitions ${mm.last.transitions - transitions0} in 12 s, slide p95 ${(p95 * 1000).toFixed(2)} mm per frame (bound 10), max ${(max * 1000).toFixed(2)} mm (bound 50)`);
+  check(r, "motion-match: matching over real CC0 UAL clips on a humanoid", "not run", "no adapter from a UAL clip to the matcher's clip input in the page yet; the clips load on the avatar page");
+  finish(r, ok ? "pass" : "fail");
 }

@@ -83,6 +83,7 @@ export interface SyntheticGait {
   speedEnd?: number;
   turnRate?: number;
   strides?: number;
+  /** Defaults to true for a steady gait and false when `speedEnd` differs, since a start or stop cannot loop. */
   looped?: boolean;
 }
 
@@ -106,7 +107,7 @@ export class ClipSet {
   }
   /** A synthetic two foot gait clip with planted feet (three bones: hips, left leg, right leg). */
   addSynthetic(g: SyntheticGait): number {
-    return this.core.addSynth(g.speed, g.speedEnd ?? g.speed, g.turnRate ?? 0, g.strides ?? 3, g.looped ?? true);
+    return this.core.addSynth(g.speed, g.speedEnd ?? g.speed, g.turnRate ?? 0, g.strides ?? 3, g.looped ?? (g.speedEnd === undefined || g.speedEnd === g.speed));
   }
   get count(): number {
     return this.core.count;

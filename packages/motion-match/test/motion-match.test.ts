@@ -102,6 +102,38 @@ describe("matcher", () => {
     m.dispose();
   });
 
+  it("start and stop clips do not loop by default, so planted feet do not jump", () => {
+    // the example page's clip set and wander cycle; a start or stop clip
+    // marked looped wrapped from its end to its start with no transition,
+    // 162.5 mm in one frame in the browser check
+    const s = new ClipSet(30);
+    for (const g of [
+      { speed: 0, strides: 4 }, { speed: 0.6, strides: 4 }, { speed: 1.3, strides: 4 }, { speed: 2.4, strides: 4 }, { speed: 3.4, strides: 4 },
+      { speed: 1.2, turnRate: 0.9, strides: 4 }, { speed: 1.2, turnRate: -0.9, strides: 4 }, { speed: 0, turnRate: 1.2, strides: 3 }, { speed: 0, turnRate: -1.2, strides: 3 },
+      { speed: 0, speedEnd: 1.3, strides: 3 }, { speed: 1.3, speedEnd: 0, strides: 3 }, { speed: 1.3, speedEnd: 3.4, strides: 4 }, { speed: 3.4, speedEnd: 1.3, strides: 4 },
+    ])
+      s.addSynthetic(g);
+    const m = new MotionMatcher(s, { capabilities: { turnInPlace: true } });
+    let prev: number[][] | null = null;
+    let prevContacts: boolean[] = [];
+    let worst = 0;
+    for (let i = 0; i < 60 * 24; i++) {
+      const k = Math.floor(i / 120) % 6;
+      const root = m.update(1 / 60, { speed: [1.2, 3.2, 0.6, 0, 1.4, 0][k]!, turnRate: [0, 0.3, -0.9, 1.2, 0.8, 0][k]! });
+      const c = m.motorState().contacts;
+      const [sn, cs] = [Math.sin(root.yaw), Math.cos(root.yaw)];
+      const w = m.pose().feet.map((p) => [root.x + cs * p[0]! + sn * p[2]!, root.z - sn * p[0]! + cs * p[2]!]);
+      if (prev) w.forEach((p, f) => {
+        if (c[f] && prevContacts[f]) worst = Math.max(worst, Math.hypot(p[0]! - prev![f]![0]!, p[1]! - prev![f]![1]!));
+      });
+      prev = w;
+      prevContacts = [...c];
+    }
+    // computed 2026-11-23: 39.2 mm after the fix, 173.6 mm before; the bound is the Rust test's 50 mm
+    expect(worst).toBeLessThan(0.05);
+    m.dispose();
+  });
+
   it("rejects clips whose arrays disagree", () => {
     const s = new ClipSet(30);
     expect(() => s.add({ looped: true, root: [0, 0, 0, 0, 0.1, 0], rotations: [0, 0, 0, 1], hips: [0, 1, 0, 0, 1, 0], feet: [0, 0, 0, 0, 0, 0], contacts: [1, 1] })).toThrow(/frame count/);
