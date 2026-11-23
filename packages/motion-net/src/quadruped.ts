@@ -1,6 +1,6 @@
-// A quadruped gait host over a codebook matching network, written for this
-// library from the published architecture description (AI4AnimationPy,
-// Starke et al.) and the data layout of the published quadruped files.
+// A quadruped gait host over a codebook matching network. CC BY-NC 4.0:
+// adapted from a web port of AI4AnimationPy (Starke et al.), see LICENSE in
+// this package.
 // The weights are CC BY-NC 4.0 and load from a URL the caller gives; this
 // code ships none.
 //

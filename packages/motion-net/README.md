@@ -1,9 +1,16 @@
 # @hackbuild/motion-net
 
+Licence: CC BY-NC 4.0, non-commercial use only, unlike the rest of this
+repository. An audit on 2026-11-23 found this package was adapted from a
+web port of AI4AnimationPy (CC BY-NC 4.0) rather than written from the
+published architecture description as first stated. See LICENSE. A
+clean-room MIT replacement is in progress; until it lands, keep this
+package out of anything you need to be MIT.
+
 A runtime for small motion networks, and a quadruped gait host over the
 published codebook matching network. The kernels are the Rust crate
 `crates/motion-net` compiled to wasm32 with SIMD128; a WGSL path runs the
-same models on WebGPU. Code is MIT. No weights ship in this package or
+same models on WebGPU. No weights ship in this package or
 this repository: the caller gives a URL, ArrayBuffer or File, and the
 weight licence is stated on first load.
 
@@ -11,7 +18,6 @@ weight licence is stated on first load.
   input and output normalization) and codebook matching (`kind:
   "codebook"`: an estimator picks a soft code per group, a denoiser refines
   it, a FiLM decoder conditioned on time decodes a sequence of frames).
-  Both are written from the published descriptions of the architectures.
 - A neutral `NetManifest` (model plus a tensor table of offset, count,
   shape and f16 or f32) and `codebookManifest(file)` for the upstream
   quadruped file layout.

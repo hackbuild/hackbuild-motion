@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "A runtime for small motion networks (dense stacks, codebook matching) on WebGPU or wasm SIMD in a worker, and a quadruped gait host over the published codebook network. Ships no weights.",
   "type": "module",
-  "license": "MIT",
+  "license": "CC-BY-NC-4.0",
   "author": "Moheeb Zara <hackbuildvideo@gmail.com>",
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
   "files": [
     "dist",
     "README.md",
+    "LICENSE",
     "scripts"
   ],
   "scripts": {

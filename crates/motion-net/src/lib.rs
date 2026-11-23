@@ -1,5 +1,5 @@
-//! A runtime for small motion networks, written for this library from the
-//! published descriptions of the architectures it runs.
+//! A runtime for small motion networks. CC BY-NC 4.0, unlike the rest of
+//! this workspace: adapted from a web port of AI4AnimationPy, see LICENSE.
 //!
 //! - [`half`]: IEEE 754 half floats to f32, bit exact.
 //! - [`kernels`]: matrix vector products with SIMD128 on wasm and the same

@@ -1,6 +1,6 @@
-//! Codebook matching with a FiLM decoder, written from the published
-//! description of the architecture (Starke et al., codebook matching for
-//! character control):
+//! Codebook matching with a FiLM decoder (Starke et al., codebook matching
+//! for character control). CC BY-NC 4.0: adapted from a web port of
+//! AI4AnimationPy, see LICENSE in this crate.
 //!
 //! - x is the normalized input.
 //! - The estimator, three dense layers with ELU between them, maps x to

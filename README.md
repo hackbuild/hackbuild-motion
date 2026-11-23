@@ -12,7 +12,7 @@ they pass their tests; the table below grows with them.
 | [`@hackbuild/ik`](packages/ik) | `hackbuild-ik` | two bone with pole, FABRIK, CCD, clamped look at, finger curl, foot locking |
 | [`@hackbuild/gait`](packages/gait) | `hackbuild-gait` | Froude gait choice, leg oscillators, footfall tables, posture springs, tail and ears, backend interface |
 | [`@hackbuild/retarget`](packages/retarget) | `hackbuild-retarget` | humanoid motion format, clip retargeting between any rigs, BVH and VMD readers, motion tags |
-| [`@hackbuild/motion-net`](packages/motion-net) | `hackbuild-motion-net` | runtime for small motion networks (dense, codebook matching) on wasm SIMD or WebGPU, quadruped gait host; loads external weights |
+| [`@hackbuild/motion-net`](packages/motion-net) | `hackbuild-motion-net` | runtime for small motion networks (dense, codebook matching) on wasm SIMD or WebGPU, quadruped gait host; loads external weights. CC BY-NC 4.0, not MIT, until the clean-room rewrite lands |
 | [`@hackbuild/motion-match`](packages/motion-match) | `hackbuild-motion-match` | motion matching with inertialized transitions over a clip database |
 | [`@hackbuild/presence`](packages/presence) | | gaze, blink, breath, idle scheduler, point, reach, throw, layered clip player |
 | [`@hackbuild/avatar`](packages/avatar) | | VRM, Mixamo, UAL, GLB and FBX into the normalized space, material repair, wardrobe, first person head hide |
