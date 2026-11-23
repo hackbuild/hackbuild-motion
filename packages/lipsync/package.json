@@ -23,6 +23,10 @@
       "types": "./dist/bellows.d.ts",
       "import": "./dist/bellows.js"
     },
+    "./articulatory": {
+      "types": "./dist/articulatory.d.ts",
+      "import": "./dist/articulatory.js"
+    },
     "./iife": "./dist/lipsync.iife.js"
   },
   "files": [

@@ -78,6 +78,37 @@ imports nothing from bellows; `bellows-voice` 0.7.3 and `bellowsjs` 0.5.0
 are optional peer dependencies pinned to the versions the fixture came
 from, and the package runs without them.
 
+### Articulatory source
+
+`@hackbuild/lipsync/articulatory` builds the mouth from vocal tract state
+in place of a viseme lookup: jaw arc, lip aperture, protrusion and width,
+the labiodental contact, tongue body and tip positions and the velum port,
+in the units of bellows-voice's articulator frame (centimetres, cm^2 for
+the velum). `ArticulatorFrame` is a plain structural interface, so any
+source with those fields drives it.
+
+- `mouthChannels(frame)`: open, closure, round, spread, labiodental,
+  dental, alveolar, postalveolar, sibilant, retroflex, velar and nasal,
+  each 0 to 1, after the mapping in the bellows integration report
+  (thresholds inferred from bellows-voice 0.7.3's body 0 targets).
+- `articulatoryFrame(frame)`: a `LipFrame` for `drive()`. Consonant
+  visemes come from the channels, the rest of the mouth goes to the vowel
+  visemes; the five VRM vowels are a softmax over their distance to points
+  taken from bellows' own vowels (aa, ee, ih, oh, ou), shut by the lip
+  closure. `sounding: 0` gives a silent frame.
+- `arkitFromChannels(channels)`: jawOpen, mouthClose, pucker and funnel,
+  stretch and smile, mouthRollLower and tongueOut straight from the
+  channels.
+- `fromTractModel(model)`: a frame from bellows-voice's main thread
+  `TractModel` (`postureByName()` and `drawingNow()`), which follows the
+  plan rather than the audio and has no gesture look ahead; call its
+  `step()` at a fixed step.
+
+Pending: bellows-voice's articulator probe (the engine's own state as the
+audio plays) had not landed when this was written. Its frame uses these
+field names, so `probe.heard()` should pass straight to
+`articulatoryFrame`; that hookup is untested.
+
 `dist/lipsync.iife.js` is the single file build (`HackbuildLipsync`). It
 uses only the rig's plain data tables, so it carries no wasm.
 
@@ -114,6 +145,14 @@ uses only the rig's plain data tables, so it carries no wasm.
   reaches 0.9 or more on the timeline and 0.55 after the default output
   follower (computed).
 
+- 2026-11-23: `test/articulatory.test.ts` reads settled bellows-voice
+  0.7.3 `TractModel` postures for all 53 of its sounds
+  (`test/fixtures/bellows-frames.json`): every consonant's strongest
+  viseme matches its place (l reads DD, the frame has no lateral channel),
+  ten anchor vowels match their viseme and the rest read as a vowel shape,
+  the five VRM presets each win on their own bellows vowel, and the VRM
+  vowels shut under p, b and m (computed).
+
 ### Not verified by anything
 
 - No real TTS engine's events or real speech audio have gone through it;
@@ -121,13 +160,16 @@ uses only the rig's plain data tables, so it carries no wasm.
 - Nobody has watched a face driven by it in a browser; listed in
   `docs/browser-checks.md`.
 - Dominance values and viseme to vowel weights were chosen by eye.
+- The articulatory thresholds have not been tuned by eye on a face, and
+  the articulatory source has not been compared in time against the
+  dominance timeline. The bellows probe hookup is untested.
 - The letter rules are English only.
 
 ## Size budget
 
 | file | raw | gzip |
 |---|---|---|
-| `lipsync.iife.js` | 21,114 bytes | 7,695 bytes |
+| `lipsync.iife.js` | 26,831 bytes | 9,451 bytes |
 
 Measured 2026-11-23. Budget: under 32 KB raw.
 
