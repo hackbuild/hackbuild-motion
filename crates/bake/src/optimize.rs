@@ -564,6 +564,15 @@ fn remap_accessor_refs(json: &mut Value, map: &BTreeMap<usize, usize>) {
     }
 }
 
+/// Every place an accessor names a buffer view: its own data and, for a
+/// sparse accessor (Blender writes shape keys this way), the sparse index
+/// and value arrays.
+const ACCESSOR_VIEWS: [&str; 3] = [
+    "/bufferView",
+    "/sparse/indices/bufferView",
+    "/sparse/values/bufferView",
+];
+
 /// Drops accessors and buffer views nothing references, then rewrites the
 /// binary chunk with only the views still in use.
 fn compact(g: &mut Glb) {
@@ -580,8 +589,10 @@ fn compact(g: &mut Glb) {
     remap_accessor_refs(&mut g.json, &amap);
     let mut views_used = BTreeSet::new();
     for a in &kept {
-        if let Some(v) = a.get("bufferView").and_then(Value::as_u64) {
-            views_used.insert(v as usize);
+        for p in ACCESSOR_VIEWS {
+            if let Some(v) = a.pointer(p).and_then(Value::as_u64) {
+                views_used.insert(v as usize);
+            }
         }
     }
     for im in g.array("images") {
@@ -603,17 +614,21 @@ fn compact(g: &mut Glb) {
             bin.push(0);
         }
         let start = bin.len();
-        bin.extend_from_slice(g.bin.get(off..off + len).unwrap_or(&[]));
+        let bytes = off.checked_add(len).and_then(|end| g.bin.get(off..end));
+        bin.extend_from_slice(bytes.unwrap_or(&[]));
         v["byteOffset"] = json!(start);
         v["buffer"] = json!(0);
         vmap.insert(i, new_views.len());
         new_views.push(v);
     }
     for a in kept.iter_mut() {
-        if let Some(v) = a.get("bufferView").and_then(Value::as_u64)
-            && let Some(n) = vmap.get(&(v as usize))
-        {
-            a["bufferView"] = json!(*n);
+        for p in ACCESSOR_VIEWS {
+            if let Some(slot) = a.pointer_mut(p)
+                && let Some(v) = slot.as_u64()
+                && let Some(n) = vmap.get(&(v as usize))
+            {
+                *slot = json!(*n);
+            }
         }
     }
     if let Some(o) = g.json.as_object_mut() {

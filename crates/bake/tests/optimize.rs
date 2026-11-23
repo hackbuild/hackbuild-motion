@@ -125,3 +125,47 @@ fn refuses_what_it_cannot_rewrite() {
     let (_, rep) = optimize(&g.write(), &OptimizeOptions::default(), &mut KeepTextures).unwrap();
     assert!(rep.skipped.iter().any(|s| s.contains("unknown extension")));
 }
+
+#[test]
+fn sparse_morph_targets_keep_their_views() {
+    // a sparse morph target on the line mesh: two displaced vertices, its
+    // index and value views placed after every other view
+    let src = synthetic_glb(11, 6);
+    let mut g = Glb::parse(&src).unwrap();
+    while !g.bin.len().is_multiple_of(4) {
+        g.bin.push(0);
+    }
+    let ioff = g.bin.len();
+    g.bin.extend_from_slice(&1u32.to_le_bytes());
+    let voff = g.bin.len();
+    for f in [0.5f32, 0.25, 0.125] {
+        g.bin.extend_from_slice(&f.to_le_bytes());
+    }
+    let nv = g.array("bufferViews").len();
+    let na = g.array("accessors").len();
+    let views = g.json["bufferViews"].as_array_mut().unwrap();
+    views.push(json!({ "buffer": 0, "byteOffset": ioff, "byteLength": 4 }));
+    views.push(json!({ "buffer": 0, "byteOffset": voff, "byteLength": 12 }));
+    g.json["accessors"].as_array_mut().unwrap().push(json!({
+        "componentType": 5126, "count": 2, "type": "VEC3",
+        "min": [0.0, 0.0, 0.0], "max": [0.5, 0.25, 0.125],
+        "sparse": {
+            "count": 1,
+            "indices": { "bufferView": nv, "componentType": 5125 },
+            "values": { "bufferView": nv + 1 }
+        }
+    }));
+    g.json["meshes"][1]["primitives"][0]["targets"] = json!([{ "POSITION": na }]);
+    let glb = g.write();
+
+    let (out, _) = optimize(&glb, &OptimizeOptions::default(), &mut KeepTextures).unwrap();
+    let g = Glb::parse(&out).unwrap();
+    let t = g.json["meshes"][1]["primitives"][0]["targets"][0]["POSITION"]
+        .as_u64()
+        .unwrap() as usize;
+    let sparse = &g.array("accessors")[t]["sparse"];
+    let iv = sparse["indices"]["bufferView"].as_u64().unwrap() as usize;
+    let vv = sparse["values"]["bufferView"].as_u64().unwrap() as usize;
+    assert_eq!(g.view_bytes(iv).unwrap(), &1u32.to_le_bytes());
+    assert_eq!(f32s(g.view_bytes(vv).unwrap()), vec![0.5, 0.25, 0.125]);
+}

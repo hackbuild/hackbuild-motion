@@ -112,12 +112,16 @@ inlined).
 - 2026-11-22: the command line optimize, lock add, lock check (pass, then
   fail after a file change) and clips commands ran end to end (measured in
   `tests/cli.rs`).
+- 2026-11-23: a sparse morph target (the form Blender writes shape keys
+  in) keeps its index and value buffer views through optimize; before,
+  both views were dropped and the accessor pointed at the wrong data
+  (computed, `sparse_morph_targets_keep_their_views`).
 
 ### Not verified by anything
 
 - A real model: no Meshy, VRM, UAL or Mixamo file has gone through the
-  optimizer yet; skinned meshes with morph targets are handled by the same
-  path but untested on a real rig.
+  optimizer yet. Primitives with sparse morph targets pass through
+  unwelded; the sparse case is tested only on a synthetic file.
 - The `--texture-hook` command path of the CLI and any real image resize.
 - Contact thresholds on real clips; the defaults (0.12 m, 0.45 m/s) are
   starting values (inferred).
