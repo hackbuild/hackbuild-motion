@@ -76,13 +76,16 @@ function frame(now: number) {
     footTarget.set(-0.09, swing ? 0.08 + 0.08 * Math.sin((ph / 0.4) * Math.PI) : 0.08, 0.25 * Math.cos(ph * Math.PI * 2));
     const contact = swing ? 0 : 1;
     if (lockOn.checked) lock.update(dt, footTarget, contact);
-    if (lockOn.checked && lock.locked) {
-      if (prevLocked) lockedSlide = Math.max(lockedSlide, prevLocked.distanceTo(footTarget));
-      prevLocked = footTarget.clone();
-      lockedFrames++;
-    } else prevLocked = null;
     footMark.position.copy(footTarget);
     solveTwoBone(b.rightUpperLeg!, b.rightLowerLeg!, b.rightFoot!, footTarget, new THREE.Vector3(0, 0, 1));
+    // the drift is measured on the solved foot, not on the lock's stored target
+    human.updateMatrixWorld(true);
+    const solved = b.rightFoot!.getWorldPosition(new THREE.Vector3());
+    if (lockOn.checked && lock.locked) {
+      if (prevLocked) lockedSlide = Math.max(lockedSlide, prevLocked.distanceTo(solved));
+      prevLocked = solved;
+      lockedFrames++;
+    } else prevLocked = null;
   });
   renderer.render(scene, camera);
   if (Math.floor(now / 250) !== Math.floor((now - 17) / 250)) {
@@ -91,7 +94,7 @@ function frame(now: number) {
       "arm end error mm, worst while in reach (measured)": armErr * 1000,
       "chain end error mm (measured)": chainErr * 1000,
       "foot locked": lock.locked ? "yes" : "no",
-      "locked foot drift mm, worst (measured)": lockedSlide * 1000,
+      "locked foot drift mm, worst, solved foot (measured)": lockedSlide * 1000,
       "fps p50 (measured)": s.fpsP50,
       "ik work ms p95 (measured)": s.workMsP95,
     });
@@ -109,7 +112,7 @@ if (auto) {
   Object.assign(r.numbers, timer.numbers(), {
     "arm end error mm worst (measured)": Math.round(armErr * 1e5) / 100,
     "chain end error mm last (measured)": Math.round(chainErr * 1e5) / 100,
-    "locked foot drift mm worst (measured)": Math.round(lockedSlide * 1e5) / 100,
+    "locked foot drift mm worst, solved foot (measured)": Math.round(lockedSlide * 1e5) / 100,
     "locked frames (measured)": lockedFrames,
   });
   const ok = armErr < 1e-3 && lockedSlide < 1e-3 && lockedFrames > 0 && r.notes.length === 0;

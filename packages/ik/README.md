@@ -21,8 +21,9 @@ skeleton, a raw bone array or a test.
   knuckles (3.5 cm off the palm), with finger and thumb curl axes and
   angles.
 - `ContactLock` and `pelvisDrop`: feet held where they landed while contact
-  is high, released by an exponential (0.06 s), and the hip drop that keeps
-  a locked foot in reach.
+  is high, released by an exponential (0.06 s) that reaches zero without a
+  final step, a contact during a release held where the foot is, and the
+  hip drop that keeps a locked foot in reach.
 - `/three`: `solveTwoBone`, `solveChain`, `lookAtChain`, `curlFingers`,
   `FootLock`, `rotateWorld`.
 
@@ -79,6 +80,17 @@ function frame(dt: number) {
   and TypeScript).
 - 2026-11-22: the golden trace over every solver is bit identical between
   the native and the wasm build (measured).
+
+- 2026-11-23: a re-contact during a release holds the shown foot (it
+  jumped 172 mm to the free target before), a negative or NaN dt does not
+  move the foot past its target, every release step is no larger than the
+  one before (the last 2 percent was dropped in one frame), and
+  `twoBone` with a zero length bone or a non finite input leaves the chain
+  as it is (it panicked in `clamp`). The browser check and a new
+  TypeScript test measure drift on the solved foot: 0 mm over 241 locked
+  frames in Chrome 150 (measured), 0 mm to 1e-6 in the test (computed).
+  `cargo test -p hackbuild-ik` passes 16 unit tests; the golden trace was
+  regenerated for the new release curve.
 
 ### Not verified by anything
 

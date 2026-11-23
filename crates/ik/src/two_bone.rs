@@ -24,6 +24,21 @@ pub struct TwoBone {
 pub fn two_bone(a: Vec3, b: Vec3, c: Vec3, target: Vec3, pole: Vec3, soft: f64) -> TwoBone {
     let l1 = (b - a).length();
     let l2 = (c - b).length();
+    let finite = |v: Vec3| v.x.is_finite() && v.y.is_finite() && v.z.is_finite();
+    // a zero length bone or a non finite input has no solution: leave the
+    // chain as it is
+    if !(finite(a) && finite(b) && finite(c) && finite(target) && finite(pole) && soft.is_finite())
+        || l1 < 1e-9
+        || l2 < 1e-9
+    {
+        return TwoBone {
+            mid: b,
+            end: c,
+            upper: Quat::IDENTITY,
+            lower: Quat::IDENTITY,
+            reached: false,
+        };
+    }
     let to = target - a;
     let raw = to.length();
     let dn = if raw > 1e-12 {
@@ -140,5 +155,23 @@ mod tests {
             0.0,
         );
         assert!(s.mid.z < -0.2);
+    }
+
+    #[test]
+    fn degenerate_input_leaves_the_chain_alone() {
+        let a = Vec3::ZERO;
+        let b = Vec3::new(0.0, -0.4, 0.0);
+        let c = Vec3::new(0.0, -0.8, 0.0);
+        let t = Vec3::new(0.2, -0.5, 0.1);
+        for (b2, c2, t2) in [
+            (a, c, t),
+            (b, b, t),
+            (b, c, Vec3::new(f64::NAN, 0.0, 0.0)),
+            (Vec3::new(f64::INFINITY, 0.0, 0.0), c, t),
+        ] {
+            let r = two_bone(a, b2, c2, t2, Vec3::Z, 0.0);
+            assert!(!r.reached);
+            assert_eq!(r.upper, Quat::IDENTITY);
+        }
     }
 }

@@ -159,6 +159,33 @@ describe("look, hand and contact", () => {
     expect(idx[2]!.getWorldPosition(new THREE.Vector3()).distanceTo(tipBefore)).toBeGreaterThan(0.01);
   });
 
+  it("a locked foot stays put on the solved leg, not only in the lock", () => {
+    const hip = new THREE.Bone();
+    const knee = new THREE.Bone();
+    const foot = new THREE.Bone();
+    hip.add(knee);
+    knee.add(foot);
+    knee.position.set(0, -0.42, 0);
+    foot.position.set(0, -0.42, 0);
+    hip.position.set(-0.09, 0.9, 0);
+    hip.updateMatrixWorld(true);
+    const lock = new FootLock();
+    let prev: THREE.Vector3 | null = null;
+    let drift = 0;
+    for (let k = 0; k < 60; k++) {
+      // the free target slides 5 mm a frame while contact holds
+      const target = new THREE.Vector3(-0.09, 0.08, 0.2 - 0.005 * k);
+      lock.update(1 / 60, target, 1);
+      solveTwoBone(hip, knee, foot, target, new THREE.Vector3(0, 0, 1));
+      hip.updateMatrixWorld(true);
+      const p = foot.getWorldPosition(new THREE.Vector3());
+      if (prev) drift = Math.max(drift, p.distanceTo(prev));
+      prev = p;
+    }
+    expect(drift).toBeLessThan(1e-6);
+    lock.dispose();
+  });
+
   it("contact lock holds and releases; pelvis drop reaches", () => {
     const lock = new ContactLock(0.55, 0.06);
     const out = new Float64Array(3);
