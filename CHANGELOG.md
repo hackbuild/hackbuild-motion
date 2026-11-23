@@ -18,3 +18,8 @@ Versions follow semver per package. Nothing is published to npm yet.
   non humanoids, rest analysis (facing, units, floor, A pose), reference
   humanoid, the expression and viseme table (VRM, ARKit 52, Oculus 15),
   three.js `mapObject3D`, `chainsOf`, `restOf`, `applyRestFix`.
+- `@hackbuild/ik`: two bone analytic IK with pole and soft reach, FABRIK
+  with cone and hinge limits, CCD, segment deltas, clamped look at chains,
+  eye direction clamp, hand frame and finger curl, contact locking and
+  pelvis drop, three.js `solveTwoBone`, `solveChain`, `lookAtChain`,
+  `curlFingers`, `FootLock`.

@@ -1,0 +1,48 @@
+{
+  "name": "@hackbuild/ik",
+  "version": "0.1.0",
+  "description": "Two bone IK with pole, FABRIK, CCD, clamped look at, hand frame and finger curl, foot contact locking. Rust core in wasm.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Moheeb Zara <hackbuildvideo@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackbuild/hackbuild-motion.git",
+    "directory": "packages/ik"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.11.0"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./three": {
+      "types": "./dist/three.d.ts",
+      "import": "./dist/three.js"
+    },
+    "./inline": {
+      "types": "./dist/wasm/inline.d.ts",
+      "import": "./dist/wasm/inline.js"
+    },
+    "./wasm": "./dist/wasm/ik_bg.wasm",
+    "./iife": "./dist/ik.iife.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ../../tools/build-package.mjs ik"
+  },
+  "peerDependencies": {
+    "three": ">=0.186.1"
+  },
+  "peerDependenciesMeta": {
+    "three": {
+      "optional": true
+    }
+  }
+}
