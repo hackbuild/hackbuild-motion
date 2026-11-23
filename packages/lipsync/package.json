@@ -1,0 +1,34 @@
+{
+  "name": "@hackbuild/lipsync",
+  "version": "0.1.0",
+  "description": "Viseme driver: timed words, phonemes or visemes from a TTS engine with coarticulation, or the audio level when no timings exist, out to Oculus visemes, VRM vowels or ARKit blendshapes.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Moheeb Zara <hackbuildvideo@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackbuild/hackbuild-motion.git",
+    "directory": "packages/lipsync"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.11.0"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./iife": "./dist/lipsync.iife.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ../../tools/build-package.mjs lipsync"
+  },
+  "dependencies": {
+    "@hackbuild/rig": "0.1.0"
+  }
+}
