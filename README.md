@@ -2,7 +2,7 @@
 
 Rigs, retargeting, IK, procedural and neural motion, avatars and lip sync for 3D characters on the web. Rust cores compiled to wasm, TypeScript bindings for three.js.
 
-Status: phase A landed, 2026-11-22. Packages land in `packages/` as
+Status: phases A and C landed, 2026-11-22. Packages land in `packages/` as
 they pass their tests; the table below grows with them.
 
 | package | crate | what |
@@ -12,6 +12,12 @@ they pass their tests; the table below grows with them.
 | [`@hackbuild/ik`](packages/ik) | `hackbuild-ik` | two bone with pole, FABRIK, CCD, clamped look at, finger curl, foot locking |
 | [`@hackbuild/gait`](packages/gait) | `hackbuild-gait` | Froude gait choice, leg oscillators, footfall tables, posture springs, tail and ears, backend interface |
 | [`@hackbuild/retarget`](packages/retarget) | `hackbuild-retarget` | humanoid motion format, clip retargeting between any rigs, BVH and VMD readers, motion tags |
+| [`@hackbuild/motion-net`](packages/motion-net) | `hackbuild-motion-net` | runtime for small motion networks (dense, codebook matching) on wasm SIMD or WebGPU, quadruped gait host; loads external weights |
+| [`@hackbuild/motion-match`](packages/motion-match) | `hackbuild-motion-match` | motion matching with inertialized transitions over a clip database |
+| [`@hackbuild/presence`](packages/presence) | | gaze, blink, breath, idle scheduler, point, reach, throw, layered clip player |
+| [`@hackbuild/avatar`](packages/avatar) | | VRM, Mixamo, UAL, GLB and FBX into the normalized space, material repair, wardrobe, first person head hide |
+| [`@hackbuild/lipsync`](packages/lipsync) | | viseme driver from speech timing events or audio level |
+| [`@hackbuild/bake`](packages/bake) | `hackbuild-bake` | GLB optimize, clip packs, assets.lock.json; CLI and wasm |
 
 Every package works in one normalized humanoid space (VRM 1.0 bone names,
 T pose, +Z forward, meters, feet at y = 0), takes an injected
@@ -44,11 +50,14 @@ Each package README carries its own dated list. Across the repository:
 ### Not verified by anything
 
 - CI on GitHub: the wasm-pack step in the unit job has not run there yet.
-- Motion in a real browser at real frame rate.
+- Motion in a real browser at real frame rate. `docs/browser-checks.md`
+  lists each check that is waiting.
+- The WebGPU path of `@hackbuild/motion-net` has never run.
 
 ## Licence
 
 | path | licence |
 |---|---|
 | code | MIT (LICENSE) |
+| model weights | none in this repository; each loader names the licence of the weights it is given |
 | README, CHANGELOG, docs | CC-BY-4.0 (LICENSES/CC-BY-4.0.txt), code samples also MIT |

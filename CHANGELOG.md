@@ -42,3 +42,32 @@ Versions follow semver per package. Nothing is published to npm yet.
   source label, and `PhaseEstimator` for phase from touchdown timing.
 - build order fixed (rig before retarget), tsbuildinfo kept in `dist`, and
   a test that no package source keeps module scope three.js scratch objects.
+- `@hackbuild/motion-net`: runtime for dense stacks and codebook matching
+  networks (estimator, denoiser, FiLM decoder) with SIMD128 kernels in
+  wasm, f64 or f32 accumulation, a WGSL WebGPU path, a blob worker with an
+  in page fallback, weight fetch with SHA-256 and Cache Storage, licence
+  notices; `CodebookGait`, a quadruped gait host over the published
+  network (request time stamps, blend from arrival, per sequence
+  playheads, staleness health, coast past the end, turn in place, partial
+  decode) filling gait's `MotorState`, and `NeuralFallback` with a 2 s
+  procedural hold. Bit equal to the legacy port on the quadruped weights
+  with f64 sums. No weights in the repository.
+- `@hackbuild/motion-match`: feature database, bounding box search
+  matching brute force, inertialized transitions, synthetic gait clips,
+  gait backend contract; native and wasm bit identical.
+- `@hackbuild/presence`: gaze with aversion and seam hold, blink, breath,
+  idle scheduler, point, reach and throw timing, layered clip player with
+  loop seam and idle handback, head level.
+- `@hackbuild/avatar`: VRM (optional three-vrm peer), Mixamo, UAL, GLB
+  and FBX loading into the normalized humanoid space; material and texture
+  repair; wardrobe slots, alternate garments and part toggles; expression
+  binding; first person head hide; redistribution gate.
+- `@hackbuild/lipsync`: viseme timeline from word, phoneme or viseme
+  events with coarticulation by dominance; audio level and band fallback;
+  output to VRM, Oculus or ARKit.
+- `@hackbuild/bake`: GLB optimize with texture hooks, clip packs with
+  error, seam and contact reports, assets.lock.json writer and checker,
+  native CLI and wasm.
+- build: `tools/build-package.mjs` runs a package's `scripts/prebuild.mjs`
+  and copies `src/generated` into `dist`; `docs/browser-checks.md` lists
+  the browser checks that have not run.
