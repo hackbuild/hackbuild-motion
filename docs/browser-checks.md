@@ -20,7 +20,12 @@ them: `npm run examples && npm run examples:check` opens each page with
   served to the page for this run only through `HB_LOCAL_DIR`; the
   deployed page asks for a bind pose URL or a dropped file.
 
-Counts: 13 pass, 0 fail, 12 not run.
+Counts: 13 pass, 0 fail, 12 not run. The lipsync page was rerun on
+2026-11-23 after the bellows pieces landed (same machine and browser):
+its two earlier rows passed again (52 of 60 timed text samples open, 17
+word events and 196 open frames from the system voice, frame p95 18.4
+ms) and three bellows rows were added below, 2 pass and 1 not run, so
+the counts are now 15 pass, 0 fail, 13 not run.
 
 | package | check | status | numbers and reason |
 |---|---|---|---|
@@ -48,4 +53,7 @@ Counts: 13 pass, 0 fail, 12 not run.
 | lipsync | visemes from timed text | pass | mouth open on 50 of 60 samples over 3 s (measured) |
 | lipsync | a face driven from real TTS events | pass | 17 word boundary events from the Chrome system voice, mouth open on 188 frames, on a 2D face (measured). A real avatar face needs a person looking. |
 | lipsync | a face driven from real microphone audio | not run | needs a microphone and a person speaking |
+| lipsync | the bellows voice drives the face from its phoneme spans (rerun 2026-11-23) | pass | bellows-voice 0.7.3 on bellowsjs 0.5.0 from the npm CDN, 54 spans, speak() planned in 10 ms, mouth open on 319 of 370 frames and lips shut on 31 (measured). Whether mouth and sound line up needs a person looking and listening. |
+| lipsync | the bellows voice drives the face from its tract model (rerun 2026-11-23) | pass | the same line through `TractModel` and the articulatory source, open on 326 of 371 frames, lips shut on 13 (measured); sync not judged by a person |
+| lipsync | the bellows articulator probe drives the face as the audio plays | not run | bellows-voice 0.8.0 with the probe is on git (ac30dc2), not on npm, so no CDN serves it to the page; its offline `renderSpeech` track is tested in `packages/lipsync` |
 | bake | the bake page in a browser on a real model, texture hook included | not run | no bake page yet |

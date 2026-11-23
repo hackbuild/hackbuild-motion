@@ -176,8 +176,10 @@ uses only the rig's plain data tables, so it carries no wasm.
 
 - No real TTS engine's events or real speech audio have gone through it;
   the band thresholds are inferred from formant ranges, not fitted.
-- Nobody has watched a face driven by it in a browser; listed in
-  `docs/browser-checks.md`.
+- Nobody has watched a face driven by it in a browser or listened to it;
+  the automated pass in `docs/browser-checks.md` drove the 2D face on the
+  lipsync page from the bellows voice's spans and tract model and counted
+  open and shut frames only.
 - Dominance values and viseme to vowel weights were chosen by eye.
 - The articulatory thresholds have not been tuned by eye on a face, and
   the articulatory source has not been compared in time against the

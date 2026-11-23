@@ -34,9 +34,9 @@
     },
     {
       "name": "lipsync",
-      "what": "visemes from speech word timing (the system voice or timed text) or from audio level (microphone or a file).",
+      "what": "visemes from speech word timing (the system voice or timed text), from the bellows voice's phoneme spans or tract model, or from audio level (microphone or a file).",
       "stage": true,
-      "timeoutS": 60
+      "timeoutS": 180
     }
   ]
 }
