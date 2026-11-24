@@ -32,5 +32,7 @@ jobs:
         with:
           name: release-tarballs-${{ github.sha }}
           path: .pack/*.tgz
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 30
   # publish: not present on purpose. See CONTRIBUTING.md, "Releasing".

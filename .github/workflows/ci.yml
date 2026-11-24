@@ -63,6 +63,8 @@ jobs:
         with:
           name: tarballs
           path: .pack/*.tgz
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 7
   browser:
     needs: packages
