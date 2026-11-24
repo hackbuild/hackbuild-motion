@@ -25,7 +25,8 @@ Examples: https://hackbuild.github.io/hackbuild-motion/ (one page per
 package, built from `examples/` by `.github/workflows/pages.yml`). The
 rigs are built in code; models, clips and weights come from a URL you give
 or a file you drop, and the pages state each weight licence on load.
-`npm run examples` builds the site into `_site/`; `npm run examples:check`
+`npm run examples` builds the site into `_site/`, and into `_site/single/`
+one HTML per page that opens from disk; `npm run examples:check`
 opens every page in the system Chrome on the real GPU and writes results
 and screenshots to `.local/` (see `docs/browser-checks.md`).
 

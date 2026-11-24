@@ -16,7 +16,7 @@
     "test": "vitest run && node --test tools/test/*.test.mjs",
     "typecheck": "tsc -b && tsc -p tsconfig.tests.json && tsc -p examples",
     "lint:voice": "git ls-files | grep -Ev '\\.(png|jpe?g|glb|bin|wasm|wav)$|^(LICENSES/|RULES.md|CLAUDE.md|tools/)|package-lock.json|Cargo.lock' | xargs node tools/lint-voice.mjs",
-    "examples": "node tools/build-examples.mjs",
+    "examples": "node tools/build-pages.mjs",
     "examples:check": "node tools/check-examples.mjs",
     "lint:packages": "node tools/lint-packages.mjs",
     "release:dry": "node tools/lint-packages.mjs && node tools/release-plan.mjs",

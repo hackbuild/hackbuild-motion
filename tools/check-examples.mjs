@@ -20,7 +20,7 @@ const only = process.argv.slice(2);
 const pages = site.pages.filter((p) => !only.length || only.includes(p.name));
 const shots = join(root, ".local", "shots");
 mkdirSync(shots, { recursive: true });
-if (!existsSync(join(siteDir, "index.html"))) throw new Error("check-examples: run node tools/build-examples.mjs first");
+if (!existsSync(join(siteDir, "index.html"))) throw new Error("check-examples: run node tools/build-pages.mjs first");
 
 const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".wasm": "application/wasm", ".png": "image/png" };
 const server = createServer((req, res) => {

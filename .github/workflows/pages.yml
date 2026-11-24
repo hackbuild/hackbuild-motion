@@ -30,7 +30,7 @@ jobs:
       - run: cargo install wasm-pack --version 0.13.1 --locked
       - run: npm ci
       - run: npm run build
-      - run: node tools/build-examples.mjs
+      - run: node tools/build-pages.mjs
       # weights and model files never ship; the pages fetch them from upstream or take a dropped file
       - run: "! find _site -type f | grep -Ei '\\.(glb|gltf|vrm|fbx|bvh|wav|bin|onnx|safetensors|gguf)$'"
       - uses: actions/upload-pages-artifact@v5
