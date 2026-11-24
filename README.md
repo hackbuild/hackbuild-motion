@@ -18,6 +18,7 @@ they pass their tests; the table below grows with them.
 | [`@hackbuild/motion-match`](packages/motion-match) | `hackbuild-motion-match` | motion matching with inertialized transitions over a clip database |
 | [`@hackbuild/presence`](packages/presence) | | gaze, blink, breath, idle scheduler, point, reach, throw, layered clip player |
 | [`@hackbuild/avatar`](packages/avatar) | | VRM, Mixamo, UAL, GLB and FBX into the normalized space, material repair, wardrobe, first person head hide |
+| [`@hackbuild/avatar-host`](packages/avatar-host) | | a character on a three.js stage in any container: ticketed loads, follow camera, the presence frame order, a loop that pauses when hidden, the `hb-avatar-host` element |
 | [`@hackbuild/lipsync`](packages/lipsync) | | viseme driver from speech timing events or audio level |
 | [`@hackbuild/bake`](packages/bake) | `hackbuild-bake` | GLB optimize, clip packs, assets.lock.json; CLI and wasm |
 

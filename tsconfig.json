@@ -11,6 +11,7 @@
     { "path": "packages/presence" },
     { "path": "packages/avatar" },
     { "path": "packages/lipsync" },
-    { "path": "packages/bake" }
+    { "path": "packages/bake" },
+    { "path": "packages/avatar-host" }
   ]
 }

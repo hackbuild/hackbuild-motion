@@ -1,0 +1,53 @@
+{
+  "name": "@hackbuild/avatar-host",
+  "version": "0.1.0",
+  "description": "Host a character on a three.js stage in any container: ticketed loads through @hackbuild/avatar, a follow camera, the presence frame order, a loop that pauses when hidden, and a hb-avatar-host element.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Moheeb Zara <hackbuildvideo@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackbuild/hackbuild-motion.git",
+    "directory": "packages/avatar-host"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.11.0"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./three": {
+      "types": "./dist/three.d.ts",
+      "import": "./dist/three.js"
+    },
+    "./iife": "./dist/avatar-host.iife.js"
+  },
+  "unpkg": "dist/avatar-host.iife.js",
+  "jsdelivr": "dist/avatar-host.iife.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node ../../tools/build-package.mjs avatar-host"
+  },
+  "dependencies": {
+    "@hackbuild/avatar": "0.1.0",
+    "@hackbuild/lipsync": "0.1.0",
+    "@hackbuild/organic": "0.1.0",
+    "@hackbuild/presence": "0.1.0",
+    "@hackbuild/rig": "0.1.0"
+  },
+  "peerDependencies": {
+    "three": ">=0.186.1"
+  },
+  "peerDependenciesMeta": {
+    "three": {
+      "optional": true
+    }
+  }
+}

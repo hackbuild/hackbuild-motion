@@ -24,7 +24,8 @@ How an agent works in hackbuild-motion. RULES.md is absolute and wins over this 
 
     crates/      Rust cores: organic, rig, retarget, ik, gait, motion-net, motion-match, bake
     packages/    @hackbuild/organic, rig, retarget, ik, gait, motion-net, motion-match,
-                 presence, avatar, lipsync, bake (TS wrappers and three.js adapters)
+                 presence, avatar, avatar-host, lipsync, bake (TS wrappers and three.js
+                 adapters)
 
 The family plan and the research behind each package are kept outside this repository by the
 owner. Packages in the sibling repos (hackbuild-motion, hackbuild-browser-ai, hackbuild-agents,

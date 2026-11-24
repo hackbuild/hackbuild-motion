@@ -1,6 +1,6 @@
 {
   "about": "gzip level 9 bytes (measured) per published file; CI fails when a file moves more than 5 percent from its row. Rewrite with node tools/lint-packages.mjs --update-budget after a reviewed change.",
-  "measured": "2026-11-23",
+  "measured": "2026-11-24",
   "margin": 0.05,
   "packages": {
     "@hackbuild/avatar": {
@@ -54,6 +54,10 @@
       "main: dist/index.js bundled": 88908,
       "dist/wasm/rig_bg.wasm": 57198,
       "dist/rig.iife.js": 90016
+    },
+    "@hackbuild/avatar-host": {
+      "main: dist/index.js bundled": 3696,
+      "dist/avatar-host.iife.js": 176503
     }
   }
 }
