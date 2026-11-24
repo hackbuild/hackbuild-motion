@@ -38,6 +38,8 @@ frames from the system voice. Earlier text on this page gave counts of
 | motion-match | motion matching over a synthetic gait clip database at real frame rate (rerun 2026-11-23) | pass | bounds 10 mm p95 and 50 mm max per frame. Earlier run: the row read pass with 171.6 mm max at a transition and no bound, which is fail 1 by today's bound. A first rerun with the bound failed at 162.5 mm max (start and stop clips looped). After the fix: 17 transitions in 12 s, contact foot slide 4.96 mm per frame p95 and 16.7 mm max, matcher 0.2 ms p95, database 12.5 ms (measured) |
 | motion-match | matching over real CC0 UAL clips on a humanoid, transitions and foot slide | not run | no adapter from a UAL clip to the matcher's clip input in the page yet; the clips load on the avatar page |
 | presence | gaze, aversion and saccades on a real avatar | not run | no presence page yet |
+| presence | the rest stance on the placeholder (run 2026-11-24, headless Chrome, avatar-host page) | pass | arms hang at the sides with the hands near hip height; the builder looked at a screenshot |
+| presence | the face driver on a real face: eased moods, resting smile, clip face tracks, lids and mouth | not run | no real VRM or morph rig file in the repository |
 | presence | head level on a mocap idle | not run | no presence page yet |
 | presence | loop seam blend on a real idle clip; idle handback and background loop | not run | no presence page yet |
 | presence | the body turning for targets behind | not run | no presence page yet |

@@ -4,6 +4,7 @@
 // keep +Y up and +Z forward), the space @hackbuild/avatar loads into.
 import { type AnimationClip, type KeyframeTrack, type Object3D, Quaternion, Vector3 } from "three";
 import { type Clip, type Pose } from "./clip.js";
+import { RELAXED } from "./stance.js";
 import { type GazeOutput } from "./gaze.js";
 
 export interface ClipFromThreeOptions {
@@ -133,4 +134,34 @@ export interface ArmChain {
 export function reachArm(arm: ArmChain, target: Vector3, weight: number): void {
   aimBone(arm.upper, arm.lower, target, 0.85 * weight);
   aimBone(arm.lower, arm.hand, target, 0.8 * weight);
+}
+
+/**
+ * The rest stance over posed bones (same order as `names`) from their
+ * current rotations: each arm turn is applied about the body's forward
+ * axis in world space, then expressed in the bone's local frame, so rigs
+ * whose bones rest in other frames still lower their arms. `root` is the
+ * body's root; its world rotation sets the forward axis.
+ */
+export function restStanceFromThree(bones: readonly Object3D[], names: readonly string[], root?: Object3D | null): Clip {
+  const n = bones.length;
+  const rotations = new Float32Array(n * 8);
+  const frame = root ? root.getWorldQuaternion(new Quaternion()) : new Quaternion();
+  const fwd = new Vector3(0, 0, 1).applyQuaternion(frame);
+  const parentQ = new Quaternion();
+  const d = new Quaternion();
+  bones.forEach((b, i) => {
+    const q = b.quaternion.clone();
+    const a = RELAXED[names[i] ?? ""];
+    if (a !== undefined) {
+      if (b.parent) b.parent.getWorldQuaternion(parentQ);
+      else parentQ.identity();
+      // local = parent^-1 * D * parent * rest
+      d.setFromAxisAngle(fwd, a);
+      q.premultiply(parentQ.clone().invert().multiply(d).multiply(parentQ));
+    }
+    q.toArray(rotations, i * 4);
+    q.toArray(rotations, (n + i) * 4);
+  });
+  return { name: "rest stance", fps: 30, frames: 2, bones: n, loop: true, rotations };
 }

@@ -2,13 +2,15 @@
 // the clip player writes every bone (idle, then the body and upper layers),
 // the head level lifts a glaring mocap head, the pose goes onto the bones,
 // gaze turns neck, head and eyes and blinks the lids, the mouth follows its
-// timeline or level, then the avatar steps its own update (VRM springs and
-// expressions, or the morph rig).
+// timeline or level, the face driver writes moods, clip face tracks, lids
+// and mouth in one pass, then the avatar steps its own update (VRM springs
+// and expressions, or the morph rig). With no idle clip the base layer is
+// the rest stance, arms relaxed at the sides.
 import type { AnimationClip, Object3D } from "three";
 import { Quaternion, Vector3 } from "three";
 import type { Rng } from "@hackbuild/organic";
-import { type Clip, ClipPlayer, GazeController, type GazeMode, HeadLevel, type PlayOptions, type Layer } from "@hackbuild/presence";
-import { type GazeRig, applyGaze, applyPose, clipFromThree } from "@hackbuild/presence/three";
+import { type Clip, ClipPlayer, Face, GazeController, type GazeMode, HeadLevel, type PlayOptions, type Layer, RESTING_FACE } from "@hackbuild/presence";
+import { type GazeRig, applyGaze, applyPose, clipFromThree, restStanceFromThree } from "@hackbuild/presence/three";
 import { LipSync, type MouthTarget, drive } from "@hackbuild/lipsync";
 import { HUMAN_BONES, type HumanBone } from "@hackbuild/rig/bones";
 import type { Avatar, Part } from "@hackbuild/avatar/three";
@@ -21,6 +23,10 @@ export interface BodyOptions {
   levelHead?: boolean;
   /** Which face channels the mouth writes. Default picked from the face's names. */
   mouth?: MouthTarget;
+  /** Base layer: "relaxed" lowers the arms to the sides, "rest" keeps the loaded rest pose. Default relaxed. */
+  stance?: "relaxed" | "rest";
+  /** Weights a quiet face rests at; false for a neutral face. Default RESTING_FACE (a slight smile). */
+  restingFace?: Readonly<Record<string, number>> | false;
 }
 
 /** What a loaded body can do, for the capability note under the stage. */
@@ -49,6 +55,8 @@ export class Body {
   readonly player: ClipPlayer;
   readonly gaze: GazeController | null;
   readonly lip = new LipSync();
+  /** The face driver every expression weight goes through. */
+  readonly face: Face;
   readonly caps: BodyCaps;
   readonly mouth: MouthTarget;
   /** Turn gaze off and on without a new body. */
@@ -58,7 +66,6 @@ export class Body {
   private readonly rig: GazeRig | null;
   private readonly vrmLook: VrmLike["lookAt"] | null;
   private readonly converted = new WeakMap<AnimationClip, Clip>();
-  private held: string | null = null;
   private speaking = false;
   private readonly eye = new Vector3();
   private readonly tmp = new Vector3();
@@ -76,11 +83,15 @@ export class Body {
       }
     }
     avatar.root.updateMatrixWorld(true);
-    const rest: Clip = { name: "rest", fps: 30, frames: 2, bones: this.bones.length, loop: true, rotations: new Float32Array(this.bones.length * 8) };
-    this.bones.forEach((b, i) => {
-      b.quaternion.toArray(rest.rotations, i * 4);
-      b.quaternion.toArray(rest.rotations, (this.bones.length + i) * 4);
-    });
+    let rest: Clip;
+    if (opts.stance === "rest") {
+      rest = { name: "rest", fps: 30, frames: 2, bones: this.bones.length, loop: true, rotations: new Float32Array(this.bones.length * 8) };
+      this.bones.forEach((b, i) => {
+        b.quaternion.toArray(rest.rotations, i * 4);
+        b.quaternion.toArray(rest.rotations, (this.bones.length + i) * 4);
+      });
+    } else rest = restStanceFromThree(this.bones, this.names, avatar.root);
+    this.face = new Face(avatar.expressions, { resting: opts.restingFace === false ? {} : (opts.restingFace ?? RESTING_FACE) });
     const upper: number[] = [];
     this.names.forEach((n, i) => UPPER.test(n) && upper.push(i));
     this.player = new ClipPlayer({ idle: rest, upperBones: upper });
@@ -133,11 +144,9 @@ export class Body {
     return this.avatar.wardrobe.parts;
   }
 
-  /** Holds one expression; null clears it. */
+  /** Holds one mood, eased in by the face driver; null hands the face back to its resting weights. */
   setExpression(name: string | null, weight = 1): void {
-    if (this.held && this.held !== name) this.avatar.expressions.setValue(this.held, 0);
-    this.held = name;
-    if (name) this.avatar.expressions.setValue(name, weight);
+    this.face.set(name, weight);
   }
 
   /** A presence clip over this body's bone order, from one of its animations (by name or object). */
@@ -178,7 +187,7 @@ export class Body {
 
   /** True while a clip or a mouth moves the body by itself (reduced motion keeps drawing then). */
   moving(): boolean {
-    return this.player.layerWeight("body") > 0 || this.player.layerWeight("upper") > 0 || this.speaking;
+    return this.player.layerWeight("body") > 0 || this.player.layerWeight("upper") > 0 || this.speaking || this.face.settling();
   }
 
   /** Where the eyes sit, world space. */
@@ -200,7 +209,6 @@ export class Body {
     const pose = this.player.update(dt);
     if (this.level && !still) this.level.apply(dt, pose, this.head);
     applyPose(pose, this.bones);
-    const ex = this.avatar.expressions;
     if (this.gazeOn && this.gaze && this.rig && !still) {
       this.avatar.root.updateMatrixWorld(true);
       if (look) this.gaze.setTarget([look.x, look.y, look.z]);
@@ -217,11 +225,12 @@ export class Body {
         this.vrmLook.yaw = (g.eyeYaw * 180) / Math.PI;
         this.vrmLook.pitch = (g.eyePitch * 180) / Math.PI;
       }
-      ex.setValue("blink", g.blink);
-    } else if (still) ex.setValue("blink", 0);
+      this.face.lid(g.blink);
+    } else if (still) this.face.lid(0);
     const mouth = this.lip.update(mouthTime, dt);
     this.speaking = mouth.source !== "silent";
-    drive(ex, mouth, this.mouth);
+    drive(this.face.mouth, mouth, this.mouth);
+    this.face.update(dt, this.player.faces);
     this.avatar.update(dt);
   }
 

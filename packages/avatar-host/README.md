@@ -60,8 +60,13 @@ The main entry has no three.js:
 - `Body`: the body surface and the frame order. Each frame the presence
   `ClipPlayer` writes every bone (an idle of the rest pose, a body layer
   and an upper layer), `HeadLevel` lifts a low clip head, `applyPose`,
-  `GazeController` through `applyGaze` plus blinks, `LipSync` through
-  `drive`, then `avatar.update(dt)`. `play(clip | animation | name)`,
+  `GazeController` through `applyGaze`, then the presence `Face` writes
+  every expression weight in one pass (moods eased, clip face tracks, the
+  gaze controller's lid, `LipSync` mouth shapes through `drive` on
+  `face.mouth`), then `avatar.update(dt)`. With no idle clip the base
+  layer is the rest stance, arms relaxed at the sides (`stance: "rest"`
+  keeps the loaded pose); a quiet face rests at a slight smile
+  (`restingFace: false` for neutral). `play(clip | animation | name)`,
   `stop`, `clipOf`, `setExpression`, `setGazeMode`, `setPartVisible`,
   `lip` for speech events. Gaze turns on by itself when the head rests
   upright and facing +Z (VRM bodies and the placeholder); for VRM the eyes
@@ -138,6 +143,11 @@ The example page `examples/avatar-host` runs the browser rows with `?auto`.
 
 ### Verified on this machine
 
+- 2026-11-24: `npx vitest run packages/avatar-host` passed 33 of 33
+  tests (counted), with the face driver and rest stance: a played clip
+  hands back to the rest stance with the hand below the shoulder;
+  `stance: "rest"` keeps the loaded pose; a held mood reaches 0.63 in
+  1/8 s and the lid and mouth go through the face.
 - 2026-11-24: `npx vitest run packages/avatar-host` passed 31 of 31
   tests (counted), with the environment slot: a slow scene load
   overtaken by a newer one is disposed and never attached; the same id
@@ -182,15 +192,15 @@ The example page `examples/avatar-host` runs the browser rows with `?auto`.
 - The room, cafe and outdoors scenes have not been shown on this stage;
   their files are not in the repository. The pixel ratio cap was measured
   at a device ratio of 1 only.
-- The face driver and thumbnails are later items and not in this package
-  yet.
+- Thumbnails are a later item and not in this package yet. The face
+  driver has not run on a real face in a browser.
 
 ## Size budget
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
 | `dist/index.js` (main entry, imports external) | 3,696 bytes | 3,880 bytes |
-| `dist/avatar-host.iife.js` (single file build) | 194,084 bytes | 203,788 bytes |
+| `dist/avatar-host.iife.js` (single file build) | 195,826 bytes | 205,617 bytes |
 
 Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

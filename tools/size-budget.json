@@ -42,8 +42,8 @@
       "dist/organic.iife.js": 46978
     },
     "@hackbuild/presence": {
-      "main: dist/index.js bundled": 9473,
-      "dist/presence.iife.js": 12477
+      "main: dist/index.js bundled": 11295,
+      "dist/presence.iife.js": 14561
     },
     "@hackbuild/retarget": {
       "main: dist/index.js bundled": 146773,
@@ -57,7 +57,7 @@
     },
     "@hackbuild/avatar-host": {
       "main: dist/index.js bundled": 3696,
-      "dist/avatar-host.iife.js": 194084
+      "dist/avatar-host.iife.js": 195826
     },
     "@hackbuild/environment": {
       "main: dist/index.js bundled": 3088,

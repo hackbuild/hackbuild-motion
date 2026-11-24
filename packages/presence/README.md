@@ -30,11 +30,32 @@ with a three.js adapter under `/three`. No wasm.
   a one shot fades back to the base (idle handback, with `ended` and
   `handback` events); `hold: Infinity` holds until `release()`. Loops whose
   first and last frames differ by more than 2 degrees blend their last
-  0.4 s into the start and restart from 0.4 s.
+  0.4 s into the start and restart from 0.4 s. A clip may carry `faces`,
+  one weight per frame per expression; after each `update`,
+  `player.faces` holds this frame's weights, each scaled by its layer
+  weight.
+- `Face`: one owner for every expression weight, over any sink with
+  `setValue(name, weight)` (`ExpressionRig` or a three-vrm expression
+  manager); it keeps its own weights, so the sink needs no read call.
+  `set(mood, weight)` eases at rate 8 per second (a mood reaches 0.63 of
+  its target in 1/8 s); with no mood the face rests at `RESTING_FACE`
+  (happy 0.25, relaxed 0.3, vendor; `setResting({})` for a neutral face).
+  `lid(w)` takes the lid weight from `Blink` or the gaze controller, and
+  `blink = false` writes the lid open at once. Mouth shapes from speech go
+  in through `face.mouth` (pass it to lipsync's `drive`) and win their
+  channels; other channels show the larger of the clip weight and the
+  mood, and return to the mood when the clip lets go.
+- `restStance(names)` and `restStanceFromThree(bones, names, root)`: the
+  base layer for a body with no idle clip, upper arms turned 1.18 rad and
+  forearms 0.08 rad down about the body's forward axis (`RELAXED`,
+  vendor). The three.js version expresses the turn in each bone's own
+  frame, so rigs whose bones rest in other frames still lower their arms.
 - `HeadLevel`: low passes the clip's head pitch (1.2 s) and lifts the slow
   part by up to 10 degrees, so a mocap idle stops glaring while nods pass.
 - `/three`: `clipFromThree` (AnimationClip to a flat clip), `applyPose`,
-  `applyGaze` (neck and head share, eye bones), `aimBone` and `reachArm`.
+  `applyGaze` (neck and head share, eye bones inside 12 degrees sideways
+  and 8 up and down by default, `eyeLimitDeg`), `aimBone`, `reachArm` and
+  `restStanceFromThree`.
 
 Every random draw comes from an injected `Rng`.
 
@@ -106,6 +127,18 @@ function frame(dt: number) {
   bones, aimed an arm within 0.02 rad of a target and split head yaw
   between neck and head (measured in the adapter test).
 
+- 2026-11-24: `npx vitest run packages/presence` passed 37 of 37 tests
+  (counted), with the face driver: a mood eases to 0.63 of its target in
+  1/8 s within 1e-6; with no mood the face sits at the resting weights; a
+  clip weight above the mood wins and returns to the mood when the clip
+  ends; speech wins the mouth and a shape it stopped writing is released;
+  turning blink off mid blink writes 0; face tracks sample between frames
+  and fade with their layer; the rest stance keeps the hands more than
+  0.4 m below the shoulders on a rig whose left arm rests turned 90
+  degrees, with the arms hanging beside the body.
+- 2026-11-24, headless Chrome, the avatar-host example: the placeholder
+  stands in the rest stance; the builder looked at a screenshot.
+
 ### Not verified by anything
 
 - Nobody has looked at any of this on a real avatar in a real browser at
@@ -116,7 +149,9 @@ function frame(dt: number) {
   the arm part).
 - Clip transitions crossfade with minimum jerk weights; inertialized
   transitions over the organic `Inertializer` are open.
-- Face tracks in clips, procedural nod, shake and think gestures, foot
+- The face driver on a real VRM or morph rig face in a browser, and the
+  resting smile on a real face, have not been looked at.
+- Procedural nod, shake and think gestures, foot
   locking and turn in place steps are not in this package yet.
 - Reach duration constants and the 0.6 s point retract are inferred.
 
@@ -124,8 +159,8 @@ function frame(dt: number) {
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 9,473 bytes | 9,946 bytes |
-| `dist/presence.iife.js` (single file build) | 12,477 bytes | 13,100 bytes |
+| `dist/index.js` (main entry, imports external) | 11,295 bytes | 11,859 bytes |
+| `dist/presence.iife.js` (single file build) | 14,561 bytes | 15,289 bytes |
 
 Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

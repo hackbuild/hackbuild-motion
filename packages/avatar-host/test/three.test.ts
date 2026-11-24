@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { referenceRest } from "@hackbuild/rig";
 import { seededRng } from "@hackbuild/organic";
-import type { Clip } from "@hackbuild/presence";
+import { type Clip, RELAXED } from "@hackbuild/presence";
 import { MissingFileError } from "@hackbuild/environment";
 import { Body, EnvironmentSlot, FollowCamera, bodyAdapters, stagePixelRatio, loadBody, placeholderBody, rigReady, trackingManager } from "../src/three.js";
 import { AvatarHost, type BodySource } from "../src/index.js";
@@ -134,7 +134,31 @@ describe("Body frame order", () => {
     expect(body.moving()).toBe(true);
     for (let i = 0; i < 180; i++) body.update(1 / 60, null, false, 1 + i / 60);
     expect(body.moving()).toBe(false);
-    expect(arm.quaternion.angleTo(new THREE.Quaternion())).toBeLessThan(1e-3);
+    // the base layer is the rest stance: the arm hangs at the side
+    expect(arm.quaternion.angleTo(new THREE.Quaternion())).toBeCloseTo(Math.abs(RELAXED.rightUpperArm!), 3);
+    const y = (b: "rightHand" | "rightUpperArm") => body.avatar.bones[b]!.getWorldPosition(new THREE.Vector3()).y;
+    body.avatar.root.updateMatrixWorld(true);
+    expect(y("rightHand")).toBeLessThan(y("rightUpperArm") - 0.3);
+  });
+
+  it("keeps the loaded rest pose as the base with stance rest", () => {
+    const body = new Body(placeholderBody(), { rng: seededRng("t"), stance: "rest" });
+    for (let i = 0; i < 5; i++) body.update(1 / 60, null, false, i / 60);
+    expect(body.avatar.bones.rightUpperArm!.quaternion.angleTo(new THREE.Quaternion())).toBeLessThan(1e-6);
+  });
+
+  it("sends moods, lids and the mouth through the face driver", () => {
+    const avatar = placeholderBody();
+    const seen = new Map<string, number>();
+    avatar.expressions = { setValue: (n: string, w: number) => void seen.set(n, w) };
+    const body = new Body(avatar, { rng: seededRng("t"), restingFace: false });
+    body.setExpression("happy");
+    for (let i = 0; i < 10; i++) body.update(1 / 80, null, false, i / 80);
+    expect(seen.get("happy")).toBeCloseTo(1 - Math.exp(-1), 6);
+    expect(body.moving()).toBe(true);
+    body.update(1 / 60, null, true, 1);
+    expect(seen.get("blink")).toBe(0);
+    expect(seen.has("aa")).toBe(true);
   });
 
   it("turns the head toward a target to its left and stops idle motion when still", () => {

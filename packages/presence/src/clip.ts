@@ -18,6 +18,26 @@ export interface Clip {
   rotations: Float32Array;
   /** frames * 3 root (hips) positions, optional. */
   root?: Float32Array;
+  /** Expression tracks, one weight per frame each, handed to the face rather than written to bones. */
+  faces?: ClipFace[];
+}
+
+export interface ClipFace {
+  /** Expression or morph name. */
+  name: string;
+  /** frames weights, 0 to 1. */
+  weights: Float32Array;
+}
+
+/** A face track's weight at time `t` seconds, linear between frames, clamped to the ends. */
+export function sampleFace(c: Clip, face: ClipFace, t: number): number {
+  const n = Math.min(c.frames, face.weights.length);
+  if (n === 0) return 0;
+  const f = Math.max(0, Math.min(n - 1, t * c.fps));
+  const i = Math.floor(f);
+  const a = face.weights[i]!;
+  const b = face.weights[Math.min(n - 1, i + 1)]!;
+  return a + (b - a) * (f - i);
 }
 
 export interface Pose {
@@ -196,6 +216,8 @@ export interface ClipPlayerOptions {
 
 export class ClipPlayer {
   readonly pose: Pose;
+  /** This frame's expression weights from the clips' face tracks, each weighted by its layer weight; read after `update`. */
+  readonly faces = new Map<string, number>();
   /** Events from the last update. */
   events: PlayerEvent[] = [];
   readonly bones: number;
@@ -318,7 +340,23 @@ export class ClipPlayer {
       const mask = layer === "upper" ? this.upperMask : undefined;
       for (const t of this.layers[layer]) blendPose(this.pose, t.pose, t.w, this.pose, mask);
     }
+    this.updateFaces();
     return this.pose;
+  }
+
+  private updateFaces(): void {
+    this.faces.clear();
+    const add = (c: Clip, t: number, w: number) => {
+      if (!c.faces || w <= 0) return;
+      for (const f of c.faces) this.faces.set(f.name, Math.max(this.faces.get(f.name) ?? 0, sampleFace(c, f, t) * w));
+    };
+    const idleD = clipDuration(this.idle);
+    add(this.idle, idleD > 0 ? this.idleT % idleD : 0, 1 - this.layerWeight("body"));
+    for (const layer of ["body", "upper"] as const)
+      for (const t of this.layers[layer]) {
+        const d = clipDuration(t.clip);
+        add(t.clip, t.loop && d > 0 ? t.t % d : Math.min(t.t, d), t.w);
+      }
   }
 
   private updateBase(dt: number): void {

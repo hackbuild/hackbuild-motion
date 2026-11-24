@@ -4,6 +4,18 @@ Versions follow semver per package. Nothing is published to npm yet.
 
 ## 0.2.0 (unreleased)
 
+### Face driver and rest stance, 2026-11-24
+
+- `@hackbuild/presence`: `Face`, one owner for every expression weight:
+  moods eased at rate 8, resting weights (happy 0.25, relaxed 0.3,
+  vendor), the lid from `Blink` or gaze, speech mouth shapes first, clip
+  face tracks at the larger of clip and mood. `Clip` gains optional
+  `faces`; `ClipPlayer.faces` holds the frame's weights by layer weight.
+  `restStance` and `restStanceFromThree` lower the arms for a body with
+  no idle clip.
+- `@hackbuild/avatar-host`: `Body` writes its face through `Face` and
+  stands in the rest stance (`stance`, `restingFace` options).
+
 ### Environment, 2026-11-24
 
 - `@hackbuild/avatar-host`: the environment slot. `stage.environment` and
