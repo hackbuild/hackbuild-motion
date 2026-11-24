@@ -1,0 +1,46 @@
+{
+  "name": "@hackbuild/environment",
+  "version": "0.1.0",
+  "description": "Brightly lit scenes around a character: layouts as data, a set assembled from kit models and merged by material, image light from an HDRI or the three.js room environment, a key light with a shadow and a rim light.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Moheeb Zara <hackbuildvideo@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackbuild/hackbuild-motion.git",
+    "directory": "packages/environment"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.11.0"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./three": {
+      "types": "./dist/three.d.ts",
+      "import": "./dist/three.js"
+    },
+    "./iife": "./dist/environment.iife.js"
+  },
+  "unpkg": "dist/environment.iife.js",
+  "jsdelivr": "dist/environment.iife.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node ../../tools/build-package.mjs environment"
+  },
+  "peerDependencies": {
+    "three": ">=0.186.1"
+  },
+  "peerDependenciesMeta": {
+    "three": {
+      "optional": true
+    }
+  }
+}

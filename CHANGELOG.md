@@ -4,6 +4,16 @@ Versions follow semver per package. Nothing is published to npm yet.
 
 ## 0.2.0 (unreleased)
 
+### Environment, 2026-11-24
+
+- `@hackbuild/environment`: new package. Studio, room, cafe and outdoors
+  layouts as data with the files each needs (`needsOf`, `missingFor`);
+  only the studio works with no file. `loadEnvironment` loads fully before
+  `attach`, turns an HDRI so its brightest point sits behind the key
+  light, bakes a light probe normalized to mean radiance 1, and restores
+  tone mapping on dispose. `assemble` merges a kit set by material.
+  Bundles no HDRI and no model.
+
 ### Model pack repair, 2026-11-24
 
 - `@hackbuild/avatar`: `normalizeHumanoid` bakes units into the model

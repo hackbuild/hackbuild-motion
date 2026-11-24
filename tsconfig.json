@@ -12,6 +12,7 @@
     { "path": "packages/avatar" },
     { "path": "packages/lipsync" },
     { "path": "packages/bake" },
+    { "path": "packages/environment" },
     { "path": "packages/avatar-host" }
   ]
 }
