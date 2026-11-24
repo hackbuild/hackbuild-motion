@@ -47,6 +47,16 @@ The main entry has no three.js:
   `on(type, fn)`: `loaded` (the body and its capability list), `failed`
   (copy and cause), `stats` (fps from the loop clock, draw calls,
   triangles, buffer size, pixel ratio), `state`, `lost`, `restored`.
+- `EnvironmentSlot` as `stage.environment`, and `stage.showEnvironment(id
+  | { preset, resolve } | null)`: a lit scene from `@hackbuild/environment`
+  around the body, imported on first use. Requests are ticketed: a slow
+  load a newer one overtook is disposed and never attached; the same id
+  again does nothing. The swap disposes the old scene first, turns on the
+  shadow map with the body casting, hides the plain lights and caps the
+  pixel ratio at 1.5 (vendor) while a scene shows. A missing file emits
+  `failed` with the environment copy and keeps the current scene. The
+  studio needs no file; the element takes it as the `environment`
+  attribute.
 - `Body`: the body surface and the frame order. Each frame the presence
   `ClipPlayer` writes every bone (an idle of the rest pose, a body layer
   and an upper layer), `HeadLevel` lifts a low clip head, `applyPose`,
@@ -69,7 +79,8 @@ The main entry has no three.js:
 - `placeholderBody()`: a mannequin of capsules on a humanoid skeleton,
   built in code, head top near 1.74 m (computed). No asset file.
 - `defineAvatarHost(tag?, opts?)`: defines `hb-avatar-host`. Attributes
-  `src` (a model URL; the placeholder shows without one), `paused`,
+  `src` (a model URL; the placeholder shows without one), `environment`
+  (a scene id), `paused`,
   `inactive`, `covered`. Stage events arrive as DOM events of the same
   name with the stage event as `detail`. Nothing is defined on import.
 
@@ -127,6 +138,16 @@ The example page `examples/avatar-host` runs the browser rows with `?auto`.
 
 ### Verified on this machine
 
+- 2026-11-24: `npx vitest run packages/avatar-host` passed 31 of 31
+  tests (counted), with the environment slot: a slow scene load
+  overtaken by a newer one is disposed and never attached; the same id
+  loads once, a failed load keeps the scene, null clears it; the pixel
+  ratio caps at 1.5 with a scene.
+- 2026-11-24, headless Chrome on the example page: the studio scene under
+  the placeholder turns on the shadow map with 24 meshes casting and the
+  ground taking it, 49 draw calls against 24 plain, and the plain lights
+  come back after it (measured). The screenshot was looked at by the
+  builder: a shadow falls on the ground beside the body.
 - 2026-11-24: `npx vitest run packages/avatar-host` passed 28 of 28
   tests (counted): two overlapping shows resolve null for the first and
   never show it; a failed create is retried on the next show; `exclusive`
@@ -158,15 +179,18 @@ The example page `examples/avatar-host` runs the browser rows with `?auto`.
   motion in a browser have not been run.
 - Nobody has looked at the follow camera or gaze at frame rate on a
   loaded model.
-- The environment slot (pixel ratio 1.5 with a scene), the face driver and
-  thumbnails are later items and not in this package yet.
+- The room, cafe and outdoors scenes have not been shown on this stage;
+  their files are not in the repository. The pixel ratio cap was measured
+  at a device ratio of 1 only.
+- The face driver and thumbnails are later items and not in this package
+  yet.
 
 ## Size budget
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
 | `dist/index.js` (main entry, imports external) | 3,696 bytes | 3,880 bytes |
-| `dist/avatar-host.iife.js` (single file build) | 181,429 bytes | 190,500 bytes |
+| `dist/avatar-host.iife.js` (single file build) | 194,084 bytes | 203,788 bytes |
 
 Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

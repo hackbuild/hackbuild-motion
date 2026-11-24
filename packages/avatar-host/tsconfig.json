@@ -8,5 +8,5 @@
     "skipLibCheck": true
   },
   "include": ["src"],
-  "references": [{ "path": "../avatar" }, { "path": "../presence" }, { "path": "../lipsync" }, { "path": "../organic" }, { "path": "../rig" }]
+  "references": [{ "path": "../avatar" }, { "path": "../environment" }, { "path": "../presence" }, { "path": "../lipsync" }, { "path": "../organic" }, { "path": "../rig" }]
 }

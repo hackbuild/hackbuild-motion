@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import { referenceRest } from "@hackbuild/rig";
 import { seededRng } from "@hackbuild/organic";
 import type { Clip } from "@hackbuild/presence";
-import { Body, FollowCamera, bodyAdapters, loadBody, placeholderBody, rigReady, trackingManager } from "../src/three.js";
+import { MissingFileError } from "@hackbuild/environment";
+import { Body, EnvironmentSlot, FollowCamera, bodyAdapters, stagePixelRatio, loadBody, placeholderBody, rigReady, trackingManager } from "../src/three.js";
 import { AvatarHost, type BodySource } from "../src/index.js";
 import { UAL, buildGlb, humanoidJoints } from "../../avatar/test/glb.js";
 
@@ -192,5 +193,69 @@ describe("scene level loader", () => {
     manager.itemEnd("x");
     await p;
     expect(done).toBe(true);
+  });
+});
+
+describe("EnvironmentSlot", () => {
+  const fakeEnv = (id: string, log: string[]) => ({
+    id,
+    shadows: true,
+    attach: () => log.push(`attach ${id}`),
+    dispose: () => log.push(`dispose ${id}`),
+  });
+  const target = (log: string[]) => {
+    let shown: { id: string; dispose(): void } | null = null;
+    return {
+      scene: new THREE.Scene(),
+      renderer: null as unknown as THREE.WebGLRenderer,
+      setEnvironment(env: ReturnType<typeof fakeEnv> | null) {
+        shown?.dispose();
+        shown = env;
+        env?.attach();
+        log.push(`show ${env?.id ?? "none"}`);
+      },
+    };
+  };
+
+  it("disposes a slow load a newer one overtook and never attaches it", async () => {
+    const log: string[] = [];
+    const gates = new Map<string, () => void>();
+    const slot = new EnvironmentSlot(target(log), (req) => {
+      const id = req.preset as string;
+      return new Promise((ok) => gates.set(id, () => ok(fakeEnv(id, log))));
+    });
+    const slow = slot.set("room");
+    const fast = slot.set("studio");
+    gates.get("studio")!();
+    expect((await fast)?.id).toBe("studio");
+    gates.get("room")!();
+    expect(await slow).toBeNull();
+    expect(log).toEqual(["attach studio", "show studio", "dispose room"]);
+    expect(slot.current).toBe("studio");
+  });
+
+  it("does nothing for the same id, clears for null and keeps the scene on a failure", async () => {
+    const log: string[] = [];
+    let calls = 0;
+    const slot = new EnvironmentSlot(target(log), async (req) => {
+      calls++;
+      if (req.preset === "cafe") throw new MissingFileError("hdri/comfy_cafe_1k.hdr");
+      return fakeEnv(req.preset as string, log);
+    });
+    await slot.set("studio");
+    await slot.set("studio");
+    expect(calls).toBe(1);
+    await expect(slot.set("cafe")).rejects.toThrow("could not load hdri/comfy_cafe_1k.hdr");
+    expect(slot.current).toBe("studio");
+    await slot.set(null);
+    expect(slot.current).toBeNull();
+    expect(log.slice(-2)).toEqual(["dispose studio", "show none"]);
+  });
+
+  it("caps the pixel ratio at 1.5 with a scene", () => {
+    expect(stagePixelRatio(3, 2, false)).toBe(2);
+    expect(stagePixelRatio(3, 2, true)).toBe(1.5);
+    expect(stagePixelRatio(1, 2, true)).toBe(1);
+    expect(stagePixelRatio(0)).toBe(1);
   });
 });

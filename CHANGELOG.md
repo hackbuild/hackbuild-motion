@@ -6,6 +6,12 @@ Versions follow semver per package. Nothing is published to npm yet.
 
 ### Environment, 2026-11-24
 
+- `@hackbuild/avatar-host`: the environment slot. `stage.environment` and
+  `showEnvironment` show a scene with ticketed loads, the body casting a
+  shadow, the plain lights off and the pixel ratio capped at 1.5; the
+  element takes an `environment` attribute. The example page has a
+  studio light toggle and two browser checks for it.
+
 - `@hackbuild/environment`: new package. Studio, room, cafe and outdoors
   layouts as data with the files each needs (`needsOf`, `missingFor`);
   only the studio works with no file. `loadEnvironment` loads fully before

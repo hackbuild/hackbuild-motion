@@ -13,6 +13,7 @@ $("#controls").innerHTML = `
 <button class="hb-btn" id="closer" aria-label="zoom in">closer</button>
 <button class="hb-btn" id="farther" aria-label="zoom out">farther</button>
 <button class="hb-btn" id="pause">pause</button>
+<button class="hb-btn" id="scene" aria-pressed="false">studio light</button>
 <button class="hb-btn" id="doll">back to placeholder</button>`;
 
 defineAvatarHost("hb-avatar-host", {
@@ -51,6 +52,7 @@ function draw() {
     "draw calls": stats?.calls ?? 0,
     "buffer px": stats ? `${stats.width} by ${stats.height}` : "none",
     "pixel ratio": stats?.pixelRatio ?? 0,
+    scene: stage.environment.current ?? "plain",
     body: placeholder ? "placeholder" : caps ? describe(caps) : "none",
   });
 }
@@ -93,6 +95,13 @@ $("#pause").addEventListener("click", () => {
   $("#pause").textContent = paused ? "pause" : "play";
 });
 $("#doll").addEventListener("click", () => stage.showPlaceholder());
+// the studio needs no file; the room, cafe and outdoors scenes need kit models and hdris you drop
+const scene = $("#scene");
+scene.addEventListener("click", async () => {
+  const on = scene.getAttribute("aria-pressed") !== "true";
+  if (await stage.showEnvironment(on ? "studio" : null)) scene.setAttribute("aria-pressed", String(on));
+  draw();
+});
 const drop = $("#drop");
 onDrop(drop, (files) => void el.showFiles(files), $("#file") as HTMLInputElement);
 // folders dropped on the zone keep their paths, so textures beside the model resolve
@@ -177,6 +186,22 @@ if (auto) {
       const ok = copy === "the 3d view was lost. press to restore." && !el.querySelector(".hb-stage-restore") && stage.loop.isRunning;
       check(r, "avatar-host: a lost context shows the restore line and comes back", ok ? "pass" : "fail", `button "${copy}", running after restore: ${stage.loop.isRunning} (${stage.loop.why.join(" ") || "no hold"}), restored event: ${gotRestored}`);
     }
+
+    // the studio scene: shadow under the body, pixel ratio capped
+    const calls0 = gl.info.render.calls;
+    const shown = await stage.showEnvironment("studio");
+    await sleep(600);
+    const shadowed = gl.shadowMap.enabled && !!stage.scene.getObjectByName("environment-ground")?.receiveShadow;
+    let casters = 0;
+    stage.body?.avatar.root.traverse((o) => (casters += (o as THREE.Mesh).isMesh && o.castShadow ? 1 : 0));
+    const prScene = gl.getPixelRatio();
+    const callsScene = gl.info.render.calls;
+    r.numbers["draw calls, placeholder in the studio (measured)"] = callsScene;
+    r.numbers["pixel ratio in the studio (measured)"] = prScene;
+    check(r, "avatar-host: the studio renders with a shadow under the placeholder", shown && shadowed && casters > 0 && prScene <= 1.5 ? "pass" : "fail", `shadow map ${gl.shadowMap.enabled}, ${casters} meshes cast, ground takes it, ${callsScene} draw calls (${calls0} plain), pixel ratio ${prScene}. how it looks needs a person.`);
+    await stage.showEnvironment(null);
+    await sleep(300);
+    check(r, "avatar-host: the plain stage comes back with its lights after the studio", !gl.shadowMap.enabled && stage.lights.every((l) => l.visible) && stage.environment.current === null ? "pass" : "fail", `shadow map ${gl.shadowMap.enabled}, plain lights ${stage.lights.filter((l) => l.visible).length} of ${stage.lights.length}`);
 
     // frame rate with a wave playing
     stage.body && stage.body.play(wave(stage.body));

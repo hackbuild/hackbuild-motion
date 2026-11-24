@@ -52,6 +52,9 @@ frames from the system voice. Earlier text on this page gave counts of
 | avatar-host | the placeholder body on stage (run 2026-11-24, headless Chrome) | pass | 24 bones, 24 draw calls (measured) |
 | avatar-host | with the page hidden the loop draws 0 frames in 1 s | pass | 0 frames while hidden, 18 frames in 0.3 s after return (measured). Hidden was simulated by overriding `document.hidden` and sending `visibilitychange`; a real tab switch has not been run. |
 | avatar-host | the canvas equals the host width at 320 px | pass | canvas 320 css px, drawing buffer 320 px at pixel ratio 1 (measured). A pixel ratio 2 screen has not been run. |
+| avatar-host | the studio renders with a shadow under the placeholder body (run 2026-11-24, headless Chrome) | pass | shadow map on, 24 meshes cast, the ground takes it, 49 draw calls against 24 plain, pixel ratio 1 (measured). The builder looked at a screenshot; at frame rate it needs a person. |
+| avatar-host | the plain stage comes back after the studio | pass | shadow map off, 3 of 3 plain lights on (measured) |
+| environment | room, cafe and outdoors with their kit models and HDRIs | not run | the CC0 files are not in the repository; no page fetches them yet |
 | avatar-host | the old body is disposed after a swap | pass | 24 geometries on the GPU before and after two swaps (measured) |
 | avatar-host | a superseded show resolves null and never shows | pass | a slow show followed by the placeholder (measured) |
 | avatar-host | a lost context shows the restore line and comes back | pass | `WEBGL_lose_context` lost the context; the button read "the 3d view was lost. press to restore."; a press restored it and the loop ran again (measured) |

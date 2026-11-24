@@ -4,7 +4,7 @@
 // ticketed host, so fast switching never shows a stale body. Events carry
 // what the stage chrome needs: loaded with the capability list, failed with
 // copy for the person, frame stats, the loop state and a lost context.
-import { Box3, Color, DirectionalLight, HemisphereLight, type Light, PerspectiveCamera, Scene, SRGBColorSpace, TOUCH, Vector2, Vector3, WebGLRenderer } from "three";
+import { Box3, Color, DirectionalLight, HemisphereLight, type Light, type Mesh, PCFSoftShadowMap, PerspectiveCamera, Scene, SRGBColorSpace, TOUCH, Vector2, Vector3, WebGLRenderer } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { seededRng, type Rng } from "@hackbuild/organic";
 import { type Avatar, posedBounds } from "@hackbuild/avatar/three";
@@ -16,6 +16,8 @@ import { Body, type BodyCaps, type BodyOptions } from "./body.js";
 import { FollowCamera, type FollowOptions } from "./follow.js";
 import { type BodyLoadOptions, bodyAdapters } from "./load.js";
 import { type PlaceholderOptions, placeholderBody } from "./placeholder.js";
+import { EnvironmentSlot, type EnvironmentRequest, stagePixelRatio } from "./environment.js";
+import type { LoadedEnvironment } from "@hackbuild/environment/three";
 
 export const LOST_COPY = "the 3d view was lost. press to restore.";
 
@@ -24,7 +26,7 @@ export interface StageOptions extends BodyLoadOptions {
   canvas?: HTMLCanvasElement;
   /** Seeded randomness for gaze and blinks. Default seededRng("avatar-host"). */
   rng?: Rng;
-  /** Device pixels per CSS pixel, at most. Default 2 (proposed). */
+  /** Device pixels per CSS pixel, at most. Default 2 (proposed); a lit scene caps it at 1.5 (vendor). */
   maxPixelRatio?: number;
   /** Scene background; null leaves the canvas transparent. Default null. */
   background?: number | null;
@@ -36,6 +38,8 @@ export interface StageOptions extends BodyLoadOptions {
   statsEvery?: number;
   /** A button with the restore line over a lost context. Default true. */
   restoreButton?: boolean;
+  /** A scene to show from the start, as `setEnvironment` takes it. */
+  environment?: EnvironmentRequest | string;
 }
 
 export interface StageStats {
@@ -75,6 +79,10 @@ export class AvatarStage {
   readonly lights: Light[] = [];
   /** The body on stage, or null. */
   body: Body | null = null;
+  /** The lit scene around the body: `stage.environment.set("studio")`. */
+  readonly environment: EnvironmentSlot;
+  private scenery: LoadedEnvironment | null = null;
+  private background: Color | null;
   /** Normalized pointer over the canvas, -1 to 1, for gaze. */
   readonly pointer = new Vector2();
   private pointerAt = -Infinity;
@@ -112,7 +120,10 @@ export class AvatarStage {
     this.renderer = new WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: true });
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.loseExt = this.renderer.getContext().getExtension("WEBGL_lose_context");
-    this.scene.background = opts.background == null ? null : new Color(opts.background);
+    this.background = opts.background == null ? null : new Color(opts.background);
+    this.scene.background = this.background;
+    this.renderer.shadowMap.type = PCFSoftShadowMap;
+    this.environment = new EnvironmentSlot(this);
     if (opts.lights !== false) {
       const key = new DirectionalLight(0xffffff, 3);
       key.position.set(1.2, 1.8, 2.2);
@@ -139,6 +150,7 @@ export class AvatarStage {
     this.wireInput();
     this.wireObservers();
     this.resize();
+    if (opts.environment) void this.showEnvironment(opts.environment);
   }
 
   /** Subscribes to one event type; returns the unsubscribe. */
@@ -191,9 +203,52 @@ export class AvatarStage {
     return this.mount(avatar, name, false);
   }
 
+  /**
+   * Shows a lit scene by preset id or request, or the plain stage for null.
+   * Resolves true when that scene shows; a missing file emits `failed` with the
+   * environment copy and keeps the current scene.
+   */
+  async showEnvironment(req: EnvironmentRequest | string | null): Promise<boolean> {
+    try {
+      await this.environment.set(req);
+      const id = req === null ? null : typeof req === "string" ? req : typeof req.preset === "string" ? req.preset : req.preset.id;
+      return this.environment.current === id;
+    } catch (e) {
+      this.emit({ type: "failed", message: e instanceof Error ? e.message : String(e), cause: e });
+      return false;
+    }
+  }
+
+  /** The swap the environment slot calls: old scene out first, new one in, shadows and lights to match. */
+  setEnvironment(env: LoadedEnvironment | null): void {
+    if (this.disposed) {
+      env?.dispose();
+      return;
+    }
+    this.scenery?.dispose();
+    this.scenery = env;
+    if (env) env.attach();
+    else this.scene.background = this.background;
+    const shadows = !!env?.shadows;
+    this.renderer.shadowMap.enabled = shadows;
+    for (const l of this.lights) l.visible = !env;
+    if (this.body) this.castShadows(this.body.avatar.root, shadows);
+    // materials compile again with or without shadow maps
+    this.scene.traverse((o) => {
+      const m = (o as Mesh).material;
+      if (m) for (const x of Array.isArray(m) ? m : [m]) x.needsUpdate = true;
+    });
+    this.resize();
+  }
+
+  private castShadows(root: { traverse(f: (o: { castShadow: boolean }) => void): void }, on: boolean): void {
+    root.traverse((o) => (o.castShadow = on));
+  }
+
   private mount(avatar: Avatar, name: string, placeholder: boolean): Body {
     this.unmount();
     avatar.root.traverse((o) => (o.frustumCulled = false));
+    this.castShadows(avatar.root, !!this.scenery?.shadows);
     this.scene.add(avatar.root);
     const body = new Body(avatar, { rng: this.rng, ...this.opts.body });
     this.body = body;
@@ -257,7 +312,7 @@ export class AvatarStage {
   resize(): void {
     const w = this.container.clientWidth;
     const h = this.container.clientHeight;
-    const ratio = Math.min(globalThis.devicePixelRatio || 1, this.opts.maxPixelRatio ?? 2);
+    const ratio = stagePixelRatio(globalThis.devicePixelRatio || 1, this.opts.maxPixelRatio ?? 2, this.scenery !== null);
     this.renderer.setPixelRatio(ratio);
     this.renderer.setSize(Math.max(1, w), Math.max(1, h), false);
     this.camera.aspect = Math.max(w, 1) / Math.max(h, 1);
@@ -434,6 +489,9 @@ export class AvatarStage {
     this.input.abort();
     for (const o of this.observers) o.disconnect();
     this.unmount();
+    this.environment.cancel();
+    this.scenery?.dispose();
+    this.scenery = null;
     this.controls.dispose();
     this.renderer.dispose();
     this.loseExt?.loseContext();

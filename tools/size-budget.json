@@ -57,7 +57,7 @@
     },
     "@hackbuild/avatar-host": {
       "main: dist/index.js bundled": 3696,
-      "dist/avatar-host.iife.js": 181429
+      "dist/avatar-host.iife.js": 194084
     },
     "@hackbuild/environment": {
       "main: dist/index.js bundled": 3088,
