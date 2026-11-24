@@ -1,7 +1,7 @@
 {
   "name": "@hackbuild/retarget",
   "version": "0.1.0",
-  "description": "Humanoid motion interchange format, clip retargeting between any rigs, BVH and VMD readers, motion analysis that tags clips. Rust core in wasm.",
+  "description": "Humanoid motion interchange format, clip retargeting between any rigs, BVH, VMD, VPD, VRMA and Unity clip readers, motion analysis that tags clips. Rust core in wasm.",
   "type": "module",
   "license": "MIT",
   "author": "Moheeb Zara <hackbuildvideo@gmail.com>",
@@ -22,6 +22,10 @@
     "./three": {
       "types": "./dist/three.d.ts",
       "import": "./dist/three.js"
+    },
+    "./formats": {
+      "types": "./dist/formats.d.ts",
+      "import": "./dist/formats.js"
     },
     "./inline": {
       "types": "./dist/wasm/inline.d.ts",

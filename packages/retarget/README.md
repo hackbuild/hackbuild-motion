@@ -22,7 +22,25 @@ it and offers a three.js adapter under `/three`.
   floor touches it; an airborne loop is left alone.
 - Readers: `parseBvh` (any channel order, End Sites kept as helper joints)
   and `parseVmd` (MikuMikuDance, 30 fps, per channel bezier easing, Shift-JIS
-  names through `TextDecoder`, morph keys returned for the face).
+  names through `TextDecoder`, morph keys returned for the face). Legs
+  keyed only by foot IK bones are solved with two bone IK: the knee bends
+  toward the hips' facing, the foot keeps the IK bone's world rotation, a
+  target out of reach leaves the leg straight toward it. A leg keyed by
+  rotation plays as keyed.
+- `/formats`: `readVmd` (a humanoid motion and its face tracks),
+  `faceTracks` (VMD morph keys to VRM expression presets through the
+  `@hackbuild/rig` alias table, the busiest morph per preset, one weight
+  per frame, the `faces` shape `@hackbuild/presence` plays), `parseVpd`
+  (MikuMikuDance poses, foot IK solved), `isPosingDesktop` (the JSON
+  `.vpd` of a posing tool shares the extension; it is refused with a
+  reason), `parseUnityAnim`, `isHumanoidClip` and `convertUnityGeneric`
+  (Unity text clips of transform curves, paths mapped by the rig mapper,
+  the source rig resting in a T pose with identity rotations).
+- Unity humanoid muscle clips are refused. A muscle turns its bone about
+  axes and from a zero pose set by per avatar pre and post rotations that
+  Unity does not publish; the only fitted constants on hand came from
+  files whose terms are unknown, so none ship here. Export from a generic
+  rig or as VRMA instead.
 - `analyzeMotion`: tags from what the body does (hands up, cheer, wave,
   raise hand, squat, crouch, jump, spin, turn, walk, bow, nod, shake head,
   clap, hand to face, pose, dance, idle), loop and pose flags, mean head
@@ -31,6 +49,11 @@ it and offers a three.js adapter under `/three`.
   `toAnimationClip`, `retargetAnimation(clip, srcRoot, dstRoot)` and
   `LiveRetarget`, which copies a driver rig's pose onto a target every
   frame so a whole clip library on the driver plays on any model.
+  `readVrma` reads a VRM animation by the file's own humanoid table (any
+  node names), travel from the origin, and its expression tracks; it
+  needs only three's `GLTFLoader`. `pickTake` chooses a take (by name,
+  else `mixamo.com`, else the longest) and `firstPlayable` falls through a
+  clip's format variants until one plays.
 
 Written for this library. The rest alignment generalizes an earlier arm
 solver's retarget (bone directions aligned at rest).
@@ -101,17 +124,28 @@ wasm inlined, `THREE` read from the page).
   TypeScript suite passes 11 of 11, `cargo test -p hackbuild-retarget`
   15 of 15 (counted).
 
+- 2026-11-24: on fixtures the tests write: a VMD foot IK key 0.1 hip
+  heights forward with the body 0.15 hip heights lower puts the foot on
+  the target within 1 mm on the reference body and the knee in front of
+  the hip to ankle line; a target 3 hip heights down gives a straight leg
+  of 0.83 m and no NaN; a face only VMD of 45 frames gives 46 frames; of
+  two blink morphs the one with more keys plays; a VRMA arm raise of 60
+  degrees reads 60, its hips travel 0.5 m and its `aa` track 0 to 1
+  (computed). `cargo test -p hackbuild-retarget` passes 19 of 19 with
+  three IK tests; the golden trace now ends with a seeded foot IK VMD and
+  stays bit identical between native and wasm (measured).
+
 ### Not verified by anything
 
 - Real files: no Mixamo FBX, UAL glTF, CMU BVH, VRoid VRM or MMD VMD was
   loaded; the readers and rigs in the tests are synthetic.
-- VMD legs keyed only by foot IK bones stay in the rest pose; foot IK is
-  not solved. VMD morph keys are returned but not mapped to presets here
-  (`@hackbuild/rig` `resolveExpressions` holds the MMD names).
-- VRMA and Unity `.anim` readers, multi take files and the clip class pass
-  (idle, talk, gesture, locomotion and so on from file names) are not
-  written. The motion tag words have not been checked against the action
-  grammar's vocabulary, which does not exist yet.
+- Foot IK ignores the VMD IK on and off frames and the parent of all
+  bone (全ての親). No real VMD, VPD, VRMA or Unity clip was loaded.
+- Unity curves sample linearly; tangents are dropped. A generic rig whose
+  bones rest with non identity rotations reads wrong.
+- The clip class pass (idle, talk, gesture, locomotion and so on from file
+  names) is not written. The motion tag words have not been checked
+  against the action grammar's vocabulary, which does not exist yet.
 - Non uniform scale on an armature node, and scale animation.
 - Motion in a real browser at real frame rate.
 
@@ -119,9 +153,9 @@ wasm inlined, `THREE` read from the page).
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 146,773 bytes | 154,111 bytes |
-| `dist/wasm/retarget_bg.wasm` | 105,847 bytes | 111,139 bytes |
-| `dist/retarget.iife.js` (single file build) | 149,179 bytes | 156,637 bytes |
+| `dist/index.js` (main entry, imports external) | 154,498 bytes | 162,222 bytes |
+| `dist/wasm/retarget_bg.wasm` | 111,212 bytes | 116,772 bytes |
+| `dist/retarget.iife.js` (single file build) | 184,822 bytes | 194,063 bytes |
 
 Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

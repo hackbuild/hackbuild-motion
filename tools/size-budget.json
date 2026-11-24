@@ -46,9 +46,9 @@
       "dist/presence.iife.js": 14561
     },
     "@hackbuild/retarget": {
-      "main: dist/index.js bundled": 146773,
-      "dist/wasm/retarget_bg.wasm": 105847,
-      "dist/retarget.iife.js": 149179
+      "main: dist/index.js bundled": 154498,
+      "dist/wasm/retarget_bg.wasm": 111212,
+      "dist/retarget.iife.js": 184822
     },
     "@hackbuild/rig": {
       "main: dist/index.js bundled": 88908,

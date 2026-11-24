@@ -1,7 +1,9 @@
 // three.js adapter: skeletons from scene graphs, AnimationClip sampling and
 // building, and a live per frame retarget from a driver rig.
 import { AnimationClip, AnimationMixer, LoopOnce, Matrix4, type Object3D, Quaternion, QuaternionKeyframeTrack, Vector3, VectorKeyframeTrack } from "three";
-import { type Clip, RetargetRig, type Skeleton } from "./index.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import type { FaceTrack } from "./formats.js";
+import { type Clip, type HumanoidMotion, RetargetRig, type Skeleton } from "./index.js";
 
 export interface SceneSkeleton {
   skeleton: Skeleton;
@@ -214,4 +216,101 @@ export class LiveRetarget {
     this.a.dispose();
     this.b.dispose();
   }
+}
+
+/**
+ * The take to play from a file that holds several (FBX stacks, glTF
+ * animations): the one named `take`, else the `mixamo.com` take, else the
+ * longest.
+ */
+export function pickTake<T extends { name: string; duration: number }>(clips: readonly T[], take?: string): T {
+  if (take !== undefined) {
+    const named = clips.find((c) => c.name === take);
+    if (!named) throw new Error(`no take named "${take}" in this file`);
+    return named;
+  }
+  const pick = clips.find((c) => c.name === "mixamo.com") ?? clips.reduce<T | undefined>((a, c) => (!a || c.duration > a.duration ? c : a), undefined);
+  if (!pick) throw new Error("this file holds no animation. it may be a model, not a motion.");
+  return pick;
+}
+
+/**
+ * Loads the variants of one clip in order (a pack may ship a pose as vrma,
+ * anim and vpd) and returns the first that loads and that `use` accepts;
+ * `use` returns null when the motion moves none of the model's bones. Throws
+ * the last failure when none plays.
+ */
+export async function firstPlayable<M, T>(variants: number, load: (variant: number) => Promise<M>, use: (motion: M) => T | null): Promise<{ motion: M; bound: T; variant: number }> {
+  let last: unknown = new Error("no variant to load");
+  for (let i = 0; i < Math.max(1, variants); i++) {
+    try {
+      const motion = await load(i);
+      const bound = use(motion);
+      if (bound !== null) return { motion, bound, variant: i };
+      last = new Error("no bones of this model are animated by the clip");
+    } catch (e) {
+      last = e;
+    }
+  }
+  throw last instanceof Error ? last : new Error(String(last));
+}
+
+interface VrmaExtension {
+  humanoid?: { humanBones?: Record<string, { node: number }> };
+  expressions?: { preset?: Record<string, { node: number }>; custom?: Record<string, { node: number }> };
+}
+
+/**
+ * Reads a VRM animation (`.vrma`, glTF with `VRMC_vrm_animation`) as a
+ * humanoid motion at `fps`, travel starting at the origin, and its
+ * expression tracks (each expression node's X translation is its weight).
+ * Bones come from the file's own humanoid table, so any node names work.
+ */
+export async function readVrma(data: ArrayBuffer, fps = 30): Promise<{ motion: HumanoidMotion; faces: FaceTrack[] }> {
+  const gltf = await new GLTFLoader().parseAsync(data, "");
+  const ext = (gltf.parser.json as { extensions?: { VRMC_vrm_animation?: VrmaExtension } }).extensions?.VRMC_vrm_animation;
+  const bones = ext?.humanoid?.humanBones;
+  if (!bones) throw new Error("no VRMC_vrm_animation humanoid in this file. it may be a model, not a vrma.");
+  const anim = gltf.animations[0];
+  if (!anim) throw new Error("this vrma holds no animation");
+  // name each humanoid node after its bone, and its tracks with it, so the mapper reads the table
+  const renamed = new Map<string, string>();
+  for (const [bone, { node }] of Object.entries(bones)) {
+    const o = (await gltf.parser.getDependency("node", node)) as Object3D;
+    renamed.set(o.name, bone);
+    o.name = bone;
+  }
+  for (const t of anim.tracks) {
+    const dot = t.name.lastIndexOf(".");
+    const to = renamed.get(t.name.slice(0, dot));
+    if (to) t.name = to + t.name.slice(dot);
+  }
+  const scene = skeletonFromObject3D(gltf.scene);
+  const clip = sampleAnimationClip(anim, gltf.scene, scene, fps);
+  const rig = new RetargetRig(scene.skeleton);
+  let motion: HumanoidMotion;
+  try {
+    motion = rig.toHumanoid(clip);
+  } finally {
+    rig.dispose();
+  }
+  const faces: FaceTrack[] = [];
+  const exprs = { ...ext?.expressions?.custom, ...ext?.expressions?.preset };
+  for (const [name, { node }] of Object.entries(exprs)) {
+    const o = (await gltf.parser.getDependency("node", node)) as Object3D;
+    const track = anim.tracks.find((t) => t.name === `${o.name}.position` || t.name === `${o.uuid}.position`);
+    if (!track) continue;
+    const { times, values } = track;
+    const stride = values.length / times.length;
+    const at = (t: number): number => {
+      let i = 0;
+      while (i + 1 < times.length && times[i + 1]! <= t) i++;
+      const j = Math.min(times.length - 1, i + 1);
+      const u = j === i || t <= times[i]! ? 0 : (t - times[i]!) / (times[j]! - times[i]!);
+      return values[i * stride]! + (values[j * stride]! - values[i * stride]!) * Math.min(1, u);
+    };
+    const weights = Float32Array.from(motion.times, (t) => Math.min(1, Math.max(0, at(t))));
+    faces.push({ name: name as FaceTrack["name"], weights });
+  }
+  return { motion, faces };
 }

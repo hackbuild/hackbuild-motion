@@ -4,6 +4,17 @@ Versions follow semver per package. Nothing is published to npm yet.
 
 ## 0.2.0 (unreleased)
 
+### Motion formats, 2026-11-24
+
+- `@hackbuild/retarget`: VMD legs keyed only by foot IK bones are solved
+  in the crate (two bone IK, knee toward the facing, foot keeps the IK
+  bone's rotation, clamped out of reach), with the golden trace extended.
+  New `/formats` subpath: `readVmd` and `faceTracks` (morph keys to
+  expression tracks for presence clips), `parseVpd` with the posing tool
+  JSON sniff, `parseUnityAnim` and `convertUnityGeneric`. `/three` gains
+  `readVrma`, `pickTake` and `firstPlayable`. Unity humanoid muscle clips
+  are refused with a reason; see the README.
+
 ### Face driver and rest stance, 2026-11-24
 
 - `@hackbuild/presence`: `Face`, one owner for every expression weight:
