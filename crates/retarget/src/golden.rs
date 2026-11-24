@@ -1,15 +1,17 @@
 //! A fixed scenario for the native and wasm agreement test: a BVH parsed,
 //! turned into a humanoid motion, settled, analysed and bound onto the
-//! reference skeleton.
+//! reference skeleton; then a seeded VMD whose legs move by foot IK alone,
+//! solved and turned into a humanoid motion.
 
 use crate::analyze::analyze;
 use crate::bvh::parse_bvh;
 use crate::floor::settle_on_floor;
 use crate::retarget::{Rig, reference_skeleton};
+use crate::vmd::{MMD_UNIT, VmdFile};
 use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
-use organic::{Mulberry32, Rng};
+use organic::{Mulberry32, Quat, Rng, Vec3};
 
 /// A small CMU style BVH (centimeters, hips at 95) with seeded motion.
 pub fn sample_bvh(seed: u32, frames: usize) -> String {
@@ -102,6 +104,45 @@ pub fn trace(seed: u32) -> Vec<f64> {
         }
         let h = out_clip.translations[f][0];
         out.extend_from_slice(&[h.x, h.y, h.z]);
+    }
+    out.extend(vmd_ik_trace(seed));
+    out
+}
+
+/// Center bobbing and both feet stepping by IK keys every 10 frames.
+fn vmd_ik_trace(seed: u32) -> Vec<f64> {
+    let mut r = Mulberry32::new(seed ^ 0x5eed);
+    let names: Vec<String> = ["センター", "左足ＩＫ", "右足ＩＫ"]
+        .iter()
+        .map(|s| String::from(*s))
+        .collect();
+    let mut keys = Vec::new();
+    for k in 0..4u32 {
+        let mut v = |s: f64| (r.next_f64() - 0.5) * s;
+        keys.push((
+            0,
+            k * 10,
+            Vec3::new(v(1.0), -1.0 + v(1.0), v(1.0)),
+            Quat::IDENTITY,
+        ));
+        for side in 1..3 {
+            let turn = Quat::from_axis_angle(Vec3::Y, v(0.6));
+            keys.push((side, k * 10, Vec3::new(v(1.0), v(1.0).abs(), v(4.0)), turn));
+        }
+    }
+    let (skel, clip) = VmdFile::from_keys(keys, names.len()).to_clip(&names);
+    let rig = Rig::new(skel, Some(MMD_UNIT)).expect("mmd maps");
+    let m = rig.to_humanoid(&clip);
+    let mut out = Vec::new();
+    for f in (0..m.frames()).step_by(5) {
+        for b in [
+            rig::bones::HumanBone::LeftUpperLeg,
+            rig::bones::HumanBone::LeftLowerLeg,
+            rig::bones::HumanBone::RightFoot,
+        ] {
+            let q = m.rotation(b, f);
+            out.extend_from_slice(&[q.x, q.y, q.z, q.w]);
+        }
     }
     out
 }

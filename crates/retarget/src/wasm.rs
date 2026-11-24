@@ -363,6 +363,25 @@ impl VmdJs {
             .map(VmdJs)
             .ok_or_else(|| JsError::new("not a VMD motion file"))
     }
+    /// Bone keys from text, `[name, frame, px, py, pz, qx, qy, qz, qw]` per
+    /// key with `name` an index into the names later passed to `toClip`.
+    #[wasm_bindgen(js_name = fromKeys)]
+    pub fn from_keys(keys: &[f64], name_count: usize) -> VmdJs {
+        let keys = keys
+            .as_chunks::<9>()
+            .0
+            .iter()
+            .map(|k| {
+                (
+                    k[0] as usize,
+                    k[1] as u32,
+                    Vec3::new(k[2], k[3], k[4]),
+                    Quat::new(k[5], k[6], k[7], k[8]),
+                )
+            })
+            .collect();
+        VmdJs(VmdFile::from_keys(keys, name_count))
+    }
     #[wasm_bindgen(js_name = nameCount)]
     pub fn name_count(&self) -> usize {
         self.0.names.len()
@@ -388,6 +407,18 @@ impl VmdJs {
         let (skel, clip) = self.0.to_clip(&names);
         SkeletalClip { skel, clip }
     }
+}
+
+/// Humanoid bone index per node (-1 when unmapped), by name and hierarchy.
+#[wasm_bindgen(js_name = mapBones)]
+pub fn map_bones(names: Vec<String>, parents: &[i32]) -> Vec<i32> {
+    let n = names.len();
+    let s = skeleton(names, parents, &alloc::vec![0.0; n * 3], &[]);
+    rig::map_rig(&s.nodes())
+        .bones
+        .iter()
+        .map(|b| b.map_or(-1, |b| b.index() as i32))
+        .collect()
 }
 
 #[wasm_bindgen(js_name = retargetLimb)]
