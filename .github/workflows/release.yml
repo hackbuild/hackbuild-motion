@@ -1,0 +1,36 @@
+# Release, manual dispatch only. Runs every ci gate, packs each public
+# package, writes the dry run (what would publish, pending changesets) to the
+# job summary and uploads the tarballs as a workflow artifact. It stops
+# there: no job publishes, tags or creates a GitHub release. How the owner
+# turns publishing on is in CONTRIBUTING.md, "Releasing".
+name: release
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+  pack:
+    needs: ci
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: npm install -g npm@11.21.0
+      - run: rustup toolchain install && rustc --version
+      - run: cargo install wasm-pack --version 0.13.1 --locked
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: node tools/lint-packages.mjs
+      - run: node tools/release-plan.mjs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-tarballs-${{ github.sha }}
+          path: .pack/*.tgz
+          retention-days: 30
+  # publish: not present on purpose. See CONTRIBUTING.md, "Releasing".

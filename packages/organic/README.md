@@ -129,13 +129,15 @@ first on PATH.
 
 ## Size budget
 
-| file | raw | gzip |
+| file | gzip (measured) | ceiling |
 |---|---|---|
-| `organic_bg.wasm` | 69,202 bytes | 27,045 bytes |
-| `organic.iife.js` (wasm inlined as base64) | 122,003 bytes | 46,193 bytes |
+| `dist/index.js` (main entry, imports external) | 46,415 bytes | 48,735 bytes |
+| `dist/wasm/organic_bg.wasm` | 27,822 bytes | 29,213 bytes |
+| `dist/organic.iife.js` (single file build) | 46,978 bytes | 49,326 bytes |
 
-Measured 2026-11-23 with wasm-opt from wasm-pack 0.13.1. Budget: wasm
-under 80 KB raw; a change that crosses it says why in its commit.
+Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
+5 percent from its row.
 
 ## Licence
 

@@ -116,12 +116,15 @@ inlined, `THREE` read from the page).
 
 ## Size budget
 
-| file | raw | gzip |
+| file | gzip (measured) | ceiling |
 |---|---|---|
-| `gait_bg.wasm` | 87,466 bytes | 39,721 bytes |
-| `gait.iife.js` (wasm inlined as base64) | 149,918 bytes | 62,063 bytes |
+| `dist/index.js` (main entry, imports external) | 59,334 bytes | 62,300 bytes |
+| `dist/wasm/gait_bg.wasm` | 39,043 bytes | 40,995 bytes |
+| `dist/gait.iife.js` (single file build) | 61,216 bytes | 64,276 bytes |
 
-Measured 2026-11-22. Budget: wasm under 100 KB raw.
+Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
+5 percent from its row.
 
 ## Licence
 

@@ -117,14 +117,15 @@ wasm inlined, `THREE` read from the page).
 
 ## Size budget
 
-| file | raw | gzip |
+| file | gzip (measured) | ceiling |
 |---|---|---|
-| `retarget_bg.wasm` | 245,748 bytes | 106,447 bytes |
-| `retarget.iife.js` (wasm inlined as base64) | 370,293 bytes | 153,181 bytes |
+| `dist/index.js` (main entry, imports external) | 146,773 bytes | 154,111 bytes |
+| `dist/wasm/retarget_bg.wasm` | 105,847 bytes | 111,139 bytes |
+| `dist/retarget.iife.js` (single file build) | 149,179 bytes | 156,637 bytes |
 
-Measured 2026-11-22. Budget: wasm under 260 KB raw. It carries the rig
-mapper and both readers; a size pass (opt level s, fewer format strings) is
-open.
+Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
+5 percent from its row.
 
 ## Licence
 

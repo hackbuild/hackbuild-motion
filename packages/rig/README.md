@@ -109,13 +109,15 @@ face.aa?.binds; // [{ morph: "viseme_aa", weight: 1 }] on a Ready Player Me styl
 
 ## Size budget
 
-| file | raw | gzip |
+| file | gzip (measured) | ceiling |
 |---|---|---|
-| `rig_bg.wasm` | 146,959 bytes | 57,510 bytes |
-| `rig.iife.js` (wasm inlined as base64) | 228,689 bytes | 92,483 bytes |
+| `dist/index.js` (main entry, imports external) | 88,908 bytes | 93,353 bytes |
+| `dist/wasm/rig_bg.wasm` | 57,198 bytes | 60,057 bytes |
+| `dist/rig.iife.js` (single file build) | 90,016 bytes | 94,516 bytes |
 
-Measured 2026-11-22. Budget: wasm under 160 KB raw. String handling and
-formatting take most of it; a size pass is open.
+Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
+5 percent from its row.
 
 ## Licence
 

@@ -21,6 +21,7 @@ jobs:
       - run: npm ci
       - run: node --test tools/test/*.test.mjs
       - run: git ls-files -z | grep -zEv '\.(png|jpe?g|gif|webp|glb|gltf|bin|wasm|onnx|wav|ico|woff2?|ttf)$|^(LICENSES/|RULES.md|CLAUDE.md|tools/)|package-lock.json|Cargo.lock' | xargs -0 node tools/lint-voice.mjs
+      - run: node tools/lint-authors.mjs
       - run: node tools/lint-commits.mjs
         env:
           BEFORE: ${{ github.event.before }}
@@ -33,18 +34,58 @@ jobs:
         with:
           node-version-file: .nvmrc
       - run: npm install -g npm@11.21.0
-      - run: rustup target add wasm32-unknown-unknown
+      # rust-toolchain.toml pins 1.95.0 with the wasm32 target
+      - run: rustup toolchain install && rustc --version
       - run: cargo install wasm-pack --version 0.13.1 --locked
       - run: npm ci
       - run: npm run build --if-present
       - run: npm run typecheck
-      - run: npm test
+      - run: npx vitest run --reporter=default --reporter=json --outputFile.json=.local/vitest.json
+      # every test that did not run is named in the job summary, so a skip never reads as a pass
+      - run: node tools/test-summary.mjs .local/vitest.json
+        if: ${{ !cancelled() }}
+      - run: node --test tools/test/*.test.mjs
+  packages:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: npm install -g npm@11.21.0
+      - run: rustup toolchain install && rustc --version
+      - run: cargo install wasm-pack --version 0.13.1 --locked
+      - run: npm ci
+      - run: npm run build --if-present
+      # pack each package; files allowlist, publint, attw, peers, size budget and README tables
+      - run: node tools/lint-packages.mjs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: tarballs
+          path: .pack/*.tgz
+          retention-days: 7
+  browser:
+    needs: packages
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: npm install -g npm@11.21.0
+      - run: npm ci
+      - uses: actions/download-artifact@v8
+        with:
+          name: tarballs
+          path: .pack
+      # every single file build loads from file:// in headless chrome with no network
+      - run: node tools/check-browser.mjs
   rust:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - run: test -f Cargo.toml || exit 0
-      - run: rustup target add wasm32-unknown-unknown
+      - run: rustup toolchain install && rustc --version
         if: hashFiles('Cargo.toml') != ''
       - run: cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace
         if: hashFiles('Cargo.toml') != ''

@@ -139,3 +139,15 @@ dog.rotations; // 27 x 4 quaternions
   style, and nothing measures how they look.
 - At a gallop (above about 3 m/s) the limbs cannot always reach their pins
   and the paw slides up to about 10 mm per frame p95 (measured above).
+
+## Size budget
+
+| file | gzip (measured) | ceiling |
+|---|---|---|
+| `dist/index.js` (main entry, imports external) | 47,768 bytes | 50,156 bytes |
+| `dist/wasm/motion_net_bg.wasm` | 23,690 bytes | 24,874 bytes |
+| `dist/motion-net.iife.js` (single file build) | 47,978 bytes | 50,376 bytes |
+
+Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
+5 percent from its row.

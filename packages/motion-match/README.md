@@ -118,12 +118,15 @@ function frame(dt: number, cmd = { speed: 1.2, turnRate: 0 }) {
 
 ## Size budget
 
-| file | raw | gzip |
+| file | gzip (measured) | ceiling |
 |---|---|---|
-| `motion_match_bg.wasm` | 96,147 bytes | 42,986 bytes |
-| `motion-match.iife.js` (wasm inlined as base64) | 148,695 bytes | 63,234 bytes |
+| `dist/index.js` (main entry, imports external) | 64,669 bytes | 67,902 bytes |
+| `dist/wasm/motion_match_bg.wasm` | 44,165 bytes | 46,373 bytes |
+| `dist/motion-match.iife.js` (single file build) | 64,724 bytes | 67,960 bytes |
 
-Measured 2026-11-23. Budget: wasm under 100 KB raw.
+Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
+5 percent from its row.
 
 ## Licence
 

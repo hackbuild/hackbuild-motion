@@ -20,3 +20,4 @@ packages/*/src/wasm/
 # example site build and local browser check output
 _site/
 .local/
+.pack/

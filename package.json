@@ -13,18 +13,23 @@
   "scripts": {
     "prepare": "git config core.hooksPath .githooks || true",
     "build": "npm run build -w @hackbuild/organic -w @hackbuild/rig -w @hackbuild/ik -w @hackbuild/gait -w @hackbuild/retarget -w @hackbuild/motion-net -w @hackbuild/motion-match -w @hackbuild/presence -w @hackbuild/avatar -w @hackbuild/lipsync -w @hackbuild/bake",
-    "test": "vitest run --passWithNoTests && node --test tools/test/*.test.mjs",
+    "test": "vitest run && node --test tools/test/*.test.mjs",
     "typecheck": "tsc -b && tsc -p tsconfig.tests.json && tsc -p examples",
     "lint:voice": "git ls-files | grep -Ev '\\.(png|jpe?g|glb|bin|wasm|wav)$|^(LICENSES/|RULES.md|CLAUDE.md|tools/)|package-lock.json|Cargo.lock' | xargs node tools/lint-voice.mjs",
     "examples": "node tools/build-examples.mjs",
-    "examples:check": "node tools/check-examples.mjs"
+    "examples:check": "node tools/check-examples.mjs",
+    "lint:packages": "node tools/lint-packages.mjs",
+    "release:dry": "node tools/lint-packages.mjs && node tools/release-plan.mjs"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
+    "@changesets/cli": "3.0.3",
     "@pixiv/three-vrm": "3.5.5",
     "@types/node": "22.20.5",
     "@types/three": "0.186.0",
     "@virgilvox/hackbuild-ui": "file:tools/vendor/hackbuild-ui-0.4.4-5fcf588.tgz",
     "fast-check": "4.10.2",
+    "publint": "0.3.25",
     "puppeteer-core": "25.18.1",
     "rolldown": "1.2.19",
     "three": "0.186.1",

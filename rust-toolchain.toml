@@ -1,0 +1,9 @@
+# One Rust for every build, as in the sibling repositories: the wasm in
+# each package tarball and its size budget come from this compiler, so CI
+# and the owner's Mac build with the same one. rustup reads this file; a
+# Homebrew cargo earlier on PATH ignores it, so keep that at 1.95 too.
+[toolchain]
+channel = "1.95.0"
+targets = ["wasm32-unknown-unknown"]
+components = ["clippy", "rustfmt"]
+profile = "minimal"

@@ -120,6 +120,17 @@ function frame(dt: number) {
   locking and turn in place steps are not in this package yet.
 - Reach duration constants and the 0.6 s point retract are inferred.
 
+## Size budget
+
+| file | gzip (measured) | ceiling |
+|---|---|---|
+| `dist/index.js` (main entry, imports external) | 9,473 bytes | 9,946 bytes |
+| `dist/presence.iife.js` (single file build) | 12,343 bytes | 12,960 bytes |
+
+Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
+5 percent from its row.
+
 ## Licence
 
 Code MIT (`LICENSE` in this package and at the repository root). This

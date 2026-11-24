@@ -113,12 +113,15 @@ function frame(dt: number) {
 
 ## Size budget
 
-| file | raw | gzip |
+| file | gzip (measured) | ceiling |
 |---|---|---|
-| `ik_bg.wasm` | 72,214 bytes | 32,420 bytes |
-| `ik.iife.js` (wasm inlined as base64) | 120,518 bytes | 50,586 bytes |
+| `dist/index.js` (main entry, imports external) | 49,806 bytes | 52,296 bytes |
+| `dist/wasm/ik_bg.wasm` | 32,703 bytes | 34,338 bytes |
+| `dist/ik.iife.js` (single file build) | 51,424 bytes | 53,995 bytes |
 
-Measured 2026-11-22. Budget: wasm under 90 KB raw.
+Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
+5 percent from its row.
 
 ## Licence
 

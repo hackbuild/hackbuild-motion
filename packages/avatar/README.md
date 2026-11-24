@@ -125,11 +125,14 @@ shape.
 
 ## Size budget
 
-| file | raw | gzip |
+| file | gzip (measured) | ceiling |
 |---|---|---|
-| `avatar.iife.js` (GLTFLoader, FBXLoader and the rig wasm inlined) | 463,293 bytes | 146,756 bytes |
+| `dist/index.js` (main entry, imports external) | 4,763 bytes | 5,001 bytes |
+| `dist/avatar.iife.js` (single file build) | 144,183 bytes | 151,392 bytes |
 
-Measured 2026-11-22. No budget set yet.
+Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
+5 percent from its row.
 
 ## Licence
 

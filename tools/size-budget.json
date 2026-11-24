@@ -1,0 +1,59 @@
+{
+  "about": "gzip level 9 bytes (measured) per published file; CI fails when a file moves more than 5 percent from its row. Rewrite with node tools/lint-packages.mjs --update-budget after a reviewed change.",
+  "measured": "2026-11-23",
+  "margin": 0.05,
+  "packages": {
+    "@hackbuild/avatar": {
+      "main: dist/index.js bundled": 4763,
+      "dist/avatar.iife.js": 144183
+    },
+    "@hackbuild/bake": {
+      "main: dist/index.js bundled": 204749,
+      "dist/wasm/bake_bg.wasm": 148883,
+      "dist/bake.iife.js": 204855
+    },
+    "@hackbuild/gait": {
+      "main: dist/index.js bundled": 59334,
+      "dist/wasm/gait_bg.wasm": 39043,
+      "dist/gait.iife.js": 61216
+    },
+    "@hackbuild/ik": {
+      "main: dist/index.js bundled": 49806,
+      "dist/wasm/ik_bg.wasm": 32703,
+      "dist/ik.iife.js": 51424
+    },
+    "@hackbuild/lipsync": {
+      "main: dist/index.js bundled": 6021,
+      "dist/lipsync.iife.js": 9774
+    },
+    "@hackbuild/motion-match": {
+      "main: dist/index.js bundled": 64669,
+      "dist/wasm/motion_match_bg.wasm": 44165,
+      "dist/motion-match.iife.js": 64724
+    },
+    "@hackbuild/motion-net": {
+      "main: dist/index.js bundled": 47768,
+      "dist/wasm/motion_net_bg.wasm": 23690,
+      "dist/motion-net.iife.js": 47978
+    },
+    "@hackbuild/organic": {
+      "main: dist/index.js bundled": 46415,
+      "dist/wasm/organic_bg.wasm": 27822,
+      "dist/organic.iife.js": 46978
+    },
+    "@hackbuild/presence": {
+      "main: dist/index.js bundled": 9473,
+      "dist/presence.iife.js": 12343
+    },
+    "@hackbuild/retarget": {
+      "main: dist/index.js bundled": 146773,
+      "dist/wasm/retarget_bg.wasm": 105847,
+      "dist/retarget.iife.js": 149179
+    },
+    "@hackbuild/rig": {
+      "main: dist/index.js bundled": 88908,
+      "dist/wasm/rig_bg.wasm": 57198,
+      "dist/rig.iife.js": 90016
+    }
+  }
+}

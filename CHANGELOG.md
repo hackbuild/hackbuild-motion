@@ -4,6 +4,25 @@ Versions follow semver per package. Nothing is published to npm yet.
 
 ## 0.2.0 (unreleased)
 
+### Release readiness, 2026-11-23
+
+- ci: `packages` job packs every package and runs the files allowlist,
+  manifest, peer, publint, attw and gzip size budget checks
+  (`tools/lint-packages.mjs`, `tools/size-budget.json`); README size
+  tables are generated from the budget. `browser` job loads each single
+  file build from file:// in headless Chrome, three.js first for the
+  adapters. The `unit` job summary names every skipped test.
+  `tools/lint-authors.mjs` checks package.json and Cargo.toml authors.
+  `rust-toolchain.toml` pins Rust 1.95.0.
+- Every tarball shipped `dist/.tsbuildinfo`; the build info now sits
+  beside each tsconfig.
+- Changesets for versions and package changelogs; `release.yml` runs on
+  manual dispatch only, packs and uploads the tarballs, and publishes
+  nothing.
+- Verified on macOS 12: publint and attw clean on all eleven tarballs,
+  all eleven single file builds load in headless Chrome, cargo tests
+  on 1.95.0. Not verified until the push: the Linux runner.
+
 - `@hackbuild/motion-net`: rewritten under MIT from a functional
   specification and the published paper; the earlier CC BY-NC version is
   removed. Weight loader with format checks, the forward pass on wasm

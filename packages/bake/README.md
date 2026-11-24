@@ -136,13 +136,15 @@ inlined).
 
 ## Size budget
 
-| file | raw | gzip |
+| file | gzip (measured) | ceiling |
 |---|---|---|
-| `bake_bg.wasm` | 372,106 bytes | 151,006 bytes |
-| `bake.iife.js` (wasm inlined as base64) | 519,645 bytes | 210,269 bytes |
+| `dist/index.js` (main entry, imports external) | 204,749 bytes | 214,986 bytes |
+| `dist/wasm/bake_bg.wasm` | 148,883 bytes | 156,327 bytes |
+| `dist/bake.iife.js` (single file build) | 204,855 bytes | 215,097 bytes |
 
-Measured 2026-11-22. Most of the wasm is the simplifier and JSON parsing.
-A build tool, so loaded only by bake pages and scripts, never by a runtime.
+Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
+5 percent from its row.
 
 ## Licence
 
