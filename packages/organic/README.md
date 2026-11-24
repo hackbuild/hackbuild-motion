@@ -135,7 +135,7 @@ first on PATH.
 | `dist/wasm/organic_bg.wasm` | 27,822 bytes | 29,213 bytes |
 | `dist/organic.iife.js` (single file build) | 46,978 bytes | 49,326 bytes |
 
-Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
 

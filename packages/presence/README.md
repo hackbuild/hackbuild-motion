@@ -125,9 +125,9 @@ function frame(dt: number) {
 | file | gzip (measured) | ceiling |
 |---|---|---|
 | `dist/index.js` (main entry, imports external) | 9,473 bytes | 9,946 bytes |
-| `dist/presence.iife.js` (single file build) | 12,343 bytes | 12,960 bytes |
+| `dist/presence.iife.js` (single file build) | 12,477 bytes | 13,100 bytes |
 
-Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
 

@@ -4,6 +4,22 @@ Versions follow semver per package. Nothing is published to npm yet.
 
 ## 0.2.0 (unreleased)
 
+### Model pack repair, 2026-11-24
+
+- `@hackbuild/avatar`: `normalizeHumanoid` bakes units into the model
+  (`bakeScale`); the wrapper group keeps facing and floor at scale 1.
+  `managerForFiles` adds a picking texture loader (`userData.ready`,
+  `userData.file`, TGA) and guards `decodeURIComponent`. `fillMaps` fills
+  missing color maps from a UV tile owner, a name match or a sibling image
+  at coverage 0.6 or more (vendor), and `RepairReport` gains `byTile`,
+  `byName`, `byCoverage` and `misses`. FBX meshes stored hidden start
+  hidden (`hiddenInFile`, `applyStartingVisibility`). `TextureIndex`
+  splits words on Unicode letters and digits and never matches a sphere
+  map as a color. `/vrm` gains `toVrm`, a three-vrm `VRM` around a GLB or
+  FBX avatar.
+- `@hackbuild/presence`: `applyGaze` keeps eye bones inside 12 degrees
+  sideways and 8 up and down by default (`eyeLimitDeg`, vendor).
+
 ### hackbuild-ui pin, 2026-11-23
 
 - examples: hackbuild-ui 0.4.4 to 0.5.0 at commit 5211c3a, pinned by

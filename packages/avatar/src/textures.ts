@@ -2,10 +2,16 @@
 // wrong: backslash paths, any case, copy suffixes (`eyes.png.004`,
 // `Torso.001`), generic words (texture, diffuse, albedo), and the model's
 // own name as a prefix (`ModelName_Body_Texture.png` finds `body.png`).
-// Files nearer the model win a tie. Plain strings, no three.js.
+// Files nearer the model win a tie. Words split on Unicode letters and
+// digits, so Japanese and other non Latin names keep their key words. MMD
+// sphere maps (`.spa`, `.sph`) are a lighting lookup and never match as a
+// color. Plain strings, no three.js.
 
 const IMAGE = /\.(png|jpe?g|webp|tga|bmp|gif|ktx2|dds|tiff?)$/i;
 const GENERIC = new Set(["texture", "tex", "diffuse", "albedo", "basecolor", "base", "color", "colour", "col", "map", "diff", "d", "c", "img", "image"]);
+
+/** MMD sphere maps: a lighting lookup, never a surface color. */
+export const SPHERE_MAP = /\.(spa|sph)$/i;
 
 const slash = (p: string) => p.replace(/\\/g, "/");
 const baseName = (p: string) => slash(p).split("/").pop() ?? p;
@@ -24,7 +30,7 @@ const words = (s: string) =>
   s
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .toLowerCase()
-    .split(/[^a-z0-9]+/)
+    .split(/[^\p{L}\p{N}]+/u)
     .filter(Boolean);
 
 export interface TextureMatch {
@@ -63,6 +69,7 @@ export class TextureIndex {
 
   /** The best file for a reference as written in the model, or null. */
   match(ref: string): TextureMatch | null {
+    if (SPHERE_MAP.test(slash(ref).replace(/(\.\d{3})+$/, ""))) return null;
     const lower = slash(ref).toLowerCase().replace(/^\.\//, "");
     const name = baseName(lower);
     const stem = cleanStem(ref);

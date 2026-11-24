@@ -72,19 +72,31 @@ export interface GazeRig {
   head: Object3D;
   leftEye?: Object3D | null;
   rightEye?: Object3D | null;
+  /**
+   * Eye bone limits, degrees: sideways, then up and down. Default 12 and 8
+   * (vendor): eye bones of non VRM rigs are not authored for wider turns,
+   * which show the socket.
+   */
+  eyeLimitDeg?: readonly [number, number];
 }
+
+/** Default eye bone limits of `applyGaze`, degrees (vendor). */
+export const EYE_BONE_LIMIT_DEG = [12, 8] as const;
 
 /**
  * Adds a gaze frame onto the rig after the pose is written: head angles are
  * split between neck and head (`neckShare` to the neck), eye angles set the
- * eye bones. Call after `applyPose` each frame.
+ * eye bones inside `rig.eyeLimitDeg`. Call after `applyPose` each frame.
  */
 export function applyGaze(g: GazeOutput, rig: GazeRig, neckShare = 0.35): void {
   const share = rig.neck ? neckShare : 0;
   const qa = new Quaternion();
   if (rig.neck) rig.neck.quaternion.premultiply(yawPitchQuat(g.headYaw * share, g.headPitch * share, qa));
   rig.head.quaternion.premultiply(yawPitchQuat(g.headYaw * (1 - share), g.headPitch * (1 - share), qa));
-  for (const eye of [rig.leftEye, rig.rightEye]) if (eye) eye.quaternion.copy(yawPitchQuat(g.eyeYaw, g.eyePitch, qa));
+  const [ly, lp] = (rig.eyeLimitDeg ?? EYE_BONE_LIMIT_DEG).map((d) => (d * Math.PI) / 180) as [number, number];
+  const ey = Math.max(-ly, Math.min(ly, g.eyeYaw));
+  const ep = Math.max(-lp, Math.min(lp, g.eyePitch));
+  for (const eye of [rig.leftEye, rig.rightEye]) if (eye) eye.quaternion.copy(yawPitchQuat(ey, ep, qa));
 }
 
 /**

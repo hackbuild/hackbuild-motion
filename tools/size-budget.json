@@ -4,8 +4,8 @@
   "margin": 0.05,
   "packages": {
     "@hackbuild/avatar": {
-      "main: dist/index.js bundled": 4763,
-      "dist/avatar.iife.js": 144183
+      "main: dist/index.js bundled": 5539,
+      "dist/avatar.iife.js": 151952
     },
     "@hackbuild/bake": {
       "main: dist/index.js bundled": 204749,
@@ -43,7 +43,7 @@
     },
     "@hackbuild/presence": {
       "main: dist/index.js bundled": 9473,
-      "dist/presence.iife.js": 12343
+      "dist/presence.iife.js": 12477
     },
     "@hackbuild/retarget": {
       "main: dist/index.js bundled": 146773,
@@ -57,7 +57,7 @@
     },
     "@hackbuild/avatar-host": {
       "main: dist/index.js bundled": 3696,
-      "dist/avatar-host.iife.js": 176503
+      "dist/avatar-host.iife.js": 181429
     }
   }
 }

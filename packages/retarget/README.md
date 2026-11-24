@@ -123,7 +123,7 @@ wasm inlined, `THREE` read from the page).
 | `dist/wasm/retarget_bg.wasm` | 105,847 bytes | 111,139 bytes |
 | `dist/retarget.iife.js` (single file build) | 149,179 bytes | 156,637 bytes |
 
-Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
 

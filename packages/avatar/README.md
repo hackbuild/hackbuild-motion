@@ -11,9 +11,9 @@ the repair and the parts a person sees.
   glTF and FBX go through the three.js loaders; VRM goes through
   `@pixiv/three-vrm` when you pass `vrmHook()` from `/vrm`, and loads as
   plain glTF with a warning otherwise.
-- `normalizeHumanoid(model)`: maps bones with no per rig table, wraps the
-  model so it faces +Z, scales centimeter and millimeter rigs to meters,
-  stands it on y = 0 and lifts A pose arms into the T pose. A missing
+- `normalizeHumanoid(model)`: maps bones with no per rig table, bakes
+  centimeter and millimeter units into the model (`bakeScale`), wraps it
+  so it faces +Z, stands it on y = 0 and lifts A pose arms into the T pose. A missing
   required bone throws with the list of missing bones.
 - `repairMaterials(root)`: Phong and Lambert to MeshStandardMaterial with a
   roughness from shininess; opaque materials flagged transparent become
@@ -21,10 +21,35 @@ the repair and the parts a person sees.
   becomes a cutout; black base color under a texture becomes white; an
   alpha map that repeats the color map is dropped; failed maps are
   dropped; color maps are sRGB; skinned meshes are never frustum culled.
+- `bakeScale(root, s)`: units into node positions, vertex and morph
+  positions and the translation column of bind and inverse bind matrices,
+  so the root and the wrapper group stay at scale 1 and spring bones see
+  meters.
 - `TextureIndex` and `managerForFiles(files, modelName)`: lenient texture
   lookup for dropped folders. Backslash paths, any case, copy suffixes
   (`eyes.png.004`), generic words and the model's own name as a prefix are
-  ignored; nearer files win ties.
+  ignored; nearer files win ties. Words split on Unicode letters and
+  digits, so a Japanese file name keeps its key words; MMD sphere maps
+  (`.spa`, `.sph`) never match as a color. Every image an FBX asks for
+  goes through a picking loader whose textures carry `userData.ready` and
+  `userData.file`; TGA loads through TGALoader.
+- `fillMaps(root, files, report)`, run by `loadAvatar` when you pass
+  `files: managerForFiles(...)`: drops color maps that failed and fills
+  missing ones from the dropped files, first the image that owns the
+  material's UV tile on a UDIM style mesh (`tileGroups`, `resolveTiles`),
+  then an image named like the material, then a sibling material's image
+  when it covers at least 0.6 of the material's UVs (`uvCenters`,
+  `sampleImage`, `coverage`, `pickMaps`). `RepairReport` counts `byTile`,
+  `byName`, `byCoverage` and lists `misses`. Images are sampled one at a
+  time at 128 px through `createImageBitmap` with a yield between images.
+- `hiddenInFile(bytes)` and `applyStartingVisibility(root, hidden)`: FBX
+  meshes the file stores with Visibility 0 or Show false start hidden;
+  `loadAvatar` runs both on FBX before the wardrobe reads visibility.
+- `toVrm(avatar, { springs })` from `/vrm`: a three-vrm `VRM` around a
+  loaded GLB or FBX avatar, with normalized bones at identity rest
+  rotations, expressions from the rig expression table, eye bone look at
+  limited to 12 degrees sideways and 8 up and down (`EYE_RANGE`, vendor),
+  and optional spring bones, so one frame loop drives every format.
 - `Wardrobe.from(root)`: parts per mesh, or per material on merged meshes,
   classified into 17 slots (eyewear, headwear, top, bottom, footwear,
   hair, face, body and so on) by a scored keyword match that includes the
@@ -108,6 +133,17 @@ shape.
 - 2026-11-22: a VRM 1.0 GLB loads through `@pixiv/three-vrm` 3.5.5 in Node,
   gives its normalized bones by VRM name, and its metadata passes the
   redistribution gate unmodified and fails it modified.
+- 2026-11-24: `npx vitest run packages/avatar` passed 55 of 55 tests
+  (counted), 15 of them in `test/repair.test.ts`: `bakeScale` by 0.01
+  leaves skinned vertex world positions equal to the scaled originals
+  within 1e-5 and the root at scale 1; a two tile mesh with crossed
+  material names gets each tile's own file; a material with no texture
+  takes the sibling image that covers its UVs and refuses one under 0.6;
+  binary and ASCII FBX fragments with Visibility 0 give the hidden names;
+  a missing map resolves `ready` false and is dropped; a Japanese file name
+  matches by key words; a `.sph` reference returns null; `toVrm` on a
+  Mixamo named GLB gives normalized bones with identity rest rotations
+  that drive the raw bones.
 - 2026-11-22: material repair, the texture index, the wardrobe classifier
   (13 names), alternate detection, ARKit expression binding and the head
   hider each have a test.
@@ -115,26 +151,26 @@ shape.
 ### Not verified by anything
 
 - No real model file has been loaded: no VRoid VRM, Mixamo export, UAL
-  pack or FBX from a store. The FBX path runs through `FBXLoader` and the
-  same normalization, untested on a file.
+  pack or FBX from a store. The FBX path, stored visibility, the picking
+  loader, tile and coverage fallbacks run on fragments built by the tests,
+  untested on a store pack. `sampleImage` needs a browser; in Node it
+  returns null and a candidate scores 0. The 0.6 threshold and the eye
+  ranges are vendor figures from earlier work, not measured here.
 - Nothing has been looked at in a browser. Listed in
   `docs/browser-checks.md`: skinned meshes after the A to T lift, cutout
   materials on hair and lashes, the head hider in a first person camera.
-- Scale is applied on a wrapper group, not baked into the vertex and bind
-  data, so spring bones of a non VRM model that assume an unscaled root are
-  not handled. VRM models are untouched.
-- UDIM tile resolution, UV coverage scoring of candidate images, FBX
-  Visibility flags, MMD loading and part grafting between models are not
-  built.
+- `toVrm` springs: the option takes a builder; no spring bones are
+  derived from a GLB or FBX by this package.
+- MMD loading and part grafting between models are not built.
 
 ## Size budget
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 4,763 bytes | 5,001 bytes |
-| `dist/avatar.iife.js` (single file build) | 144,183 bytes | 151,392 bytes |
+| `dist/index.js` (main entry, imports external) | 5,539 bytes | 5,815 bytes |
+| `dist/avatar.iife.js` (single file build) | 151,952 bytes | 159,549 bytes |
 
-Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
 

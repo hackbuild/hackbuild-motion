@@ -46,6 +46,8 @@ frames from the system voice. Earlier text on this page gave counts of
 | avatar | skinned meshes after the A pose to T pose arm lift, UAL | pass | left upper arm 0 degrees below horizontal after normalize, 1 skinned mesh, walk clip at 59.88 fps p50 (measured). The deformation needs a person looking. |
 | avatar | the same lift on real Mixamo and VRoid files | not run | no CC0 or MIT Mixamo or VRoid file to fetch |
 | avatar | cutout materials on hair and lashes | not run | the CC0 mannequin has no hair or lashes |
+| avatar | one real FBX pack with loose textures loads textured, upright and in meters, its stored hidden meshes off, tile and coverage fallbacks filling missing maps | not run | needs a pack with separate image files; the owner's packs are never committed |
+| avatar | `toVrm` on a real GLB drives the body, eyes and face from one three-vrm update | not run | no page wires `toVrm` yet |
 | avatar | the head hider in a first person camera | pass | the head is scaled away during the first person draw and restored after (measured). How it looks needs a person. |
 | avatar-host | the placeholder body on stage (run 2026-11-24, headless Chrome) | pass | 24 bones, 24 draw calls (measured) |
 | avatar-host | with the page hidden the loop draws 0 frames in 1 s | pass | 0 frames while hidden, 18 frames in 0.3 s after return (measured). Hidden was simulated by overriding `document.hidden` and sending `visibilitychange`; a real tab switch has not been run. |

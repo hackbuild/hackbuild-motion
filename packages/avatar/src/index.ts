@@ -10,3 +10,4 @@ export * from "./textures.js";
 export * from "./wardrobe.js";
 export { load, loadSync } from "@hackbuild/rig";
 export type { HumanBone } from "@hackbuild/rig/bones";
+export * from "./visibility.js";

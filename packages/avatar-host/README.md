@@ -166,7 +166,7 @@ The example page `examples/avatar-host` runs the browser rows with `?auto`.
 | file | gzip (measured) | ceiling |
 |---|---|---|
 | `dist/index.js` (main entry, imports external) | 3,696 bytes | 3,880 bytes |
-| `dist/avatar-host.iife.js` (single file build) | 176,503 bytes | 185,328 bytes |
+| `dist/avatar-host.iife.js` (single file build) | 181,429 bytes | 190,500 bytes |
 
 Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

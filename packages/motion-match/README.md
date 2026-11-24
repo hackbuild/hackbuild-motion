@@ -124,7 +124,7 @@ function frame(dt: number, cmd = { speed: 1.2, turnRate: 0 }) {
 | `dist/wasm/motion_match_bg.wasm` | 44,165 bytes | 46,373 bytes |
 | `dist/motion-match.iife.js` (single file build) | 64,724 bytes | 67,960 bytes |
 
-Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
 

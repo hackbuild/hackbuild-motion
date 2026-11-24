@@ -5,6 +5,7 @@ import {
   Box3,
   type Camera,
   type Color,
+  Loader,
   LoadingManager,
   type Material,
   Mesh,
@@ -14,20 +15,30 @@ import {
   type Object3D,
   type Group,
   type AnimationClip,
+  PropertyBinding,
+  RepeatWrapping,
   SRGBColorSpace,
   type Scene,
   type SkinnedMesh,
-  type Texture,
+  Texture,
+  TextureLoader,
   Vector3,
 } from "three";
 import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
+import { TGALoader } from "three/examples/jsm/loaders/TGALoader.js";
 import { type ResolvedExpression, type VrmExpression, resolveExpressions } from "@hackbuild/rig/expressions";
 import type { HumanBone } from "@hackbuild/rig/bones";
 import type { RestReport, RigMapReport } from "@hackbuild/rig";
 import { applyRestFix, mapObject3D, restOf } from "@hackbuild/rig/three";
 import { type AvatarFormat, sniffFormat } from "./format.js";
 import { TextureIndex } from "./textures.js";
+import { bakeScale } from "./bake.js";
+import { type ImageSample, type MapVia, pickMaps, sampleImage } from "./maps.js";
+import { hiddenInFile } from "./visibility.js";
+
+export { bakeScale } from "./bake.js";
+export * from "./maps.js";
 import { GROUP_ORDER, type PartGroup, type SlotLabel, alternates, categorize, partLabel } from "./wardrobe.js";
 
 // ---------------------------------------------------------------- materials
@@ -52,6 +63,14 @@ export interface RepairReport {
   droppedMaps: number;
   /** Color maps set to sRGB. */
   colorSpace: number;
+  /** Missing color maps filled from a dropped file named like the material. */
+  byName: number;
+  /** Missing color maps filled from the file that owns the material's UV tile. */
+  byTile: number;
+  /** Missing color maps filled from the image that covers the material's UVs best. */
+  byCoverage: number;
+  /** Texture references and materials no file was found for. */
+  misses: string[];
 }
 
 const MAP_SLOTS = ["map", "normalMap", "emissiveMap", "alphaMap", "roughnessMap", "metalnessMap", "aoMap", "bumpMap", "specularMap"] as const;
@@ -104,7 +123,7 @@ function toStandard(m: MeshPhongMaterial | MeshLambertMaterial): MeshStandardMat
  * since their bounds stay at the rest pose.
  */
 export function repairMaterials(root: Object3D, opts: RepairOptions = {}): RepairReport {
-  const r: RepairReport = { converted: 0, cutouts: 0, whitened: 0, droppedMaps: 0, colorSpace: 0 };
+  const r: RepairReport = { converted: 0, cutouts: 0, whitened: 0, droppedMaps: 0, colorSpace: 0, byName: 0, byTile: 0, byCoverage: 0, misses: [] };
   const cutoff = opts.cutoff ?? 0.5;
   const broken = opts.isBroken ?? defaultBroken;
   const done = new Map<Material, Material>();
@@ -172,12 +191,30 @@ export function repairMaterials(root: Object3D, opts: RepairOptions = {}): Repai
   return r;
 }
 
+/** Settles true once a texture's image arrived, false when it failed or no file was found. */
+export const readyOf = (t: Texture | null | undefined): Promise<boolean> =>
+  (t?.userData.ready as Promise<boolean> | undefined) ?? Promise.resolve(!!t?.image);
+
+export interface FileTextures {
+  manager: LoadingManager;
+  index: TextureIndex;
+  /** References no dropped file matched. */
+  misses: string[];
+  /** One texture per file, shared by every material that shows it; `userData.file` and `userData.ready` set. */
+  texture(file: string): Texture;
+  dispose(): void;
+}
+
 /**
  * A LoadingManager that sends every texture reference through a lenient
  * index of the files the person dropped, so wrong paths in the model still
- * find their images. `files` maps relative path to a Blob or a URL.
+ * find their images. `files` maps relative path to a Blob or a URL. Every
+ * image an FBX asks for goes through a picking loader whose textures carry
+ * `userData.ready` and `userData.file`, so a failed map can fall back;
+ * TGA files load through TGALoader. Pass the result as `opts.files` to
+ * `loadAvatar` to fill missing color maps.
  */
-export function managerForFiles(files: ReadonlyMap<string, Blob | string>, modelName = ""): { manager: LoadingManager; index: TextureIndex; misses: string[]; dispose(): void } {
+export function managerForFiles(files: ReadonlyMap<string, Blob | string>, modelName = ""): FileTextures {
   const index = new TextureIndex([...files.keys()], modelName);
   const urls = new Map<string, string>();
   const created: string[] = [];
@@ -192,15 +229,133 @@ export function managerForFiles(files: ReadonlyMap<string, Blob | string>, model
     }
     return u;
   };
+  const decode = (url: string): string => {
+    try {
+      return decodeURIComponent(url);
+    } catch {
+      return url;
+    }
+  };
   const manager = new LoadingManager();
   manager.setURLModifier((url) => {
     if (/^(blob|data|https?):/.test(url) && !files.has(url)) return url;
-    const hit = index.forReference(decodeURIComponent(url));
+    const hit = index.forReference(decode(url));
     if (hit) return urlOf(hit);
     misses.push(url);
     return url;
   });
-  return { manager, index, misses, dispose: () => created.forEach((u) => URL.revokeObjectURL(u)) };
+  const images = new TextureLoader();
+  const tga = new TGALoader();
+  const fetchTexture = (url: string, tgaFile: boolean): Texture => {
+    let settle!: (ok: boolean) => void;
+    const ready = new Promise<boolean>((r) => (settle = r));
+    const t = (tgaFile ? tga : images).load(url, () => settle(true), undefined, () => settle(false));
+    t.userData.ready = ready;
+    return t;
+  };
+  const loaded = new Map<string, Texture>();
+  const texture = (file: string): Texture => {
+    let t = loaded.get(file);
+    if (!t) {
+      t = fetchTexture(urlOf(file), /\.tga$/i.test(file));
+      // UDIM style layouts put UVs in 1 to 2, 3 to 4 and depend on wrapping
+      t.wrapS = t.wrapT = RepeatWrapping;
+      t.userData.file = file;
+      loaded.set(file, t);
+    }
+    return t;
+  };
+  class Picking extends Loader<Texture> {
+    override load(name: string): Texture {
+      if (/^(blob|data):/.test(name)) {
+        const t = fetchTexture(name, false);
+        t.userData.file = name;
+        return t;
+      }
+      const file = index.forReference(decode(name));
+      if (file) return texture(file);
+      misses.push(name);
+      const t = new Texture();
+      t.userData.ready = Promise.resolve(false);
+      return t;
+    }
+  }
+  manager.addHandler(/^\.[^./]+$/, new Picking(manager));
+  return { manager, index, misses, texture, dispose: () => created.forEach((u) => URL.revokeObjectURL(u)) };
+}
+
+/**
+ * Drops color maps that failed and fills missing ones from the dropped
+ * files: the material's UV tile, then its name, then a sibling's image that
+ * covers its UVs (see `pickMaps`). Waits for every map to settle. Counts go
+ * into `report`.
+ */
+export async function fillMaps(root: Object3D, files: Pick<FileTextures, "index" | "texture">, report: RepairReport): Promise<void> {
+  const meshes: Mesh[] = [];
+  root.traverse((o) => {
+    if ((o as Mesh).isMesh) meshes.push(o as Mesh);
+  });
+  const mats = new Set<MeshStandardMaterial>();
+  for (const m of meshes) for (const x of Array.isArray(m.material) ? m.material : [m.material]) if ((x as MeshStandardMaterial).isMeshStandardMaterial) mats.add(x as MeshStandardMaterial);
+  await Promise.all(
+    [...mats].map(async (m) => {
+      if (m.map && !(await readyOf(m.map))) {
+        report.misses.push(String(m.map.userData.file ?? m.name));
+        m.map = null;
+        m.needsUpdate = true;
+        report.droppedMaps++;
+      }
+    }),
+  );
+  const own = (m: Material): string | null => {
+    const t = (m as MeshStandardMaterial).map;
+    return t ? String(t.userData.file ?? t.uuid) : null;
+  };
+  const samples = new Map<string, Promise<ImageSample | null>>();
+  const picked = await pickMaps(meshes, {
+    own,
+    byName: (name) => (name ? files.index.forReference(name) : null),
+    sample: (file) => {
+      let p = samples.get(file);
+      if (!p) {
+        const t = files.texture(file);
+        p = readyOf(t).then((ok) => (ok ? sampleImage(t.image as CanvasImageSource) : null));
+        samples.set(file, p);
+      }
+      return p;
+    },
+  });
+  const count: Record<MapVia, "byTile" | "byName" | "byCoverage"> = { tile: "byTile", name: "byName", coverage: "byCoverage" };
+  for (const [mat, pick] of picked) {
+    if (!mats.has(mat as MeshStandardMaterial)) continue;
+    const m = mat as MeshStandardMaterial;
+    if (!pick) continue;
+    const t = files.texture(pick.file);
+    if (!(await readyOf(t))) {
+      report.misses.push(pick.file);
+      continue;
+    }
+    t.colorSpace = SRGBColorSpace;
+    m.map = t;
+    if (m.color.r === 0 && m.color.g === 0 && m.color.b === 0) m.color.setRGB(1, 1, 1);
+    m.vertexColors = false;
+    m.needsUpdate = true;
+    report[count[pick.via]]++;
+  }
+}
+
+/** Hides the meshes an FBX file stores switched off (`hiddenInFile`), before the wardrobe reads visibility. */
+export function applyStartingVisibility(root: Object3D, hidden: ReadonlySet<string>): number {
+  // FBXLoader sanitizes node names the way animation bindings need them
+  const off = new Set([...hidden].map((n) => PropertyBinding.sanitizeNodeName(n)));
+  let n = 0;
+  root.traverse((o) => {
+    if ((o as Mesh).isMesh && (off.has(o.name) || hidden.has(o.name))) {
+      o.visible = false;
+      n++;
+    }
+  });
+  return n;
 }
 
 // ---------------------------------------------------------------- humanoid
@@ -226,8 +381,9 @@ export interface Humanoid {
 }
 
 /**
- * Maps the model's bones to VRM 1.0 names, then wraps it so it faces +Z,
- * stands in meters with its feet on y = 0, and lifts A pose arms into the
+ * Maps the model's bones to VRM 1.0 names, bakes its units into the model
+ * (`bakeScale`, so spring bones see an unscaled root), then wraps it so it
+ * faces +Z, stands in meters with its feet on y = 0, and lifts A pose arms into the
  * T pose. Throws with the missing bone list when a required bone is absent.
  * Needs the rig wasm: `await load()` first.
  */
@@ -237,11 +393,13 @@ export function normalizeHumanoid(model: Object3D, opts: NormalizeOptions = {}):
   if (mapped.report.missingRequired.length) throw new Error(`avatar: missing required bones: ${mapped.report.missingRequired.join(", ")}.`);
   const rest = restOf(mapped.bones);
   if (!rest) throw new Error("avatar: rest analysis needs hips, head and both arms.");
-  const fix: { headHeight?: number; tPoseArms?: boolean; straightLegs?: boolean } = {};
-  if (opts.headHeight !== undefined) fix.headHeight = opts.headHeight;
+  const fix: { tPoseArms?: boolean; straightLegs?: boolean } = {};
   if (opts.tPoseArms !== undefined) fix.tPoseArms = opts.tPoseArms;
   if (opts.straightLegs !== undefined) fix.straightLegs = opts.straightLegs;
-  const root = applyRestFix(model, mapped.bones, rest, fix);
+  // units go into the vertex, node and bind data; the wrapper keeps facing and floor
+  const s = opts.headHeight ? opts.headHeight / rest.height : rest.scale;
+  bakeScale(model, s);
+  const root = applyRestFix(model, mapped.bones, { ...rest, scale: 1, floor: (rest.floor / rest.scale) * s }, fix);
   root.updateMatrixWorld(true);
   const head = mapped.bones.head!.getWorldPosition(new Vector3());
   const rootY = root.parent ? root.parent.getWorldPosition(new Vector3()).y : 0;
@@ -484,6 +642,8 @@ export interface LoadOptions {
   /** Resource path for relative references. */
   path?: string;
   manager?: LoadingManager;
+  /** From `managerForFiles`: its manager is used, and missing color maps are filled from the dropped files. */
+  files?: FileTextures;
   /** From `@hackbuild/avatar/vrm`; without it a VRM loads as plain glTF. */
   vrm?: VrmHook;
   repair?: RepairOptions | false;
@@ -555,11 +715,14 @@ export async function loadAvatar(src: AvatarSource, opts: LoadOptions = {}): Pro
   let model: Object3D;
   let animations: AnimationClip[] = [];
   let vrm: VrmResult | null = null;
+  const manager = opts.manager ?? opts.files?.manager;
   if (format === "fbx") {
-    model = new FBXLoader(opts.manager).parse(own(bytes), path);
+    model = new FBXLoader(manager).parse(own(bytes), path);
     animations = (model as Object3D & { animations: AnimationClip[] }).animations ?? [];
+    // FBXLoader ignores stored visibility
+    if (applyStartingVisibility(model, hiddenInFile(bytes))) warnings.push("meshes the file stores hidden start hidden. show them from the wardrobe.");
   } else if (format === "glb" || format === "gltf" || format === "vrm") {
-    const loader = new GLTFLoader(opts.manager);
+    const loader = new GLTFLoader(manager);
     if (format === "vrm") {
       if (opts.vrm) opts.vrm.register(loader);
       else warnings.push("vrm loaded as plain gltf. pass vrmHook() from @hackbuild/avatar/vrm for spring bones and expressions.");
@@ -572,6 +735,10 @@ export async function loadAvatar(src: AvatarSource, opts: LoadOptions = {}): Pro
     throw new Error(`avatar: ${format === "vrma" ? "a vrma file is an animation. load it with a clip loader." : "unknown model format."}`);
   }
   const repair = opts.repair === false ? null : repairMaterials(vrm ? vrm.root : model, opts.repair ?? {});
+  if (repair && opts.files) {
+    await fillMaps(vrm ? vrm.root : model, opts.files, repair);
+    repair.misses.unshift(...opts.files.misses);
+  }
   let humanoid: Humanoid | null = null;
   let bones: Partial<Record<HumanBone, Object3D>>;
   let root: Object3D;

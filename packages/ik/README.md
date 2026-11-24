@@ -119,7 +119,7 @@ function frame(dt: number) {
 | `dist/wasm/ik_bg.wasm` | 32,703 bytes | 34,338 bytes |
 | `dist/ik.iife.js` (single file build) | 51,424 bytes | 53,995 bytes |
 
-Measured 2026-11-23 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
 

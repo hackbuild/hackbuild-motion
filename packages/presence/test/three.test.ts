@@ -77,4 +77,19 @@ describe("three adapter", () => {
     expect(Math.atan2(e.x, e.z)).toBeCloseTo(0.1, 5);
     expect(Math.asin(e.y)).toBeCloseTo(-0.05, 5);
   });
+
+  it("keeps eye bones inside 12 and 8 degrees unless told otherwise", () => {
+    const head = new THREE.Object3D();
+    const eye = new THREE.Object3D();
+    const g = { headYaw: 0, headPitch: 0, eyeYaw: 0.5, eyePitch: 0.5 } as GazeOutput;
+    const angles = () => {
+      const e = new THREE.Vector3(0, 0, 1).applyQuaternion(eye.quaternion);
+      return [Math.atan2(e.x, e.z), Math.asin(e.y)];
+    };
+    applyGaze(g, { head, leftEye: eye });
+    expect(angles()[0]).toBeCloseTo((12 * Math.PI) / 180, 5);
+    expect(angles()[1]).toBeCloseTo((8 * Math.PI) / 180, 5);
+    applyGaze(g, { head, leftEye: eye, eyeLimitDeg: [40, 40] });
+    expect(angles()[0]).toBeCloseTo(0.5, 5);
+  });
 });
