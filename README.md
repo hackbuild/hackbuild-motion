@@ -2,6 +2,8 @@
 
 Rigs, retargeting, IK, procedural and neural motion, avatars and lip sync for 3D characters on the web. Rust cores compiled to wasm, TypeScript bindings for three.js.
 
+Live examples: <https://hackbuild.github.io/hackbuild-motion/>
+
 Status: phases A and C landed, 2026-11-22. Packages land in `packages/` as
 they pass their tests; the table below grows with them.
 
