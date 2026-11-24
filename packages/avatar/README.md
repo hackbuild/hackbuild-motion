@@ -76,6 +76,10 @@ function frame(dt: number) {
 }
 ```
 
+`avatar.dispose()` takes the body out of the scene and frees its geometry,
+materials, maps and bone textures; `repairMaterials` frees the materials it
+replaces.
+
 For a dropped folder, `managerForFiles(new Map(files.map((f) => [f.webkitRelativePath || f.name, f])), "model")`
 gives a LoadingManager to pass as `opts.manager`.
 

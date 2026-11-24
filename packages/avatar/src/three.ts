@@ -162,6 +162,8 @@ export function repairMaterials(root: Object3D, opts: RepairOptions = {}): Repai
       }
       if (two) out.side = 2;
       out.needsUpdate = true;
+      // the replaced material is unused now; its maps live on in the new one
+      if (out !== m) m.dispose();
       done.set(m, out);
       return out;
     };
@@ -504,6 +506,27 @@ export interface Avatar {
   warnings: string[];
   /** Call once per frame after the pose is written. */
   update(dt: number): void;
+  /** Takes the body out of its parent and frees its geometry, materials, maps and bone textures. */
+  dispose(): void;
+}
+
+const isTexture = (v: unknown): v is Texture => !!v && (v as Texture).isTexture === true;
+
+/** Frees every geometry, material, texture and skeleton under `root` and detaches it. */
+export function disposeObject(root: Object3D): void {
+  const mats = new Set<Material>();
+  root.traverse((o) => {
+    const mesh = o as Mesh;
+    if (!mesh.isMesh) return;
+    mesh.geometry?.dispose();
+    for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) if (m) mats.add(m);
+    (mesh as SkinnedMesh).skeleton?.dispose();
+  });
+  for (const m of mats) {
+    for (const v of Object.values(m)) if (isTexture(v)) v.dispose();
+    m.dispose();
+  }
+  root.removeFromParent();
 }
 
 async function bytesOf(src: AvatarSource): Promise<Uint8Array> {
@@ -586,6 +609,9 @@ export async function loadAvatar(src: AvatarSource, opts: LoadOptions = {}): Pro
     update(dt: number) {
       if (vrm) vrm.update(dt);
       else expressions.apply?.();
+    },
+    dispose() {
+      disposeObject(root);
     },
   };
 }
