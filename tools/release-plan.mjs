@@ -18,7 +18,7 @@ if (!existsSync(PACK)) {
   console.error("release-plan: no .pack/, run node tools/lint-packages.mjs first");
   process.exit(1);
 }
-const pkgs = readdirSync(join(root, "packages"))
+const pkgs = readdirSync(join(root, "packages"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name)
   .map((d) => join(root, "packages", d, "package.json"))
   .filter(existsSync)
   .map((f) => JSON.parse(readFileSync(f, "utf8")))

@@ -107,7 +107,7 @@ async function bundledMain(dir, entry) {
 const singleFile = (pkg) => (pkg.unpkg ?? (typeof pkg.exports?.["./iife"] === "string" ? pkg.exports["./iife"] : undefined))?.replace(/^\.\//, "");
 
 export function workspaces() {
-  return readdirSync(join(root, "packages"))
+  return readdirSync(join(root, "packages"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name)
     .filter((d) => existsSync(join(root, "packages", d, "package.json")))
     .map((d) => ({ dir: join(root, "packages", d), rel: `packages/${d}`, pkg: JSON.parse(readFileSync(join(root, "packages", d, "package.json"), "utf8")) }))
     .filter((w) => !w.pkg.private && (!only.length || only.includes(w.pkg.name) || only.includes(w.rel.slice(9))));
