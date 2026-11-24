@@ -33,6 +33,11 @@
       "timeoutS": 180
     },
     {
+      "name": "avatar-host",
+      "what": "the stage for any body: the placeholder built in code or a dropped vrm, glb or fbx, a camera that follows the pose, and a loop that stops while the page is hidden, off screen or covered.",
+      "timeoutS": 60
+    },
+    {
       "name": "lipsync",
       "what": "visemes from speech word timing (the system voice or timed text), from the bellows voice's phoneme spans or tract model, or from audio level (microphone or a file).",
       "stage": true,

@@ -47,6 +47,13 @@ frames from the system voice. Earlier text on this page gave counts of
 | avatar | the same lift on real Mixamo and VRoid files | not run | no CC0 or MIT Mixamo or VRoid file to fetch |
 | avatar | cutout materials on hair and lashes | not run | the CC0 mannequin has no hair or lashes |
 | avatar | the head hider in a first person camera | pass | the head is scaled away during the first person draw and restored after (measured). How it looks needs a person. |
+| avatar-host | the placeholder body on stage (run 2026-11-24, headless Chrome) | pass | 24 bones, 24 draw calls (measured) |
+| avatar-host | with the page hidden the loop draws 0 frames in 1 s | pass | 0 frames while hidden, 18 frames in 0.3 s after return (measured). Hidden was simulated by overriding `document.hidden` and sending `visibilitychange`; a real tab switch has not been run. |
+| avatar-host | the canvas equals the host width at 320 px | pass | canvas 320 css px, drawing buffer 320 px at pixel ratio 1 (measured). A pixel ratio 2 screen has not been run. |
+| avatar-host | the old body is disposed after a swap | pass | 24 geometries on the GPU before and after two swaps (measured) |
+| avatar-host | a superseded show resolves null and never shows | pass | a slow show followed by the placeholder (measured) |
+| avatar-host | a lost context shows the restore line and comes back | pass | `WEBGL_lose_context` lost the context; the button read "the 3d view was lost. press to restore."; a press restored it and the loop ran again (measured) |
+| avatar-host | a dropped VRM, GLB or FBX on the stage, gaze and the follow camera on a real model | not run | no CC0 model was fetched for this run; the generated GLB path is covered in the unit tests only. Nobody has looked at gaze on a loaded model. |
 | lipsync | visemes from timed text | pass | mouth open on 49 of 60 samples over 3 s (measured, rerun 2026-11-23) |
 | lipsync | a face driven from real TTS events | pass | 17 word boundary events from the Chrome system voice, mouth open on 200 frames, on a 2D face (measured, rerun 2026-11-23). A real avatar face needs a person looking. |
 | lipsync | a face driven from real microphone audio | not run | needs a microphone and a person speaking |

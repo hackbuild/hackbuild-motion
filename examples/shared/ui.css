@@ -29,6 +29,7 @@ body.hb { display: flex; flex-direction: column; min-height: 100vh; }
 /* viewport: a three.js scene orbits with one finger and zooms with two;
    the 2d face lets the page scroll */
 .hb-viewport:not(.is-orbit) > canvas { touch-action: pan-y pinch-zoom; }
+.hb-viewport > hb-avatar-host { display: block; width: 100%; height: 100%; }
 
 /* index list: page name over its line */
 .pg-pages { list-style: none; margin: 0 0 var(--hb-s4); padding: 0; }
