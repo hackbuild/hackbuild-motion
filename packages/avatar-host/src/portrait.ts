@@ -52,8 +52,6 @@ export interface PortraitOptions {
   canvas?: HTMLCanvasElement;
 }
 
-const v = new Vector3();
-
 /** One renderer, scene, lights and camera, and the framing both portraits share. */
 class Shot {
   readonly canvas: HTMLCanvasElement;
@@ -96,6 +94,7 @@ class Shot {
 
 /** Points an orthographic camera at `box` from the portrait angle and fits it, `aspect` width over height. */
 export function frameBox(cam: OrthographicCamera, box: Box3, aspect = 1): void {
+  const v = new Vector3();
   const center = box.getCenter(new Vector3());
   const reach = Math.max(1e-3, box.getSize(v).length() * 2);
   const dir = new Vector3(Math.sin(YAW) * Math.cos(PITCH), Math.sin(PITCH), Math.cos(YAW) * Math.cos(PITCH));

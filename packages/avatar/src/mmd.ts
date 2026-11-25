@@ -65,16 +65,13 @@ export function springSettings(boneName: string, linearDamping: number, sizeX: n
   };
 }
 
-const euler = new Euler();
-const axis = new Vector3();
-
 // spheres stay spheres; boxes and capsules become capsules along their long (local Y) axis
 function colliderShape(b: MmdRigidBody, center: Vector3, unit: number): VRMSpringBoneColliderShapeSphere | VRMSpringBoneColliderShapeCapsule {
   const [x, y, z] = b.shapeSize;
   if (b.shapeType === SPHERE) return new VRMSpringBoneColliderShapeSphere({ offset: center, radius: x * unit });
   const radius = (b.shapeType === BOX ? Math.min(x, z) : x) * unit;
   const half = (b.shapeType === BOX ? y : y / 2) * unit;
-  axis.set(0, 1, 0).applyEuler(euler.set(b.shapeRotation[0], b.shapeRotation[1], b.shapeRotation[2], "YXZ"));
+  const axis = new Vector3(0, 1, 0).applyEuler(new Euler(b.shapeRotation[0], b.shapeRotation[1], b.shapeRotation[2], "YXZ"));
   return new VRMSpringBoneColliderShapeCapsule({ offset: center.clone().addScaledVector(axis, -half), tail: center.clone().addScaledVector(axis, half), radius });
 }
 
