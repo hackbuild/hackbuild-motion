@@ -1,5 +1,6 @@
 import { characterStage, avatarDrop, type CharacterStageEvent } from "@hackbuild/motion-views/vanilla";
 import { auto, check, finish, result, sleep, status } from "../shared/ui.js";
+import { codeVoice } from "../shared/clips.js";
 import { kvRows, panel, stageRackPage } from "../shared/views.js";
 
 const r = result("character-stage");
@@ -10,11 +11,12 @@ const page = stageRackPage(
     { id: "view", label: "view" },
   ],
   "the character",
-  "the body is the stand-in built in code. drop a .vrm, .glb or .fbx on the stage, or in the body tab, to change it.",
+  "the body is the stand-in built in code, and its voice a hum written in code, timed per word as a speech engine times it. drop a .vrm, .glb or .fbx on the stage, or in the body tab, to change the body.",
 );
 const vrm = () => import("@hackbuild/avatar/vrm").then((m) => m.vrmHook());
 const HELLO = "hello. drop a vrm, glb or fbx on me and i will wear it.";
-const view = characterStage(page.stage, { vrm, hello: HELLO });
+// say hello speaks real audio with word timings, as a speech engine hands them over
+const view = characterStage(page.stage, { vrm, hello: () => ({ text: HELLO, ...codeVoice(HELLO) }) });
 
 // the inset: the line he says while he says it, as the original's note on the stage
 const head = document.createElement("div");
@@ -87,10 +89,30 @@ if (auto) {
     r.numbers["bust distance m (measured)"] = +d0.toFixed(3);
     r.numbers["full distance m (measured)"] = +d1.toFixed(3);
     view.frame("bust");
+    // the audio level the stage hands the lips, recorded on its way in
+    const lip = view.body!.lip;
+    const setLevel = lip.setLevel.bind(lip);
+    let peak = 0;
+    lip.setLevel = (level, bands) => {
+      peak = Math.max(peak, level);
+      setLevel(level, bands);
+    };
     (document.querySelector('[data-verb="say"]') as HTMLButtonElement).click();
+    await sleep(1500);
+    check(r, "speech: say hello plays audio with its word timings", view.speechSource === "words" && view.doing === "talking" && view.body?.moving() ? "pass" : "fail", `${view.speechSource}, ${view.doing}`);
+    check(r, "speech: the audio level reaches the lips", peak > 0.01 ? "pass" : "fail", `peak ${peak.toFixed(3)}`);
+    r.numbers["speech peak level (measured)"] = +peak.toFixed(3);
+    for (let i = 0; i < 40 && view.doing === "talking"; i++) await sleep(250);
+    check(r, "speech: he goes quiet when the audio ends", view.doing === "idle" ? "pass" : "fail", view.doing);
+    peak = 0;
+    const spoken = view.say({ audio: codeVoice("one two three").audio });
     await sleep(500);
-    check(r, "lips: the mouth moves while he talks", view.body?.moving() && view.doing === "talking" ? "pass" : "fail", view.doing);
-    await sleep(2600);
+    check(r, "speech: audio with no timings moves the lips by its level", view.speechSource === "audio level" && peak > 0.01 ? "pass" : "fail", `${view.speechSource}, peak ${peak.toFixed(3)}`);
+    await spoken;
+    const said = view.say("one two three");
+    await sleep(100);
+    check(r, "speech: text alone falls back to estimated timings", view.speechSource === "estimate" && view.doing === "talking" ? "pass" : "fail", `${view.speechSource}`);
+    await said;
     (document.querySelector('[data-verb="wave"]') as HTMLButtonElement).click();
     await sleep(400);
     const w = view.body?.player.layerWeight("upper") ?? 0;

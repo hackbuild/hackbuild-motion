@@ -36,7 +36,7 @@ const browser = await puppeteer.launch({
   executablePath: process.env.HB_CHROME ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   headless: true,
   userDataDir: profile,
-  args: ["--no-first-run", "--window-size=1280,800", `--host-resolver-rules=${HOSTS.map((h) => `MAP ${h} ~NOTFOUND`).join(", ")}`],
+  args: ["--no-first-run", "--window-size=1280,800", "--autoplay-policy=no-user-gesture-required", `--host-resolver-rules=${HOSTS.map((h) => `MAP ${h} ~NOTFOUND`).join(", ")}`],
 });
 let failed = 0;
 try {

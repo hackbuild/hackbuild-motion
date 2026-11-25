@@ -128,7 +128,7 @@ if (auto) {
     const w = body.player.layerWeight("body");
     check(r, "strip: a picked clip plays on the body", w > 0.5 && stage.doing === "nod" ? "pass" : "fail", `${stage.doing}, weight ${w.toFixed(2)}`);
     await Promise.race([strip.thumbsIdle(), sleep(20000)]);
-    const stills = document.querySelectorAll(".hb-hist-thumb > img").length;
+    const stills = document.querySelectorAll(".hb-clipstrip img").length;
     check(r, "strip: a still is drawn for every clip", stills === items.length ? "pass" : "fail", `${stills} of ${items.length}`);
     const failed = Object.values(r.checks).some((c) => c.status === "fail");
     finish(r, failed ? "fail" : "pass", failed ? "a check failed" : "");
