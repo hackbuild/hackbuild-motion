@@ -14,7 +14,7 @@
     "prepare": "git config core.hooksPath .githooks || true",
     "build": "npm run build -w @hackbuild/organic -w @hackbuild/rig -w @hackbuild/ik -w @hackbuild/gait -w @hackbuild/retarget -w @hackbuild/motion-net -w @hackbuild/motion-match -w @hackbuild/presence -w @hackbuild/avatar -w @hackbuild/lipsync -w @hackbuild/bake -w @hackbuild/environment -w @hackbuild/avatar-host",
     "test": "vitest run && node --test tools/test/*.test.mjs",
-    "typecheck": "tsc -b && tsc -p tsconfig.tests.json && tsc -p examples",
+    "typecheck": "tsc -b && tsc -p tsconfig.tests.json && tsc -p tsconfig.how.json && tsc -p examples",
     "lint:voice": "git ls-files | grep -Ev '\\.(png|jpe?g|glb|bin|wasm|wav)$|^(LICENSES/|RULES.md|CLAUDE.md|tools/)|package-lock.json|Cargo.lock' | xargs node tools/lint-voice.mjs",
     "examples": "node tools/build-pages.mjs",
     "examples:check": "node tools/check-examples.mjs",
