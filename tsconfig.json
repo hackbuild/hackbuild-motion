@@ -13,6 +13,7 @@
     { "path": "packages/lipsync" },
     { "path": "packages/bake" },
     { "path": "packages/environment" },
-    { "path": "packages/avatar-host" }
+    { "path": "packages/avatar-host" },
+    { "path": "packages/motion-views" }
   ]
 }

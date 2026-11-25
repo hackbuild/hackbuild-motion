@@ -62,6 +62,10 @@
     "@hackbuild/environment": {
       "main: dist/index.js bundled": 3088,
       "dist/environment.iife.js": 34995
+    },
+    "@hackbuild/motion-views": {
+      "main: dist/index.js bundled": 2637,
+      "dist/motion-views.iife.js": 212118
     }
   }
 }

@@ -1,0 +1,63 @@
+{
+  "name": "@hackbuild/motion-views",
+  "version": "0.1.0",
+  "description": "The motion views: CharacterStage, AvatarDrop and ClipStrip, binding the motion packages to hackbuild-ui, each as a Vue component and a custom element.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Moheeb Zara <hackbuildvideo@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hackbuild/hackbuild-motion.git",
+    "directory": "packages/motion-views"
+  },
+  "engines": {
+    "node": "^22.18.0 || >=24.11.0"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./vanilla": {
+      "types": "./dist/vanilla.d.ts",
+      "import": "./dist/vanilla.js"
+    },
+    "./vue": {
+      "types": "./dist/vue.d.ts",
+      "import": "./dist/vue.js"
+    },
+    "./iife": "./dist/motion-views.iife.js"
+  },
+  "unpkg": "dist/motion-views.iife.js",
+  "jsdelivr": "dist/motion-views.iife.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "how.ts"
+  ],
+  "scripts": {
+    "build": "node ../../tools/build-package.mjs motion-views"
+  },
+  "dependencies": {
+    "@hackbuild/avatar": "0.1.3",
+    "@hackbuild/avatar-host": "0.1.5",
+    "@hackbuild/lipsync": "0.1.1",
+    "@hackbuild/organic": "0.1.1",
+    "@hackbuild/presence": "0.1.1"
+  },
+  "peerDependencies": {
+    "@virgilvox/hackbuild-ui": ">=0.10.0 <0.11.0",
+    "three": ">=0.186.1",
+    "vue": ">=3.5.0"
+  },
+  "peerDependenciesMeta": {
+    "three": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  }
+}
