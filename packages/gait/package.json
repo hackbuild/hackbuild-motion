@@ -35,7 +35,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "how.ts"
   ],
   "scripts": {
     "build": "node ../../tools/build-package.mjs gait"
