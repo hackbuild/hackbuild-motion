@@ -2,9 +2,13 @@ import { load } from "@hackbuild/ik";
 import { FootLock, lookAtChain, solveChain, solveTwoBone } from "@hackbuild/ik/three";
 import * as THREE from "three";
 import { bonesByName, humanoidRig, stage, sticks } from "../shared/scene.js";
-import { $, FrameTimer, auto, check, finish, readout, result, sleep, status } from "../shared/ui.js";
+import { $, FrameTimer, auto, check, finish, readout, result, sleep, status, fixture } from "../shared/ui.js";
+import { mountHow } from "../shared/how.js";
+import how from "../../packages/ik/how";
 
 const r = result("ik");
+check(r, "ik: the how this works fold", mountHow(how) ? "pass" : "fail");
+fixture("the arm, legs and chain are a rig built in code. no model file.");
 $("#controls").innerHTML = `
 <label class="hb-ctl">chain <select class="hb-select" id="method"><option>fabrik</option><option>ccd</option></select></label>
 <label class="hb-check"><input id="look" type="checkbox" checked> head looks at the ball</label>

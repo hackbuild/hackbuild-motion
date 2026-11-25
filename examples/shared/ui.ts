@@ -269,3 +269,17 @@ export function onDrop(zone: HTMLElement, cb: (files: File[]) => void, input?: H
 export function mb(bytes: number): string {
   return `${(bytes / 1e6).toFixed(1)} MB`;
 }
+
+/** The hackbuild-ui fixture banner above the stage: what on the page is sample data, in words. */
+export function fixture(text: string, tag = "sample"): void {
+  const top = document.querySelector(".pg-top");
+  if (!top || top.querySelector(".hb-fixture")) return;
+  const p = document.createElement("p");
+  p.className = "hb-fixture";
+  const b = document.createElement("b");
+  b.textContent = tag;
+  p.append(b, document.createTextNode(text));
+  const what = top.querySelector(".pg-what");
+  if (what) what.after(p);
+  else top.prepend(p);
+}

@@ -2,8 +2,11 @@ import { LipSync, type LipFrame, bandsFromSpectrum, estimateWords, rms } from "@
 import { type ArticulatorFrame, type ArticulatorProbeLike, articulatoryFrame, fromProbe, fromTractModel, type TractModelLike } from "@hackbuild/lipsync/articulatory";
 import { type BellowsPlan, fromSungPlan } from "@hackbuild/lipsync/bellows";
 import { $, FrameTimer, auto, check, finish, onDrop, readout, result, sleep, status } from "../shared/ui.js";
+import { mountHow } from "../shared/how.js";
+import how from "../../packages/lipsync/how";
 
 const r = result("lipsync");
+check(r, "lipsync: the how this works fold", mountHow(how) ? "pass" : "fail");
 $("#controls").innerHTML = `
 <label class="hb-ctl is-wide">text <input class="hb-input" id="text" type="text" autocomplete="off" value="the quick brown fox jumps over the lazy dog, then naps in the warm sun."></label>
 <button class="hb-btn" id="say">speak with the system voice</button>
@@ -14,6 +17,7 @@ $("#controls").innerHTML = `
 <div class="hb-dropzone" id="drop"><span>or drop an audio file to drive the mouth from its level, or tap to pick one</span> <input id="file" type="file" accept="audio/*" aria-label="pick an audio file"></div>`;
 const text = $("#text") as HTMLInputElement;
 const canvas = document.createElement("canvas");
+$("#stage").classList.add("hb-stage-lit");
 $("#stage").append(canvas);
 const g = canvas.getContext("2d")!;
 const lips = new LipSync();
@@ -192,9 +196,8 @@ function face(f: LipFrame) {
   const h = Math.round(canvas.clientHeight * dpr);
   if (canvas.width !== w) canvas.width = w;
   if (canvas.height !== h) canvas.height = h;
-  // paper behind the face, as hackbuild-ui asks of a scene; no dark branch
-  g.fillStyle = "#f5f0e6";
-  g.fillRect(0, 0, w, h);
+  // the lit stage shows through behind the face
+  g.clearRect(0, 0, w, h);
   const cx = w / 2;
   const cy = h / 2;
   // a narrow (square) viewport frames the face closer, so the mouth reads on a phone

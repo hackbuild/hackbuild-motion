@@ -14,14 +14,16 @@ export interface Stage {
 
 export function stage(target: [number, number, number] = [0, 0.4, 0], distance = 2): Stage {
   const host = $("#stage");
-  host.classList.add("is-orbit");
-  const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+  // the hackbuild-ui lit stage shows through a clear canvas, held in a viewport host
+  host.classList.add("is-orbit", "hb-stage-lit");
+  const box = document.createElement("div");
+  box.className = "hb-viewport-host";
+  host.append(box);
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   // a phone gets at most 2 device pixels per css pixel
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  host.append(renderer.domElement);
+  box.append(renderer.domElement);
   const scene = new THREE.Scene();
-  // a light scene inside the void viewport, as hackbuild-ui asks; no dark branch
-  scene.background = new THREE.Color(0xf5f0e6);
   const camera = new THREE.PerspectiveCamera(40, 16 / 9, 0.01, 200);
   camera.position.set(target[0] + distance * 0.8, target[1] + distance * 0.45, target[2] + distance);
   const controls = new OrbitControls(camera, renderer.domElement);

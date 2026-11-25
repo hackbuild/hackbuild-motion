@@ -2,9 +2,13 @@ import { BodyDynamics, Ears, GAIT_NAMES, QuadrupedGait, TailWag, WAG_MODES, load
 import { driveQuadruped, measureQuadruped } from "@hackbuild/gait/three";
 import * as THREE from "three";
 import { DOG_NAMES, TOES, dogRig, lcg, stage, sticks } from "../shared/scene.js";
-import { $, FrameTimer, auto, check, finish, readout, result, sleep, status } from "../shared/ui.js";
+import { $, FrameTimer, auto, check, finish, readout, result, sleep, status, fixture } from "../shared/ui.js";
+import { mountHow } from "../shared/how.js";
+import how from "../../packages/gait/how";
 
 const r = result("gait");
+check(r, "gait: the how this works fold", mountHow(how) ? "pass" : "fail");
+fixture("the dog is a rig built in code. no model file.");
 $("#controls").innerHTML = `
 <label class="hb-ctl">speed m/s <input class="hb-range" id="speed" type="range" min="0" max="3" step="0.05" value="0.8"><span class="hb-readout" id="speedv">0.80</span></label>
 <label class="hb-ctl">turn rad/s <input class="hb-range" id="turn" type="range" min="-1.5" max="1.5" step="0.05" value="0.4"><span class="hb-readout" id="turnv">0.40</span></label>

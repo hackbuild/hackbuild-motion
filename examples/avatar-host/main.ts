@@ -2,11 +2,15 @@ import { type BodyCaps, type StageEvent, type AvatarHostElement, type Body, defi
 import { bodyError, droppedFiles } from "@hackbuild/avatar-host";
 import type { Clip } from "@hackbuild/presence";
 import * as THREE from "three";
-import { $, auto, check, finish, onDrop, readout, result, sleep, status } from "../shared/ui.js";
+import { $, auto, check, finish, onDrop, readout, result, sleep, status, fixture } from "../shared/ui.js";
+import { mountHow } from "../shared/how.js";
+import how from "../../packages/avatar-host/how";
 
 const r = result("avatar-host");
+check(r, "avatar-host: the how this works fold", mountHow(how) ? "pass" : "fail");
+fixture("the body on stage is the placeholder built in code. a model you drop replaces it.");
 $("#controls").innerHTML = `
-<p class="pg-note">the placeholder is built in code. a model you drop stays in this tab; nothing is uploaded.</p>
+<p class="pg-note">a model you drop stays in this tab; nothing is uploaded.</p>
 <div class="hb-dropzone" id="drop"><span>drop a .vrm, .glb or .fbx with its textures, or tap to pick files</span> <input id="file" type="file" multiple accept=".vrm,.glb,.gltf,.fbx,.png,.jpg,.jpeg,.tga,.bin" aria-label="pick a .vrm, .glb or .fbx model and its textures"></div>
 <button class="hb-btn" id="wave">wave</button>
 <button class="hb-btn" id="fit">fit</button>

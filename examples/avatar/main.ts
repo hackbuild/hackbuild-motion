@@ -4,8 +4,11 @@ import { vrmHook } from "@hackbuild/avatar/vrm";
 import * as THREE from "three";
 import { stage } from "../shared/scene.js";
 import { $, FrameTimer, auto, check, finish, loadWeight, mb, onDrop, params, readout, result, sleep, status, attr } from "../shared/ui.js";
+import { mountHow } from "../shared/how.js";
+import how from "../../packages/avatar/how";
 
 const r = result("avatar");
+check(r, "avatar: the how this works fold", mountHow(how) ? "pass" : "fail");
 // Quaternius Universal Animation Library, standard pack: CC0 1.0. A mirror on
 // GitHub pinned to one commit; the pack's home is quaternius.com.
 const UAL = "https://raw.githubusercontent.com/IAFahim/quaternius.universalAnimationLibrary.standard/8456155dbae7eb861f553a2341871ccae633c857/UAL1_Standard.fbx";

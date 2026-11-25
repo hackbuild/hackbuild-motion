@@ -2,8 +2,11 @@ import { BONES, PARENTS, PAWS, Predictor, QuadrupedHost, STYLES, UPSTREAM, WEIGH
 import * as THREE from "three";
 import { stage } from "../shared/scene.js";
 import { $, FrameTimer, auto, check, finish, mb, onDrop, params, quantile, readout, result, sleep, status } from "../shared/ui.js";
+import { mountHow } from "../shared/how.js";
+import how from "../../packages/motion-net/how";
 
 const r = result("motion-net");
+check(r, "motion-net: the how this works fold", mountHow(how) ? "pass" : "fail");
 // from 1024 px the controls sit in a column beside the view (ui.css, pg-side),
 // so the whole view fits a 1280 by 720 screen; a phone keeps view first, controls below
 document.body.classList.add("pg-side");
