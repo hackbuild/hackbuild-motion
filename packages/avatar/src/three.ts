@@ -367,6 +367,10 @@ export interface NormalizeOptions {
   tPoseArms?: boolean;
   /** Straighten splayed legs. Default false. */
   straightLegs?: boolean;
+  /** Meters per model unit when the format fixes it (MMD: 0.08); overrides the unit guess. */
+  unit?: number;
+  /** Map the MMD D deform leg bones, the ones most models skin to, in place of the plain ones. */
+  deform?: boolean;
 }
 
 export interface Humanoid {
@@ -390,6 +394,7 @@ export interface Humanoid {
 export function normalizeHumanoid(model: Object3D, opts: NormalizeOptions = {}): Humanoid {
   model.updateMatrixWorld(true);
   const mapped = mapObject3D(model);
+  if (opts.deform) for (const d of mapped.report.deform) mapped.bones[d.bone] = mapped.nodes[d.node]!;
   if (mapped.report.missingRequired.length) throw new Error(`avatar: missing required bones: ${mapped.report.missingRequired.join(", ")}.`);
   const rest = restOf(mapped.bones);
   if (!rest) throw new Error("avatar: rest analysis needs hips, head and both arms.");
@@ -397,7 +402,7 @@ export function normalizeHumanoid(model: Object3D, opts: NormalizeOptions = {}):
   if (opts.tPoseArms !== undefined) fix.tPoseArms = opts.tPoseArms;
   if (opts.straightLegs !== undefined) fix.straightLegs = opts.straightLegs;
   // units go into the vertex, node and bind data; the wrapper keeps facing and floor
-  const s = opts.headHeight ? opts.headHeight / rest.height : rest.scale;
+  const s = opts.headHeight ? opts.headHeight / rest.height : (opts.unit ?? rest.scale);
   bakeScale(model, s);
   const root = applyRestFix(model, mapped.bones, { ...rest, scale: 1, floor: (rest.floor / rest.scale) * s }, fix);
   root.updateMatrixWorld(true);

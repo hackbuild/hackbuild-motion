@@ -50,6 +50,18 @@ the repair and the parts a person sees.
   rotations, expressions from the rig expression table, eye bone look at
   limited to 12 degrees sideways and 8 up and down (`EYE_RANGE`, vendor),
   and optional spring bones, so one frame loop drives every format.
+- `loadMmd(file, { files })` from `/mmd`: a dropped PMX or PMD model as a
+  three-vrm `VRM` in the normalized humanoid space. The parser is
+  `@moeru/three-mmd` (MIT, 0.2.0-beta.3, vendor), an optional peer imported
+  on the first call only. Bones map through the rig mapper's mmd dialect
+  with the D deform leg bones, the upper body moves under the lower body
+  (`spineUnderHips`), units are 0.08 m (`MMD_UNIT`, vendor), and rigid
+  bodies become spring bones (`buildSprings`): a body that follows its bone
+  becomes a collider, a simulated body a joint, skirts a little stiffer.
+  MMD IK and append rotation are not run; PMD materials have no names.
+  Most MMD models forbid redistribution, so the result carries
+  `local: true` and `MMD_LOCAL_COPY`; keep the file on the device.
+  `mmdFormat(bytes)` tells pmx and pmd from the first bytes.
 - `Wardrobe.from(root)`: parts per mesh, or per material on merged meshes,
   classified into 17 slots (eyewear, headwear, top, bottom, footwear,
   hair, face, body and so on) by a scored keyword match that includes the
@@ -78,7 +90,9 @@ Not published yet. From a clone:
 
     npm ci && npm run build -w @hackbuild/rig -w @hackbuild/avatar
 
-`@pixiv/three-vrm` (MIT) is an optional peer, needed only for `/vrm`.
+`@pixiv/three-vrm` (MIT) is an optional peer, needed for `/vrm` and
+`/mmd`. `@moeru/three-mmd` (MIT, a beta) is an optional peer, needed only
+for `/mmd`.
 
 ## Use
 
@@ -148,6 +162,15 @@ shape.
   (13 names), alternate detection, ARKit expression binding and the head
   hider each have a test.
 
+- 2026-11-24: `npx vitest run packages/avatar/` passed 33 of 33 tests
+  (counted), 6 of them in `test/mmd.test.ts` on a skeleton and a rigid
+  body list built in the test: four bodies that follow bones give four
+  colliders and four simulated bones give four joints, a skirt named bone
+  gets stiffness 1.6 and hair 1.2, the upper body moved under the lower
+  body keeps its world matrix within 1e-6, and `loadMmd` with a stand in
+  parser maps the D leg bones, puts the spine under the hips and reports
+  1.2 m head height for 15 units (computed).
+
 ### Not verified by anything
 
 - No real model file has been loaded: no VRoid VRM, Mixamo export, UAL
@@ -161,7 +184,11 @@ shape.
   materials on hair and lashes, the head hider in a first person camera.
 - `toVrm` springs: the option takes a builder; no spring bones are
   derived from a GLB or FBX by this package.
-- MMD loading and part grafting between models are not built.
+- No PMX or PMD file has been parsed here: the `/mmd` tests replace
+  three-mmd with a stand in that returns a synthetic mesh. The springs
+  have not been looked at in a browser, and the spring settings are vendor
+  figures from earlier work.
+- Part grafting between models is not built.
 
 ## Size budget
 

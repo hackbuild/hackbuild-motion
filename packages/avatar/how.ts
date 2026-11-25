@@ -7,6 +7,7 @@ const how: HowDoc = {
     "loadAvatar takes a url, bytes or a dropped file and sniffs the format from the content: glb, gltf, vrm, vrma and fbx. vrm goes through three-vrm when you pass vrmHook(), and loads as plain gltf with a warning otherwise.",
     "normalizeHumanoid maps the bones with @hackbuild/rig, bakes centimeter and millimeter units to meters, turns the model to face +z, stands it on y = 0 and lifts a pose arms into the t pose. a missing required bone throws with the list.",
     "repairMaterials fixes the common export faults: phong and lambert to standard materials, false transparency to cutouts, black base colors under a texture, color maps to srgb. wardrobe slots, expressions and a first person head hider sit on the result.",
+    "/mmd loads a dropped pmx or pmd file through @moeru/three-mmd, imported on first use, and wraps it as a three-vrm vrm: the mmd bone names map through the rig, rigid bodies become spring colliders and joints. most mmd models forbid sharing, so the result is flagged local.",
   ],
   packages: ["@hackbuild/avatar"],
   install: "npm install @hackbuild/avatar",
@@ -26,7 +27,11 @@ avatar.expressions.setValue("happy", 0.4);
 function frame(dt: number) {
   avatar.update(dt); // three-vrm update, or morph weights for a plain model
   avatar.head?.render(renderer, scene, firstPersonCamera);
-}`,
+}
+
+// a dropped pmx, with its folder for textures; three-mmd loads on this call
+const { loadMmd } = await import("@hackbuild/avatar/mmd");
+const mmd = await loadMmd(pmx, { files: managerForFiles(folder, "model") });`,
   lang: "ts",
   links: { page: "https://hackbuild.github.io/hackbuild-motion/avatar/", source: "https://github.com/hackbuild/hackbuild-motion/tree/main/packages/avatar" },
 };

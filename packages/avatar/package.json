@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/avatar",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Load VRM, Mixamo, UAL, generic GLB and FBX characters into the normalized humanoid space, with material and texture repair, wardrobe slots, expressions and first person head hiding.",
   "type": "module",
   "license": "MIT",
@@ -27,6 +27,10 @@
       "types": "./dist/vrm.d.ts",
       "import": "./dist/vrm.js"
     },
+    "./mmd": {
+      "types": "./dist/mmd.d.ts",
+      "import": "./dist/mmd.js"
+    },
     "./iife": "./dist/avatar.iife.js"
   },
   "unpkg": "dist/avatar.iife.js",
@@ -44,10 +48,14 @@
     "@hackbuild/rig": "0.1.1"
   },
   "peerDependencies": {
+    "@moeru/three-mmd": ">=0.2.0-beta.3",
     "@pixiv/three-vrm": ">=3.5.5",
     "three": ">=0.186.1"
   },
   "peerDependenciesMeta": {
+    "@moeru/three-mmd": {
+      "optional": true
+    },
     "@pixiv/three-vrm": {
       "optional": true
     },
