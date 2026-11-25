@@ -195,9 +195,9 @@ shape.
 | file | gzip (measured) | ceiling |
 |---|---|---|
 | `dist/index.js` (main entry, imports external) | 5,539 bytes | 5,815 bytes |
-| `dist/avatar.iife.js` (single file build) | 151,952 bytes | 159,549 bytes |
+| `dist/avatar.iife.js` (single file build) | 151,987 bytes | 159,586 bytes |
 
-Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
 

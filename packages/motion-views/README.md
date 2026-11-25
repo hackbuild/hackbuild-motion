@@ -99,7 +99,7 @@ is bundled: a body comes from a URL or a file the person drops.
 | file | gzip (measured) | ceiling |
 |---|---|---|
 | `dist/index.js` (main entry, imports external) | 3,266 bytes | 3,429 bytes |
-| `dist/motion-views.iife.js` (single file build) | 214,196 bytes | 224,905 bytes |
+| `dist/motion-views.iife.js` (single file build) | 214,660 bytes | 225,393 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

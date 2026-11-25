@@ -115,7 +115,7 @@ face.aa?.binds; // [{ morph: "viseme_aa", weight: 1 }] on a Ready Player Me styl
 | `dist/wasm/rig_bg.wasm` | 57,198 bytes | 60,057 bytes |
 | `dist/rig.iife.js` (single file build) | 90,016 bytes | 94,516 bytes |
 
-Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
 

@@ -226,10 +226,10 @@ The example page `examples/avatar-host` runs the browser rows with `?auto`.
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 3,696 bytes | 3,880 bytes |
-| `dist/avatar-host.iife.js` (single file build) | 195,826 bytes | 205,617 bytes |
+| `dist/index.js` (main entry, imports external) | 3,700 bytes | 3,885 bytes |
+| `dist/avatar-host.iife.js` (single file build) | 195,992 bytes | 205,791 bytes |
 
-Measured 2026-11-24 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
 

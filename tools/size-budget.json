@@ -5,7 +5,7 @@
   "packages": {
     "@hackbuild/avatar": {
       "main: dist/index.js bundled": 5539,
-      "dist/avatar.iife.js": 151952
+      "dist/avatar.iife.js": 151987
     },
     "@hackbuild/bake": {
       "main: dist/index.js bundled": 204749,
@@ -56,8 +56,8 @@
       "dist/rig.iife.js": 90016
     },
     "@hackbuild/avatar-host": {
-      "main: dist/index.js bundled": 3696,
-      "dist/avatar-host.iife.js": 195826
+      "main: dist/index.js bundled": 3700,
+      "dist/avatar-host.iife.js": 195992
     },
     "@hackbuild/environment": {
       "main: dist/index.js bundled": 3088,
@@ -65,7 +65,7 @@
     },
     "@hackbuild/motion-views": {
       "main: dist/index.js bundled": 3266,
-      "dist/motion-views.iife.js": 214196
+      "dist/motion-views.iife.js": 214660
     }
   }
 }
