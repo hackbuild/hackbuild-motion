@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/avatar-host",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Host a character on a three.js stage in any container: ticketed loads through @hackbuild/avatar, a follow camera, the presence frame order, a loop that pauses when hidden, and a hb-avatar-host element.",
   "type": "module",
   "license": "MIT",
@@ -23,6 +23,10 @@
       "types": "./dist/three.d.ts",
       "import": "./dist/three.js"
     },
+    "./thumbs": {
+      "types": "./dist/thumbs.d.ts",
+      "import": "./dist/thumbs.js"
+    },
     "./iife": "./dist/avatar-host.iife.js"
   },
   "unpkg": "dist/avatar-host.iife.js",
@@ -37,7 +41,7 @@
     "build": "node ../../tools/build-package.mjs avatar-host"
   },
   "dependencies": {
-    "@hackbuild/avatar": "0.1.1",
+    "@hackbuild/avatar": "0.1.2",
     "@hackbuild/environment": "0.1.1",
     "@hackbuild/lipsync": "0.1.1",
     "@hackbuild/organic": "0.1.1",

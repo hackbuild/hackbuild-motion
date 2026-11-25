@@ -4,6 +4,15 @@ Versions follow semver per package. Nothing is published to npm yet.
 
 ## 0.2.0 (unreleased)
 
+### Previews and MMD models, 2026-11-24
+
+- `@hackbuild/avatar` 0.1.2: new `/mmd` subpath, `loadMmd` for a dropped
+  PMX or PMD file as a three-vrm `VRM`, the parser `@moeru/three-mmd` an
+  optional peer imported on first use, rigid bodies as spring bones, the
+  result flagged `local`. `normalizeHumanoid` takes `unit` and `deform`.
+- `@hackbuild/avatar-host` 0.1.2: new `/thumbs` subpath, clip and avatar
+  previews on a paced background queue.
+
 ### Patch releases, 2026-11-24
 
 - every package one patch up (0.1.0 to 0.1.1, motion-net 0.2.0 to

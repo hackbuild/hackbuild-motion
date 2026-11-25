@@ -83,6 +83,18 @@ The main entry has no three.js:
   loads once, on the first body.
 - `placeholderBody()`: a mannequin of capsules on a humanoid skeleton,
   built in code, head top near 1.74 m (computed). No asset file.
+- `/thumbs`: previews drawn in the background. `clipThumbs({ save })`
+  poses one clay figure (the placeholder body, or a figure you pass) at
+  each clip's most telling frame, the sampled frame between 10 and 90
+  percent of the clip furthest from rest by the limbs and trunk
+  (`tellingTime`), into a 192 px square. `avatarThumbs({ save })` loads
+  each body source and draws it at rest, 240 by 320 px. Both run on
+  `ThumbQueue`: one item at a time on one renderer, urgent items first,
+  each item tried once per session, a rest between items as long as the
+  last render within 40 to 400 ms, one task yield instead in a hidden tab,
+  a lost context rebuilds the renderer, and the renderer lingers 20 s after
+  the queue empties (vendor figures, all options). `save(id, blob)` gets a
+  PNG Blob; `failed(id, reason)` names why an item gave none.
 - `defineAvatarHost(tag?, opts?)`: defines `hb-avatar-host`. Attributes
   `src` (a model URL; the placeholder shows without one), `environment`
   (a scene id), `paused`,
@@ -143,6 +155,17 @@ The example page `examples/avatar-host` runs the browser rows with `?auto`.
 
 ### Verified on this machine
 
+- 2026-11-24: `npx vitest run packages/avatar-host` passed 41 of 41
+  tests (counted), 8 of them in `test/thumbs.test.ts` with a stand in
+  renderer and fake timers: an urgent request jumps the queue, waiting
+  items included; an item is tried once; the renderer is disposed 20 s
+  after the queue empties and rebuilt for a later request; a failed render
+  reports its reason and the next item still draws; a lost context
+  rebuilds; the rest after a 250 ms render is 250 ms; a renderer that
+  cannot be built fails every waiting item with its reason; the telling
+  frame of a wave on the placeholder lands within half a sample of the
+  peak at 0.6 s (computed).
+
 - 2026-11-24: `npx vitest run packages/avatar-host` passed 33 of 33
   tests (counted), with the face driver and rest stance: a played clip
   hands back to the rest stance with the hand below the shoulder;
@@ -192,7 +215,9 @@ The example page `examples/avatar-host` runs the browser rows with `?auto`.
 - The room, cafe and outdoors scenes have not been shown on this stage;
   their files are not in the repository. The pixel ratio cap was measured
   at a device ratio of 1 only.
-- Thumbnails are a later item and not in this package yet. The face
+- No thumbnail has been drawn in a browser: `ClipPortrait` and
+  `AvatarPortrait` need WebGL and have not rendered an image yet. The
+  face
   driver has not run on a real face in a browser.
 
 ## Size budget
