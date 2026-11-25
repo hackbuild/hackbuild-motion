@@ -67,7 +67,7 @@ export const AvatarDrop = defineComponent({
     label: { type: String, default: undefined },
     options: { type: Object as PropType<AvatarDropOptions>, default: () => ({}) },
   },
-  emits: ["picked", "checked", "failed"],
+  emits: ["picked", "checked", "failed", "use"],
   setup(props, { emit, expose }) {
     const root = ref<HTMLElement | null>(null);
     const handle = shallowRef<AvatarDropHandle | null>(null);
@@ -94,17 +94,17 @@ export const ClipStrip = defineComponent({
     items: { type: Array as PropType<readonly StripItem[]>, default: () => [] },
     current: { type: String as PropType<string | null>, default: null },
     playing: { type: Boolean, default: false },
-    grid: { type: Boolean, default: false },
     go: { type: Boolean, default: true },
     label: { type: String, default: "clips" },
   },
   emits: ["pick", "play", "stop", "thumb"],
   setup(props, { emit, expose }) {
+    // the strip and its play button join the parent row
     const root = ref<HTMLElement | null>(null);
     const handle = shallowRef<ClipStripHandle | null>(null);
     let off: (() => void) | null = null;
     onMounted(() => {
-      handle.value = clipStrip(root.value!, { items: props.items, current: props.current, grid: props.grid, go: props.go, label: props.label });
+      handle.value = clipStrip(root.value!, { items: props.items, current: props.current, go: props.go, label: props.label });
       off = handle.value.on((e: ClipStripEvent) => emit(e.type, e));
     });
     watch(
@@ -124,6 +124,6 @@ export const ClipStrip = defineComponent({
       handle.value?.dispose();
     });
     expose({ handle });
-    return () => h("div", { ref: root });
+    return () => h("div", { ref: root, style: "display:contents" });
   },
 });

@@ -7,7 +7,8 @@
 // sits in the stage and rack layout of hackbuild-ui as it is.
 import { Box3, type AnimationClip, Vector3 } from "three";
 import type { Clip, PlayOptions } from "@hackbuild/presence";
-import { estimateWords } from "@hackbuild/lipsync";
+import { bandsFromSpectrum, rms } from "@hackbuild/lipsync";
+import { type Speech, type SpeechSource, estimateSeconds, speechEvents } from "./speech.js";
 import { posedBounds } from "@hackbuild/avatar/three";
 import type { BodySource, DroppedFile } from "@hackbuild/avatar-host";
 import { AvatarStage, type Body, type BodyCaps, type StageOptions } from "@hackbuild/avatar-host/three";
@@ -42,8 +43,10 @@ export interface CharacterStageOptions extends StageOptions {
   framing?: Framing;
   /** Take files dropped on the stage. Default true. */
   drop?: boolean;
-  /** What say hello says. */
-  hello?: string;
+  /** What say hello says: text, real speech, or a function that makes the speech when pressed. */
+  hello?: string | Speech | (() => Speech | Promise<Speech>);
+  /** The context real speech plays through; default one made on the first audio. */
+  audioContext?: AudioContext;
 }
 
 export type CharacterStageEvent =
@@ -65,8 +68,14 @@ export interface CharacterStageHandle {
   readonly framing: Framing;
   show(source: string | BodySource | readonly DroppedFile[]): Promise<Body | null>;
   showPlaceholder(): void;
-  /** The mouth follows the words on estimated timings; resolves when they end. */
-  say(text: string, seconds?: number): Promise<void>;
+  /**
+   * Speaks. Audio plays and its level moves the mouth, with the words or
+   * phonemes the engine timed; text alone moves the mouth on estimated word
+   * timings with no sound. Resolves when the speech ends or a newer one starts.
+   */
+  say(speech: string | Speech, seconds?: number): Promise<void>;
+  /** Where the mouth timings of the last speech came from. */
+  readonly speechSource: SpeechSource | null;
   gesture(id: Gesture): boolean;
   /** Plays a clip on the body; the corner plate shows its name. Returns the ticket, -1 when it cannot play. */
   play(clip: Clip | AnimationClip | string, opts?: PlayOptions): number;
@@ -216,19 +225,103 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
     return play(clip, { layer: id === "bow" ? "body" : "upper" }) >= 0;
   }
 
-  async function say(text: string, seconds?: number): Promise<void> {
+  // real speech: the audio plays through an analyser, its level and bands
+  // open the mouth between the timings the engine gave; text alone is
+  // spoken on estimated timings with no sound
+  let speaking = 0;
+  let audioCtx: AudioContext | null = opts.audioContext ?? null;
+  const elementSources = new WeakMap<HTMLMediaElement, MediaElementAudioSourceNode>();
+  let stopAudio: (() => void) | null = null;
+  let lastSource: SpeechSource | null = null;
+
+  async function say(input: string | Speech, seconds?: number): Promise<void> {
     const body = stage.body;
-    if (!body || !text.trim()) return;
-    const words = text.trim().split(/\s+/).length;
-    const dur = seconds ?? Math.max(0.8, words * 0.34);
+    const sp: Speech = typeof input === "string" ? { text: input } : input;
+    if (!body || (!sp.audio && !sp.text?.trim() && !sp.events?.length)) return;
+    const mine = ++speaking;
+    stopAudio?.();
+    stopAudio = null;
+    let dur = seconds ?? (sp.text ? estimateSeconds(sp.text) : 1);
+    let start: (() => void) | null = null;
+    let ended: Promise<void> | null = null;
+    let analyser: AnalyserNode | null = null;
+    if (sp.audio) {
+      audioCtx ??= new AudioContext();
+      const ctx = audioCtx;
+      // a page with no press yet keeps the context suspended; the mouth still moves on the timings
+      if (ctx.state === "suspended") await Promise.race([ctx.resume().catch(() => undefined), new Promise((ok) => setTimeout(ok, 300))]);
+      analyser = ctx.createAnalyser();
+      analyser.fftSize = 1024;
+      analyser.connect(ctx.destination);
+      const a = sp.audio;
+      if (a instanceof AudioBuffer) {
+        const node = ctx.createBufferSource();
+        node.buffer = a;
+        node.connect(analyser);
+        dur = a.duration;
+        ended = new Promise((ok) => (node.onended = () => ok()));
+        start = () => node.start();
+        stopAudio = () => {
+          node.onended = null;
+          try {
+            node.stop();
+          } catch {
+            // never started
+          }
+          node.disconnect();
+        };
+      } else {
+        let node = elementSources.get(a);
+        if (!node) elementSources.set(a, (node = ctx.createMediaElementSource(a)));
+        node.disconnect();
+        node.connect(analyser);
+        if (!(a.duration > 0)) await new Promise((ok) => a.addEventListener("loadedmetadata", ok, { once: true }));
+        dur = Number.isFinite(a.duration) ? a.duration : dur;
+        ended = new Promise((ok) => a.addEventListener("ended", () => ok(), { once: true }));
+        start = () => {
+          a.currentTime = 0;
+          void a.play();
+        };
+        stopAudio = () => {
+          a.pause();
+          node.disconnect();
+        };
+      }
+    }
+    if (mine !== speaking || stage.body !== body) return;
     const t0 = stage.loop.time;
+    const { events, source } = speechEvents(sp, t0, dur);
+    lastSource = source;
     body.lip.stop();
-    body.lip.push([...estimateWords(text, t0, t0 + dur), { type: "end", time: t0 + dur }]);
+    body.lip.push(events);
     body.setGazeMode("talk");
-    setDoing("talking", dur);
+    setDoing("talking");
     stage.loop.sync();
-    await new Promise((ok) => setTimeout(ok, dur * 1000));
+    start?.();
+    if (analyser && audioCtx) {
+      const an = analyser;
+      const rate = audioCtx.sampleRate;
+      const wave = new Float32Array(an.fftSize);
+      const spectrum = new Uint8Array(an.frequencyBinCount);
+      const tick = () => {
+        if (mine !== speaking) return;
+        an.getFloatTimeDomainData(wave);
+        an.getByteFrequencyData(spectrum);
+        stage.body?.lip.setLevel(rms(wave), bandsFromSpectrum(spectrum, rate, an.fftSize));
+        stage.loop.sync();
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+    await Promise.race([ended ?? new Promise<void>(() => undefined), new Promise<void>((ok) => setTimeout(ok, dur * 1000 + (ended ? 500 : 0)))]);
+    if (mine !== speaking) return;
+    speaking++;
+    stopAudio?.();
+    stopAudio = null;
+    analyser?.disconnect();
+    stage.body?.lip.setLevel(0);
     stage.body?.setGazeMode("listen");
+    if (doing === "talking") setDoing("idle");
   }
 
   function look(): void {
@@ -242,7 +335,10 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
 
   function runVerb(id: string): void {
     emit({ type: "verb", id });
-    if (id === "say") void say(opts.hello ?? HELLO);
+    if (id === "say") {
+      const h = opts.hello ?? HELLO;
+      void Promise.resolve(typeof h === "function" ? h() : h).then((sp) => say(sp));
+    }
     else if (id === "look") look();
     else if (id === "turn") turn();
     else if ((GESTURES as readonly string[]).includes(id)) gesture(id as Gesture);
@@ -301,6 +397,9 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
     get framing() {
       return framing;
     },
+    get speechSource() {
+      return lastSource;
+    },
     show,
     showPlaceholder: () => void stage.showPlaceholder(),
     say,
@@ -316,6 +415,8 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
     },
     dispose() {
       clearTimeout(doingTimer);
+      speaking++;
+      stopAudio?.();
       ac.abort();
       ro.disconnect();
       insetWatch.disconnect();

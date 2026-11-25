@@ -6,7 +6,7 @@ describe("entries", () => {
   it("define the vue components with the view events", () => {
     expect(CharacterStage.name).toBe("CharacterStage");
     expect(CharacterStage.emits).toEqual(["loaded", "failed", "doing", "verb", "framing"]);
-    expect(AvatarDrop.emits).toEqual(["picked", "checked", "failed"]);
+    expect(AvatarDrop.emits).toEqual(["picked", "checked", "failed", "use"]);
     expect(ClipStrip.emits).toEqual(["pick", "play", "stop", "thumb"]);
   });
   it("import with no side effect: no custom element is defined until asked", () => {

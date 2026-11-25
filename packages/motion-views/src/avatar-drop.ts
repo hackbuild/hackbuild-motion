@@ -41,7 +41,9 @@ export interface AvatarDropOptions extends BodyLoadOptions {
 export type AvatarDropEvent =
   | { type: "picked"; files: readonly DroppedFile[] }
   | { type: "checked"; report: AvatarReport; files: readonly DroppedFile[] }
-  | { type: "failed"; message: string };
+  | { type: "failed"; message: string }
+  /** The card was pressed: wear this avatar. */
+  | { type: "use"; report: AvatarReport; files: readonly DroppedFile[] };
 
 export interface AvatarDropHandle {
   readonly report: AvatarReport | null;
@@ -71,11 +73,12 @@ export function avatarDrop(host: HTMLElement, opts: AvatarDropOptions = {}): Ava
   const input = el(doc, "input", "", { type: "file", multiple: true, accept: ACCEPT, hidden: true, "aria-label": "pick an avatar file" });
   const pickBtn = button(doc, opts.label ?? "pick a file", opts.go === true, { "data-pick": "" });
   const zone = el(doc, "div", "hb-dropzone", {}, [el(doc, "span", "", {}, [opts.hint ?? "drop a .vrm, .glb or .fbx here, with its textures"]), pickBtn, input]);
-  const img = el(doc, "img", "", { alt: "", width: 56, height: 56 });
-  const thumbBox = el(doc, "span", "hb-hist-thumb", {}, [img]);
-  const nameEl = el(doc, "span", "hb-hist-label");
-  const sizeEl = el(doc, "span", "hb-hist-meta");
-  const head = el(doc, "div", "hb-hist", { hidden: true, "aria-label": "the avatar you dropped" }, [thumbBox, el(doc, "span", "hb-hist-cap", {}, [nameEl, sizeEl])]);
+  // the card is hackbuild-ui's avatar card: still, name, size line, rig line; pressing it uses the avatar
+  const thumbBox = el(doc, "span", "hb-avcard-thumb");
+  const nameEl = el(doc, "span", "hb-avcard-name");
+  const sizeEl = el(doc, "span", "hb-avcard-meta");
+  const rigEl = el(doc, "span", "hb-avcard-rig");
+  const head = el(doc, "button", "hb-avcard", { type: "button", hidden: true, "aria-pressed": "false" }, [thumbBox, el(doc, "span", "hb-avcard-body", {}, [nameEl, sizeEl, rigEl])]);
   const lines = el(doc, "div", "", { role: "status", "aria-live": "polite" });
   host.append(zone, head, lines);
 
@@ -86,6 +89,7 @@ export function avatarDrop(host: HTMLElement, opts: AvatarDropOptions = {}): Ava
   const still = new Still(doc);
   const thumbUrl = urlSlot();
   let report: AvatarReport | null = null;
+  let lastFiles: readonly DroppedFile[] | null = null;
   let ticket = 0;
   let hook: Promise<VrmHook> | null = null;
 
@@ -125,6 +129,9 @@ export function avatarDrop(host: HTMLElement, opts: AvatarDropOptions = {}): Ava
       };
       if (mine !== ticket) return null;
       report = r;
+      lastFiles = files;
+      head.setAttribute("aria-pressed", "false");
+      head.classList.remove("is-on");
       draw(r);
       emit({ type: "checked", report: r, files });
       return r;
@@ -141,14 +148,17 @@ export function avatarDrop(host: HTMLElement, opts: AvatarDropOptions = {}): Ava
 
   function draw(r: AvatarReport): void {
     head.hidden = false;
-    img.src = thumbUrl(r.thumb);
-    img.hidden = !r.thumb;
+    const src = thumbUrl(r.thumb);
+    thumbBox.replaceChildren(src ? el(doc, "img", "", { src, alt: "" }) : el(doc, "span", "", { "aria-hidden": "true" }, [r.name.slice(0, 1)]));
     nameEl.textContent = r.name;
     sizeEl.textContent = r.size;
+    const worst = r.check.lines.find((l) => l.tone !== "ok");
+    rigEl.textContent = worst ? `${r.check.head}: ${worst.text}` : `${r.check.head}, ${r.caps.bones} bones`;
+    rigEl.className = `hb-avcard-rig ${r.check.tone === "bad" ? "is-bad" : "is-ok"}`;
+    head.setAttribute("aria-label", `use ${r.name}, ${r.size}`);
     const tone = (t: RigLine["tone"]) => (t === "bad" ? "bad" : t === "warn" ? "warn" : "ok");
     lines.replaceChildren(
-      statusLine(doc, r.check.head, tone(r.check.tone)),
-      ...r.check.lines.map((l) => statusLine(doc, l.text, tone(l.tone))),
+      ...r.check.lines.filter((l) => l !== worst).map((l) => statusLine(doc, l.text, tone(l.tone))),
       statusLine(doc, r.licence.text, tone(r.licence.tone)),
     );
     pickBtn.textContent = "pick another";
@@ -156,6 +166,16 @@ export function avatarDrop(host: HTMLElement, opts: AvatarDropOptions = {}): Ava
 
   const ac = new AbortController();
   pickBtn.addEventListener("click", () => input.click(), { signal: ac.signal });
+  head.addEventListener(
+    "click",
+    () => {
+      if (!report || !lastFiles) return;
+      head.setAttribute("aria-pressed", "true");
+      head.classList.add("is-on");
+      emit({ type: "use", report, files: lastFiles });
+    },
+    { signal: ac.signal },
+  );
   input.addEventListener(
     "change",
     () => {

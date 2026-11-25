@@ -5,7 +5,7 @@
 //
 //   <hb-character-stage name="moheeb" framing="bust"><div slot="inset">..</div></hb-character-stage>
 //   <hb-avatar-drop go></hb-avatar-drop>
-//   <hb-clip-strip grid></hb-clip-strip>   (set .items from script)
+//   <hb-clip-strip></hb-clip-strip>   (set .items from script)
 import { type CharacterStageHandle, type CharacterStageOptions, type Framing, characterStage } from "./character-stage.js";
 import { type AvatarDropHandle, type AvatarDropOptions, avatarDrop } from "./avatar-drop.js";
 import { type ClipStripHandle, type StripItem, clipStrip } from "./clip-strip.js";
@@ -110,8 +110,9 @@ export function defineMotionViews(opts: MotionViewsOptions = {}): void {
       }
       connectedCallback(): void {
         if (this.handle) return;
-        if (!this.style.display) this.style.display = "block";
-        this.handle = clipStrip(this, { items: this.pending, current: this.picked, grid: this.hasAttribute("grid"), go: !this.hasAttribute("no-go") });
+        // the strip and its play button join the parent row, as the verb row lays them out
+        if (!this.style.display) this.style.display = "contents";
+        this.handle = clipStrip(this, { items: this.pending, current: this.picked, go: !this.hasAttribute("no-go") });
         this.off = this.handle.on(relay(this));
       }
       disconnectedCallback(): void {

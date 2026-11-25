@@ -16,25 +16,33 @@ view fits the stage and rack layout of hackbuild-ui 0.10 as it is.
   framing (bust, from the knees up, or full body) at the top right, the
   verb row at the foot and an inset slot at the top left. The default
   verbs are say hello (the one pink action), wave, nod and look around.
-  Files dropped on it become the body. `say(text)` moves the lips on
-  estimated word timings; `gesture("wave" | "nod" | "shake" | "bow")`
+  Files dropped on it become the body. `say(speech)` speaks real audio:
+  an AudioBuffer or an audio element plays through an analyser whose
+  level and bands open the mouth, with the word or phoneme timings a
+  speech engine reports (`@hackbuild/speak`'s `Timed`, or lipsync events
+  such as the bellows adapter makes). Text alone moves the lips on
+  estimated word timings with no sound; `gesture("wave" | "nod" | "shake" | "bow")`
   plays a gesture written in code over the body's own bones; `play(clip)`
   plays any presence clip or three.js AnimationClip.
 - `AvatarDrop`: a drop zone and a pick button. A file loads once into the
   normalized humanoid, is checked as a stage body would be, drawn as a
-  still and freed. The card shows the still, the name, the size line
+  still and freed. The hackbuild-ui avatar card (`.hb-avcard`) shows the
+  still, the name, the size line
   ("168 kb glb, 5.5 k triangles"), the licence the file states and the
   rig check in plain words ("no mouth shapes. the lips stay still while it
-  talks."). The files go out on `picked`, the report on `checked`.
-- `ClipStrip`: clips as stills to pick from, and one play button that
-  plays or stops the picked clip. Stills come from the item, or are drawn
+  talks."); pressing it sends `use`. The files go out on `picked`, the
+  report on `checked`.
+- `ClipStrip`: the hackbuild-ui clip strip (`.hb-clipstrip`): each clip's
+  still, name and length, the picked one pressed and the playing one
+  marked, and one play button that plays or stops the picked clip. Stills come from the item, or are drawn
   in the background on a clay figure by the avatar-host thumb queue.
 
 ## Entries
 
 - `.`: the words and the clip items, no three.js and no DOM.
   `rigCheck`, `sizeLine`, `licenceLine`, `secondsWord`; `clipsFromPack`
-  (a `@hackbuild/bake` pack and report, with a warning on a loop that does
+  `speechEvents`, `estimateSeconds` (what a speech becomes on the mouth
+  clock); `clipsFromPack` (a `@hackbuild/bake` pack and report, with a warning on a loop that does
   not close), `clipFromFindings` (a `@hackbuild/retarget` motion),
   `clipsFromBody`, `clipMeta`, `nextClip`.
 - `/vanilla`: `characterStage(host, opts)`, `avatarDrop(host, opts)`,
@@ -43,7 +51,7 @@ view fits the stage and rack layout of hackbuild-ui 0.10 as it is.
   `hb-avatar-drop` and `hb-clip-strip`. Importing defines nothing.
 - `/vue`: `CharacterStage` (props `name`, `src`, `framing`, `verbs`,
   `drop`, `options`; slot `inset`), `AvatarDrop` (`go`, `label`,
-  `options`) and `ClipStrip` (`items`, `current`, `playing`, `grid`, `go`).
+  `options`) and `ClipStrip` (`items`, `current`, `playing`, `go`).
   Events are the view's events by type.
 - `/iife`: the vanilla entry as one classic script; three.js comes from
   the page as `THREE`.
@@ -65,7 +73,10 @@ is bundled: a body comes from a URL or a file the person drops.
 - Verified (measured, 2026-11-25, headless system Chrome on macOS 12,
   `node tools/smoke-views.mjs`): the stand-in shows and a frame is drawn;
   the full body shot stands further back than the bust (2.78 m to
-  4.03 m); the lips move while it talks; wave plays on the upper body;
+  4.03 m); say hello plays audio written in code with its word timings
+  and the audio level reaches the lips (peak 0.215); audio with no
+  timings moves the lips by its level; text alone falls back to estimated
+  timings; it goes quiet when the audio ends; wave plays on the upper body;
   turn around turns the body half a circle; the stand-in written as a
   .glb in the page loads, maps 24 bones, gets a still and reads "no
   licence in the file"; a text file is refused in plain words; a bvh walk
@@ -74,7 +85,9 @@ is bundled: a body comes from a URL or a file the person drops.
   clip plays; a still is drawn for every clip. Unit tests cover the words
   and the clip items.
 - The three demo pages pass the suite's screen gate at 1440 and 390.
-- Not verified: a real VRM, GLB or FBX avatar with a face (the smoke uses
+- Not verified: speech from a real speech engine (the smoke's voice is
+  a hum written in code with word timings in the engine's shape), a real
+  VRM, GLB or FBX avatar with a face (the smoke uses
   the stand-in built in code, which has no mouth or blink shapes), the Vue
   components in a running Vue app (they typecheck; no page mounts them
   yet), and frame rate on a real GPU, since the smoke runs headless.
@@ -85,8 +98,8 @@ is bundled: a body comes from a URL or a file the person drops.
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 2,637 bytes | 2,768 bytes |
-| `dist/motion-views.iife.js` (single file build) | 212,118 bytes | 222,723 bytes |
+| `dist/index.js` (main entry, imports external) | 3,266 bytes | 3,429 bytes |
+| `dist/motion-views.iife.js` (single file build) | 214,196 bytes | 224,905 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
