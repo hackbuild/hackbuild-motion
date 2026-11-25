@@ -6,6 +6,9 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const root = join(import.meta.dirname, "..", "..");
+const site = JSON.parse(readFileSync(join(root, "examples", "pages.json"), "utf8"));
+// the site page of a package: its own page, or the first demo page that covers it (pages.json "packages")
+const pageOf = (pkg) => site.pages.find((p) => p.name !== pkg && (p.packages ?? [p.name]).includes(pkg))?.name ?? pkg;
 const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((d) => (d.isDirectory() ? walk(join(dir, d.name)) : [join(dir, d.name)]));
 
 for (const pkg of readdirSync(join(root, "packages"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name)) {
@@ -16,7 +19,7 @@ for (const pkg of readdirSync(join(root, "packages"), { withFileTypes: true }).f
     assert.ok(meta.files.includes("how.ts"), "how.ts missing from files");
     const how = readFileSync(join(dir, "how.ts"), "utf8");
     assert.ok(how.includes(`packages: [${JSON.stringify(meta.name)}`), "packages does not name the package");
-    assert.ok(how.includes(`page: "https://hackbuild.github.io/hackbuild-motion/${pkg}/"`), "page link is not the site page");
+    assert.ok(how.includes(`page: "https://hackbuild.github.io/hackbuild-motion/${pageOf(pkg)}/"`), "page link is not the site page");
     for (const f of walk(join(dir, "src"))) assert.doesNotMatch(readFileSync(f, "utf8"), /["'](\.\.\/)+how(\.js|\.ts)?["']/, `${f} imports how.ts`);
   });
 }

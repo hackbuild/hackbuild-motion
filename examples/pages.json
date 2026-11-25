@@ -1,6 +1,6 @@
 {
   "repo": "hackbuild-motion",
-  "intro": "eight demo pages and a page per package over the 13 packages. the rigs are built in code; any model, clip or weight file comes from a url you give or a file you drop, and its licence is shown when it loads.",
+  "intro": "eleven demo pages and a page per package over the 14 packages. the rigs are built in code; any model, clip or weight file comes from a url you give or a file you drop, and its licence is shown when it loads.",
   "footer": "code mit. pages built from github.com/hackbuild/hackbuild-motion. no weights or model files are hosted here.",
   "source": "https://github.com/hackbuild/hackbuild-motion",
   "suite": {
@@ -12,7 +12,8 @@
     "gait": "#/motion/gait",
     "lipsync": "#/motion/lipsync",
     "motion-match": "#/motion/motion-match",
-    "motion-net": "#/motion/motion-net"
+    "motion-net": "#/motion/motion-net",
+    "motion-views": "#/character"
   },
   "pages": [
     {
@@ -53,6 +54,30 @@
       "what": "visemes from speech word timing (the system voice or timed text), from the bellows voice's phoneme spans or tract model, or from audio level (microphone or a file).",
       "stage": true,
       "timeoutS": 180
+    },
+    {
+      "name": "character-stage",
+      "packages": [
+        "motion-views"
+      ],
+      "what": "a character on a lit stage: the stand-in or your own vrm, glb or fbx, with idle, gaze, blinks and lips, a verb row, an inset and bust or full framing.",
+      "timeoutS": 60
+    },
+    {
+      "name": "avatar-drop",
+      "packages": [
+        "motion-views"
+      ],
+      "what": "drop or pick an avatar and read what it is before you use it: a still, the size, the licence it states and a rig check in plain words.",
+      "timeoutS": 60
+    },
+    {
+      "name": "clip-strip",
+      "packages": [
+        "motion-views"
+      ],
+      "what": "a strip of clips with a still of each: a bvh walk retargeted onto the stand-in and gestures written in code, baked into one clip pack. pick one to play it.",
+      "timeoutS": 90
     }
   ]
 }
