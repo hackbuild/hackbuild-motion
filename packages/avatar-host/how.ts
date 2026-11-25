@@ -4,7 +4,7 @@
 const how: HowDoc = {
   what: "host a character on a three.js stage in any container: ticketed loads through @hackbuild/avatar, a follow camera, the presence frame order, a loop that pauses when hidden, and a hb-avatar-host element.",
   how: [
-    "a character on a three.js stage in any container. bodies load through @hackbuild/avatar into the normalized humanoid space; the camera frames and follows the posed body.",
+    "a character on a three.js stage in any container. bodies load through @hackbuild/avatar into the normalized humanoid space; the camera frames and follows the posed body; setFollow(false) or follow: { follow: false } in the options keeps it still.",
     "loads are ticketed: show(source) resolves to the result, or to null when a later show replaced it, so a slow file never lands over a newer one. a drop of files finds the model and the files it references by path, then by name.",
     "one animation loop runs, and it stops while the page is hidden, the host is off screen or at zero size, or a sheet covers it. the main entry has no three.js; the hb-avatar-host element is under /three.",
     "/thumbs draws previews in the background, one at a time on one renderer: clips on a clay figure at their most telling frame, characters at rest. urgent items go first, each is tried once, and the renderer is freed 20 s after the queue empties. save gets a png blob.",

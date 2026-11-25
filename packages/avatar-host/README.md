@@ -76,7 +76,9 @@ The main entry has no three.js:
   distance eases to fit the pose, pulls back from the first frame a pose
   outgrows the view and comes closer only once 12 percent too far; a hand
   zoom is left alone (rate 3, dead zone 0.06, slack 0.12, margin 1.12,
-  vendor, all options).
+  vendor, all options). `follow: { follow: false }` in the stage options,
+  or `stage.setFollow(false)` at any time, turns following off; the
+  camera then moves only by hand or `resetView`.
 - `loadBody` and `bodyAdapters`: the scene level loader. A dropped
   model's references go through the source's resolver, and the load waits
   for every texture the loader started before it resolves. The rig wasm

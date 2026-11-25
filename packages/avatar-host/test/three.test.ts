@@ -70,6 +70,19 @@ describe("FollowCamera", () => {
     expect(f.zoomed).toBe(false);
   });
 
+  it("moves nothing while follow is off, and follows again once on", () => {
+    const { cam, f, box } = setup();
+    const before = cam.position.clone();
+    const away = box.clone().translate(new THREE.Vector3(0.5, 0, 0));
+    f.follow = false;
+    expect(f.step(away, 1 / 60)).toBe(false);
+    expect(cam.position.distanceTo(before)).toBe(0);
+    f.follow = true;
+    expect(f.step(away, 1 / 60)).toBe(true);
+    const cam2 = new THREE.PerspectiveCamera(30, 1, 0.05, 200);
+    expect(new FollowCamera(cam2, new THREE.Vector3(), { follow: false }).follow).toBe(false);
+  });
+
   it("counts a release as a zoom only when the distance changed by more than 2 percent", () => {
     const { f, box } = setup();
     f.released(box, f.distance() * 1.01);

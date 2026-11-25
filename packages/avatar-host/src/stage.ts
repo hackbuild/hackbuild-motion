@@ -288,6 +288,12 @@ export class AvatarStage {
     this.loop.hold("covered", on);
   }
 
+  /** Turns the follow camera on or off. Off, the camera stays put until the person moves it or `resetView` frames the body. */
+  setFollow(on: boolean): void {
+    this.follow.follow = on;
+    this.loop.invalidate();
+  }
+
   /** factor above 1 moves closer. */
   zoomBy(factor: number): void {
     this.follow.zoomBy(factor, this.controls.minDistance, this.controls.maxDistance);

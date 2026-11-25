@@ -4,6 +4,11 @@ Versions follow semver per package. Nothing is published to npm yet.
 
 ## 0.2.0 (unreleased)
 
+### Follow camera switch, 2026-11-24
+
+- `@hackbuild/avatar-host` 0.1.3: `FollowOptions.follow` (default true)
+  and `AvatarStage.setFollow(on)` turn the follow camera off and on.
+
 ### Previews and MMD models, 2026-11-24
 
 - `@hackbuild/avatar` 0.1.2: new `/mmd` subpath, `loadMmd` for a dropped

@@ -7,6 +7,8 @@
 import { Box3, MathUtils, type PerspectiveCamera, Vector3 } from "three";
 
 export interface FollowOptions {
+  /** Follow the body; false leaves the camera where the person or the last framing put it. Default true. */
+  follow?: boolean;
   /** Ease rate per second toward a new framing. Default 3 (vendor). */
   rate?: number;
   /** Body movement under this share of its height moves nothing. Default 0.06 (vendor). */
@@ -20,6 +22,8 @@ export interface FollowOptions {
 export class FollowCamera {
   /** Set when the person picked a distance; fitting then leaves it alone. */
   zoomed = false;
+  /** False: step moves nothing; frame, zoomBy and released still work. */
+  follow: boolean;
   /** Where the person panned to, from the body's centre. */
   readonly offset = new Vector3();
   readonly rate: number;
@@ -36,6 +40,7 @@ export class FollowCamera {
     readonly target: Vector3,
     opts: FollowOptions = {},
   ) {
+    this.follow = opts.follow ?? true;
     this.rate = opts.rate ?? 3;
     this.deadZone = opts.deadZone ?? 0.06;
     this.slack = opts.slack ?? 0.12;
@@ -77,6 +82,7 @@ export class FollowCamera {
 
   /** One frame of following. Returns true when the camera moved. */
   step(box: Box3, dt: number): boolean {
+    if (!this.follow) return false;
     const k = 1 - Math.exp(-dt * this.rate);
     const h = Math.max(box.getSize(this.v2).y, 0.5);
     const gap = this.v1.copy(box.getCenter(this.v3)).add(this.offset).sub(this.target);
