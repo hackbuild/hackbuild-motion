@@ -42,6 +42,31 @@
       "what": "visemes from speech word timing (the system voice or timed text), from the bellows voice's phoneme spans or tract model, or from audio level (microphone or a file).",
       "stage": true,
       "timeoutS": 180
+    },
+    {
+      "name": "organic",
+      "what": "critically damped springs, inertialization, seeded noise and samplers for procedural animation. rust core in wasm.",
+      "stage": false
+    },
+    {
+      "name": "rig",
+      "what": "humanoid bone name mapper without per rig tables, limb chains, rest pose analysis, and the expression and viseme table. rust core in wasm.",
+      "stage": false
+    },
+    {
+      "name": "presence",
+      "what": "procedural presence for humanoids: gaze with saccades and aversion, head recruitment, blink, breath, idle scheduler, pointing, reach, throw, and a layered clip player with loop seams and idle handback.",
+      "stage": false
+    },
+    {
+      "name": "environment",
+      "what": "brightly lit scenes around a character: layouts as data, a set assembled from kit models and merged by material, image light from an hdri or the three.js room environment, a key light with a shadow and a rim light.",
+      "stage": false
+    },
+    {
+      "name": "bake",
+      "what": "glb optimize with texture hooks, clip bake into compact packs with error, seam and contact reports, and an asset lock file with licence and sha-256. rust core in wasm, plus a native command line tool.",
+      "stage": false
     }
   ]
 }
