@@ -149,7 +149,7 @@ describe("sources", () => {
 
   it("picks vrm over glb and names the failure for a drop with no body", () => {
     expect(sourceFromFiles([file("a.glb"), file("b.vrm")], urls().f).kind).toBe("vrm");
-    expect(() => sourceFromFiles([file("m.pmx")], urls().f)).toThrow("this file is a pmx. convert it to vrm or glb.");
+    expect(() => sourceFromFiles([file("m.pmx")], urls().f)).toThrow("this file is a pmx. open it with the mmd loader of the avatar package.");
     expect(() => sourceFromFiles([file("walk.bvh")], urls().f)).toThrow("a bvh file is an animation");
     expect(() => sourceFromFiles([file("notes.txt")], urls().f)).toThrow("this drop has no model");
   });
@@ -275,7 +275,7 @@ describe("bodyError", () => {
     expect(bodyError(new Error("avatar: missing required bones: hips, head."))).toBe("this model has no humanoid rig the stage can map. missing bones: hips, head.");
     expect(bodyError(new Error("avatar: fetch failed with 404 for x."))).toBe("the model did not download (http 404). check the url.");
     expect(bodyError(new TypeError("Failed to fetch"))).toMatch(/did not download/);
-    expect(bodyError(new Error("this file is a pmx. convert it to vrm or glb."))).toBe("this file is a pmx. convert it to vrm or glb.");
+    expect(bodyError(new Error("this file is a pmx. open it with the mmd loader of the avatar package."))).toBe("this file is a pmx. open it with the mmd loader of the avatar package.");
     expect(bodyError(new Error("Unexpected token < in JSON at position 0"))).toMatch(/^the model did not load\./);
   });
 });

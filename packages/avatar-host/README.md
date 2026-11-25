@@ -22,7 +22,7 @@ The main entry has no three.js:
   a drop, with a resolver that finds referenced files by path below the
   model's folder, then by file name anywhere in the drop, ignoring case.
   Misses are listed; object URLs are freed by `release`. A `.pmx` drop
-  reads "this file is a pmx. convert it to vrm or glb."
+  reads "this file is a pmx. open it with the mmd loader of the avatar package."
 - `droppedFiles(dataTransfer)`: walks dropped folders and keeps each
   file's relative path.
 - `StageLoop`: the pause reasons (`hidden`, `offscreen`, `inactive`,

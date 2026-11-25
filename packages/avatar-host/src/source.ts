@@ -72,7 +72,7 @@ export function sourceFromFiles(files: readonly DroppedFile[], urls: UrlFactory 
   for (const k of ORDER) if ((model = files.find((f) => kindOf(f.name) === k))) break;
   if (!model) {
     const ext = files.map((f) => extOf(f.name)).find((e) => e === "pmx" || e === "pmd" || e === "vrma" || e === "bvh");
-    if (ext === "pmx" || ext === "pmd") throw new Error(`this file is a ${ext}. convert it to vrm or glb.`);
+    if (ext === "pmx" || ext === "pmd") throw new Error(`this file is a ${ext}. open it with the mmd loader of the avatar package.`);
     if (ext) throw new Error(`a ${ext} file is an animation. drop a body: a .vrm, .glb, .gltf or .fbx.`);
     throw new Error("this drop has no model. drop a .vrm, .glb, .gltf or .fbx file.");
   }
