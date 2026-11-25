@@ -4,6 +4,12 @@ Versions follow semver per package. Nothing is published to npm yet.
 
 ## 0.2.0 (unreleased)
 
+### Patch releases, 2026-11-24
+
+- every package one patch up (0.1.0 to 0.1.1, motion-net 0.2.0 to
+  0.2.1): the tarball gains `how.ts`, the shared how to use record, and
+  internal pins move with it.
+
 ### Motion formats, 2026-11-24
 
 - `@hackbuild/retarget`: VMD legs keyed only by foot IK bones are solved

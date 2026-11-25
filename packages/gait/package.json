@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/gait",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Procedural legged locomotion: Froude gait choice, leg oscillators, footfall tables, posture springs, tail and ear secondary motion. Rust core in wasm.",
   "type": "module",
   "license": "MIT",

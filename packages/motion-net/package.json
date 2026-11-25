@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/motion-net",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Runtime and quadruped gait host for a categorical codebook matching motion network. Loads external CC BY-NC 4.0 weights at run time. Rust core on wasm SIMD128, worker with an in-page fallback.",
   "type": "module",
   "license": "MIT",
