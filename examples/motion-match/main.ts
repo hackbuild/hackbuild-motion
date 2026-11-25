@@ -2,11 +2,8 @@ import { ClipSet, MotionMatcher, load } from "@hackbuild/motion-match";
 import * as THREE from "three";
 import { stage } from "../shared/scene.js";
 import { $, FrameTimer, auto, check, finish, quantile, readout, result, sleep, status, fixture } from "../shared/ui.js";
-import { mountHow } from "../shared/how.js";
-import how from "../../packages/motion-match/how";
 
 const r = result("motion-match");
-check(r, "motion-match: the how this works fold", mountHow(how) ? "pass" : "fail");
 fixture("the clip database is synthetic gait clips built by the package: stand, walk, jog, run, turns, starts and stops. matching over real capture clips is a separate check.");
 $("#controls").innerHTML = `
 <label class="hb-ctl">speed m/s <input class="hb-range" id="speed" type="range" min="0" max="3.5" step="0.05" value="1.2"></label>

@@ -3,11 +3,8 @@ import { skeletonFromObject3D, toAnimationClip } from "@hackbuild/retarget/three
 import * as THREE from "three";
 import { humanoidRig, stage, sticks } from "../shared/scene.js";
 import { $, FrameTimer, auto, check, finish, onDrop, readout, result, sleep, status, fixture } from "../shared/ui.js";
-import { mountHow } from "../shared/how.js";
-import how from "../../packages/retarget/how";
 
 const r = result("retarget");
-check(r, "retarget: the how this works fold", mountHow(how) ? "pass" : "fail");
 fixture("the walk is a bvh clip written in code on a centimeter rig with other bone names. drop your own clip to replace it.");
 $("#controls").innerHTML = `
 <div class="hb-dropzone" id="drop"><span>drop a .bvh or .vmd clip here, or tap to pick one</span> <input id="file" type="file" accept=".bvh,.vmd" aria-label="pick a .bvh or .vmd clip"></div>

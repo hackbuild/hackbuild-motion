@@ -2,11 +2,8 @@ import { LipSync, type LipFrame, bandsFromSpectrum, estimateWords, rms } from "@
 import { type ArticulatorFrame, type ArticulatorProbeLike, articulatoryFrame, fromProbe, fromTractModel, type TractModelLike } from "@hackbuild/lipsync/articulatory";
 import { type BellowsPlan, fromSungPlan } from "@hackbuild/lipsync/bellows";
 import { $, FrameTimer, auto, check, finish, onDrop, readout, result, sleep, status } from "../shared/ui.js";
-import { mountHow } from "../shared/how.js";
-import how from "../../packages/lipsync/how";
 
 const r = result("lipsync");
-check(r, "lipsync: the how this works fold", mountHow(how) ? "pass" : "fail");
 $("#controls").innerHTML = `
 <label class="hb-ctl is-wide">text <input class="hb-input" id="text" type="text" autocomplete="off" value="the quick brown fox jumps over the lazy dog, then naps in the warm sun."></label>
 <button class="hb-btn" id="say">speak with the system voice</button>
