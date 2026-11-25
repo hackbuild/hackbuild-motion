@@ -5,7 +5,7 @@
 // the README the first ts block as the code sample. The paragraphs under
 // `how` start as the README's first paragraph and are rewritten by hand, so
 // an existing how.ts is never overwritten. It also lists how.ts in the
-// package `files`. tsconfig.how.json typechecks the result.
+// package `files`. tsconfig.how.json typechecks the result against tools/how.d.ts.
 // Usage: node tools/gen-how.mjs [package...]
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -35,12 +35,10 @@ for (const dir of readdirSync(join(root, "packages"))) {
   const code = (readme.match(/```ts\n([\s\S]*?)```/) ?? [, ""])[1].trimEnd();
   const first = readme.split(/\n\n/).find((b) => b.trim() && !b.startsWith("#")) ?? "";
   const body =
-    `// how this works: the fold on the package page and in the suite. Kept out of\n` +
-    `// the runtime entry; tsconfig.how.json typechecks it. Text from the README.\n` +
-    `export interface How {\n  /** one line: what the package is */\n  what: string;\n  /** short paragraphs: how it works */\n  how: string[];\n` +
-    `  packages: string[];\n  /** the install line once the packages are on npm */\n  install: string;\n  /** the line that works today */\n  today?: string;\n` +
-    `  code: string;\n  lang?: string;\n  links: { page?: string; source?: string };\n}\n\n` +
-    `const how: How = {\n` +
+    `// how this works: the fold of the package page and of the suite tool. Plain data, no imports;\n` +
+    `// shape in tools/how.d.ts, checked by tsconfig.how.json, shipped in the tarball, never imported\n` +
+    `// by the runtime entry. Text from the README.\n` +
+    `const how: HowDoc = {\n` +
     `  what: ${JSON.stringify(lower(pkg.description))},\n` +
     `  how: [\n    ${JSON.stringify(lower(first))},\n  ],\n` +
     `  packages: [${JSON.stringify(pkg.name)}],\n` +

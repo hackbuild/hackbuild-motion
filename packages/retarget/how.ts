@@ -1,21 +1,7 @@
-// how this works: the fold on the package page and in the suite. Kept out of
-// the runtime entry; tsconfig.how.json typechecks it. Text from the README.
-export interface How {
-  /** one line: what the package is */
-  what: string;
-  /** short paragraphs: how it works */
-  how: string[];
-  packages: string[];
-  /** the install line once the packages are on npm */
-  install: string;
-  /** the line that works today */
-  today?: string;
-  code: string;
-  lang?: string;
-  links: { page?: string; source?: string };
-}
-
-const how: How = {
+// how this works: the fold of the package page and of the suite tool. Plain data, no imports;
+// shape in tools/how.d.ts, checked by tsconfig.how.json, shipped in the tarball, never imported
+// by the runtime entry. Text from the README.
+const how: HowDoc = {
   what: "humanoid motion interchange format, clip retargeting between any rigs, bvh, vmd, vpd, vrma and unity clip readers, motion analysis that tags clips. rust core in wasm.",
   how: [
     "motion moves between rigs through the normalized humanoid space. a clip becomes a HumanoidMotion: local rotations per vrm bone and hip travel in multiples of hip height, so one motion fits a child and a tall adult.",

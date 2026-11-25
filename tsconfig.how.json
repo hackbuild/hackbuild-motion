@@ -3,7 +3,9 @@
   "compilerOptions": {
     "noEmit": true,
     "composite": false,
-    "declaration": false
+    "declaration": false,
+    "lib": ["ES2023"],
+    "types": []
   },
-  "include": ["packages/*/how.ts"]
+  "include": ["tools/how.d.ts", "packages/*/how.ts"]
 }

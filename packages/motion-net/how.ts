@@ -1,21 +1,7 @@
-// how this works: the fold on the package page and in the suite. Kept out of
-// the runtime entry; tsconfig.how.json typechecks it. Text from the README.
-export interface How {
-  /** one line: what the package is */
-  what: string;
-  /** short paragraphs: how it works */
-  how: string[];
-  packages: string[];
-  /** the install line once the packages are on npm */
-  install: string;
-  /** the line that works today */
-  today?: string;
-  code: string;
-  lang?: string;
-  links: { page?: string; source?: string };
-}
-
-const how: How = {
+// how this works: the fold of the package page and of the suite tool. Plain data, no imports;
+// shape in tools/how.d.ts, checked by tsconfig.how.json, shipped in the tarball, never imported
+// by the runtime entry. Text from the README.
+const how: HowDoc = {
   what: "runtime and quadruped gait host for a categorical codebook matching motion network. loads external cc by-nc 4.0 weights at run time. rust core on wasm simd128, worker with an in-page fallback.",
   how: [
     "a runtime for the published categorical codebook matching network (starke et al., siggraph 2024) and a host that turns its output into a walking quadruped. this code is mit; it was written from a functional specification of the network and the paper.",

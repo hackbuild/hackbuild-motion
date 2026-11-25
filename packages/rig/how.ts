@@ -1,21 +1,7 @@
-// how this works: the fold on the package page and in the suite. Kept out of
-// the runtime entry; tsconfig.how.json typechecks it. Text from the README.
-export interface How {
-  /** one line: what the package is */
-  what: string;
-  /** short paragraphs: how it works */
-  how: string[];
-  packages: string[];
-  /** the install line once the packages are on npm */
-  install: string;
-  /** the line that works today */
-  today?: string;
-  code: string;
-  lang?: string;
-  links: { page?: string; source?: string };
-}
-
-const how: How = {
+// how this works: the fold of the package page and of the suite tool. Plain data, no imports;
+// shape in tools/how.d.ts, checked by tsconfig.how.json, shipped in the tarball, never imported
+// by the runtime entry. Text from the README.
+const how: HowDoc = {
   what: "humanoid bone name mapper without per rig tables, limb chains, rest pose analysis, and the expression and viseme table. rust core in wasm.",
   how: [
     "every package in this repository works in one normalized humanoid space: vrm 1.0 bone names, t pose, +z forward, meters, feet at y = 0. this package gets a rig there.",

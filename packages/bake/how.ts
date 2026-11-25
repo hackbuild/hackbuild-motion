@@ -1,21 +1,7 @@
-// how this works: the fold on the package page and in the suite. Kept out of
-// the runtime entry; tsconfig.how.json typechecks it. Text from the README.
-export interface How {
-  /** one line: what the package is */
-  what: string;
-  /** short paragraphs: how it works */
-  how: string[];
-  packages: string[];
-  /** the install line once the packages are on npm */
-  install: string;
-  /** the line that works today */
-  today?: string;
-  code: string;
-  lang?: string;
-  links: { page?: string; source?: string };
-}
-
-const how: How = {
+// how this works: the fold of the package page and of the suite tool. Plain data, no imports;
+// shape in tools/how.d.ts, checked by tsconfig.how.json, shipped in the tarball, never imported
+// by the runtime entry. Text from the README.
+const how: HowDoc = {
   what: "glb optimize with texture hooks, clip bake into compact packs with error, seam and contact reports, and an asset lock file with licence and sha-256. rust core in wasm, plus a native command line tool.",
   how: [
     "one rust crate builds both the hackbuild-bake command line tool and the wasm module this package loads, so a bake in node, in a page and on the command line gives the same bytes.",

@@ -1,21 +1,7 @@
-// how this works: the fold on the package page and in the suite. Kept out of
-// the runtime entry; tsconfig.how.json typechecks it. Text from the README.
-export interface How {
-  /** one line: what the package is */
-  what: string;
-  /** short paragraphs: how it works */
-  how: string[];
-  packages: string[];
-  /** the install line once the packages are on npm */
-  install: string;
-  /** the line that works today */
-  today?: string;
-  code: string;
-  lang?: string;
-  links: { page?: string; source?: string };
-}
-
-const how: How = {
+// how this works: the fold of the package page and of the suite tool. Plain data, no imports;
+// shape in tools/how.d.ts, checked by tsconfig.how.json, shipped in the tarball, never imported
+// by the runtime entry. Text from the README.
+const how: HowDoc = {
   what: "procedural presence for humanoids: gaze with saccades and aversion, head recruitment, blink, breath, idle scheduler, pointing, reach, throw, and a layered clip player with loop seams and idle handback.",
   how: [
     "the small layers that make a standing humanoid read as present, in plain typescript over the organic springs and samplers. no wasm.",

@@ -1,21 +1,7 @@
-// how this works: the fold on the package page and in the suite. Kept out of
-// the runtime entry; tsconfig.how.json typechecks it. Text from the README.
-export interface How {
-  /** one line: what the package is */
-  what: string;
-  /** short paragraphs: how it works */
-  how: string[];
-  packages: string[];
-  /** the install line once the packages are on npm */
-  install: string;
-  /** the line that works today */
-  today?: string;
-  code: string;
-  lang?: string;
-  links: { page?: string; source?: string };
-}
-
-const how: How = {
+// how this works: the fold of the package page and of the suite tool. Plain data, no imports;
+// shape in tools/how.d.ts, checked by tsconfig.how.json, shipped in the tarball, never imported
+// by the runtime entry. Text from the README.
+const how: HowDoc = {
   what: "brightly lit scenes around a character: layouts as data, a set assembled from kit models and merged by material, image light from an hdri or the three.js room environment, a key light with a shadow and a rim light.",
   how: [
     "a scene around a character at the origin facing +z is a layout as data: a key light that casts the character's shadow, a rim light, image light from an hdri or the three.js room environment, a backdrop, an optional ground and fog, and a set built from kit models.",
