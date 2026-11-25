@@ -4,6 +4,8 @@ Rigs, retargeting, IK, procedural and neural motion, avatars and lip sync for 3D
 
 Live examples: <https://hackbuild.github.io/hackbuild-motion/>
 
+Every tool in one app: the suite, <https://hackbuild.github.io/hackbuild-suite/> (source <https://github.com/hackbuild/hackbuild-suite>).
+
 Status: phases A and C landed, 2026-11-22. Packages land in `packages/` as
 they pass their tests; the table below grows with them.
 
