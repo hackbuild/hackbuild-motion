@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/retarget",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Humanoid motion interchange format, clip retargeting between any rigs, BVH, VMD, VPD, VRMA and Unity clip readers, motion analysis that tags clips. Rust core in wasm.",
   "type": "module",
   "license": "MIT",
@@ -47,7 +47,7 @@
     "build": "node ../../tools/build-package.mjs retarget"
   },
   "dependencies": {
-    "@hackbuild/rig": "0.1.1"
+    "@hackbuild/rig": "0.1.2"
   },
   "peerDependencies": {
     "three": ">=0.186.1"

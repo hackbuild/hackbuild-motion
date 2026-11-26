@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/rig",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Humanoid bone name mapper without per rig tables, limb chains, rest pose analysis, and the expression and viseme table. Rust core in wasm.",
   "type": "module",
   "license": "MIT",

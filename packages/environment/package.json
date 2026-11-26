@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/environment",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Brightly lit scenes around a character: layouts as data, a set assembled from kit models and merged by material, image light from an HDRI or the three.js room environment, a key light with a shadow and a rim light.",
   "type": "module",
   "license": "MIT",

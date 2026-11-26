@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/bake",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "GLB optimize with texture hooks, clip bake into compact packs with error, seam and contact reports, and an asset lock file with licence and SHA-256. Rust core in wasm, plus a native command line tool.",
   "type": "module",
   "license": "MIT",

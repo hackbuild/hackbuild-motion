@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/motion-match",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Classic motion matching over a clip database: normalized trajectory and foot features, bounding box search, inertialized transitions. Rust core in wasm.",
   "type": "module",
   "license": "MIT",

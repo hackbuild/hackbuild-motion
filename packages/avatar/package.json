@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/avatar",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Load VRM, Mixamo, UAL, generic GLB and FBX characters into the normalized humanoid space, with material and texture repair, wardrobe slots, expressions and first person head hiding.",
   "type": "module",
   "license": "MIT",
@@ -46,7 +46,7 @@
     "build": "node ../../tools/build-package.mjs avatar"
   },
   "dependencies": {
-    "@hackbuild/rig": "0.1.1"
+    "@hackbuild/rig": "0.1.2"
   },
   "peerDependencies": {
     "@moeru/three-mmd": ">=0.2.0-beta.3",

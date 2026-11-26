@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/organic",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Critically damped springs, inertialization, seeded noise and samplers for procedural animation. Rust core in wasm.",
   "type": "module",
   "license": "MIT",

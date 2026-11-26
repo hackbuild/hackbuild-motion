@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/lipsync",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Viseme driver: timed words, phonemes or visemes from a TTS engine with coarticulation, or the audio level when no timings exist, out to Oculus visemes, VRM vowels or ARKit blendshapes.",
   "type": "module",
   "license": "MIT",
@@ -42,7 +42,7 @@
     "build": "node ../../tools/build-package.mjs lipsync"
   },
   "dependencies": {
-    "@hackbuild/rig": "0.1.1"
+    "@hackbuild/rig": "0.1.2"
   },
   "peerDependencies": {
     "bellows-voice": "0.8.0",
