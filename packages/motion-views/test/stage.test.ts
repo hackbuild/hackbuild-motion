@@ -73,4 +73,15 @@ describe("stageOrbit", () => {
     orbit.update();
     expect(new Vector3(0, 0, -1).applyQuaternion(cam.quaternion).dot(orbit.target.clone().sub(cam.position).normalize())).toBeCloseTo(1);
   });
+  it("leaves the camera where the page aimed it while disabled", () => {
+    const cam = new PerspectiveCamera();
+    cam.position.set(0, 1, 3);
+    const orbit = stageOrbit(cam, new EventTarget() as unknown as HTMLElement);
+    orbit.enabled = false;
+    cam.lookAt(5, 1, 3);
+    const q = cam.quaternion.clone();
+    orbit.update();
+    expect(cam.quaternion.equals(q)).toBe(true);
+    orbit.dispose();
+  });
 });

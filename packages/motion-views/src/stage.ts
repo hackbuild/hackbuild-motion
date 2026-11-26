@@ -13,9 +13,9 @@ import {
 export interface StageOrbit {
   /** The point the camera looks at and turns round. */
   readonly target: Vector3;
-  /** Off, the pointer leaves the camera alone (a page that drives it itself). */
+  /** Off, the pointer and update leave the camera alone (a page that drives it itself). */
   enabled: boolean;
-  /** Points the camera at the target; the stage calls it each frame. */
+  /** Points the camera at the target while enabled; the stage calls it each frame. */
   update(): void;
   dispose(): void;
 }
@@ -57,7 +57,7 @@ export function stageOrbit(camera: PerspectiveCamera, el: HTMLElement): StageOrb
   const orbit: StageOrbit = {
     target,
     enabled: true,
-    update: () => camera.lookAt(target),
+    update: () => { if (orbit.enabled) camera.lookAt(target) },
     dispose() {
       el.removeEventListener("pointerdown", down);
       el.removeEventListener("pointermove", move);
