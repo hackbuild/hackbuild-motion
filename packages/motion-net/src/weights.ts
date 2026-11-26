@@ -3,6 +3,7 @@
 // Every tensor is checked against the dimensions before anything runs.
 import { BONES, BONE_COUNT, STYLES, type StyleLabel } from "./layout.js";
 
+/** The licence line of the network weights, stated on the first load in a page. */
 export const WEIGHT_LICENCE =
   "motion-net weights: cc by-nc 4.0, paul starke and sebastian starke, meta, ai4animationpy. fetched at run time, never bundled, not for commercial use.";
 
@@ -16,10 +17,13 @@ export const UPSTREAM = {
   binBytes: 17_704_644,
 } as const;
 
+/** Where a weight part comes from: a URL to fetch, bytes, or a File or Blob. */
 export type Source = URL | string | ArrayBuffer | ArrayBufferView | Blob;
 
+/** The storage type of one tensor in the binary. */
 export type Dtype = "f16" | "f32";
 
+/** Where one tensor sits in the binary: byte offset, value count, shape and dtype. */
 export interface TensorEntry {
   offset: number;
   count: number;
@@ -27,6 +31,7 @@ export interface TensorEntry {
   dtype: Dtype;
 }
 
+/** The JSON manifest that describes the network and every tensor in the binary. */
 export interface Manifest {
   model: {
     input_dim: number;
@@ -44,6 +49,7 @@ export interface Manifest {
   [k: string]: unknown;
 }
 
+/** The network dimensions read from the manifest. */
 export interface Dims {
   dIn: number;
   dOut: number;
@@ -53,6 +59,7 @@ export interface Dims {
   passes: number;
 }
 
+/** Checked weights, ready for `Predictor.create`. */
 export interface Weights {
   manifest: Manifest;
   bin: ArrayBuffer;
@@ -67,6 +74,7 @@ export interface Weights {
   licence: string;
 }
 
+/** Options of `loadWeights`: the two parts, an optional SHA-256 and progress and licence callbacks. */
 export interface LoadOptions {
   manifest: Source | Manifest;
   bin: Source;
@@ -199,6 +207,7 @@ async function bytesOf(src: Source, opts: LoadOptions): Promise<ArrayBuffer> {
   return out.buffer;
 }
 
+/** The SHA-256 of a buffer as lowercase hex. */
 export async function sha256Hex(buf: ArrayBuffer): Promise<string> {
   const d = await crypto.subtle.digest("SHA-256", buf);
   return Array.from(new Uint8Array(d), (b) => b.toString(16).padStart(2, "0")).join("");

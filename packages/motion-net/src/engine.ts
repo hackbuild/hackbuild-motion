@@ -15,8 +15,10 @@
 // (requestId, message), "network-crashed" (message).
 import type { Dims, Dtype, Weights } from "./weights.js";
 
+/** Where the network runs: a blob worker or the page. */
 export type EngineMode = "worker" | "page";
 
+/** One evaluation of the network: 16 frames of output, the code and the time it took. */
 export interface RawPrediction {
   /** 16 rows of 412 denormalized values. */
   frames: Float32Array;
@@ -201,6 +203,7 @@ export function engineMain(port: Port): void {
   };
 }
 
+/** Options of `Predictor.create`: worker choice, wasm source and worker start timeout. */
 export interface PredictorOptions {
   /** "auto" tries a worker and falls back to the page; true insists on a worker; false runs in the page. */
   worker?: boolean | "auto";

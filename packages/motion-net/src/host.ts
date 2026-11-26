@@ -13,7 +13,9 @@ import type { RawPrediction } from "./engine.js";
 
 // The locomotion contract, structurally the same as @hackbuild/gait's, so
 // this package does not depend on that one.
+/** What drives a locomotion backend. */
 export type MotorSource = "procedural" | "neural" | "motion-match" | "clip" | "other";
+/** Stride phase, duty and paw contacts of the host, in the shape @hackbuild/gait uses. */
 export interface MotorState {
   source: MotorSource;
   phase: number;
@@ -21,11 +23,13 @@ export interface MotorState {
   strideFrequency: number;
   contacts: boolean[];
 }
+/** What a locomotion backend can do. */
 export interface Capabilities {
   turnInPlace: boolean;
   minStopDistance: number;
   headPitchBias: number;
 }
+/** Root position, facing and velocity on the ground after one update: meters, radians, m/s and rad/s. */
 export interface RootMotion {
   x: number;
   z: number;
@@ -33,6 +37,7 @@ export interface RootMotion {
   speed: number;
   turnRate: number;
 }
+/** A locomotion command: forward speed, turn rate and an optional posture blend. */
 export interface GaitCommand {
   /** Forward speed, m/s. */
   speed: number;
@@ -40,12 +45,14 @@ export interface GaitCommand {
   turnRate: number;
   posture?: { sit?: number; down?: number; bow?: number; reach?: number };
 }
+/** The locomotion backend contract shared with @hackbuild/gait, so the host stands in for the procedural gait. */
 export interface LocomotionBackend {
   readonly capabilities: Capabilities;
   update(dt: number, cmd: GaitCommand): RootMotion;
   motorState(): MotorState;
 }
 
+/** A host command: a gait command plus an optional world velocity, facing and style. */
 export interface HostCommand extends GaitCommand {
   /** World planar velocity, m/s; overrides `speed` and lets the dog move sideways. */
   velocity?: { x: number; z: number };
@@ -55,10 +62,12 @@ export interface HostCommand extends GaitCommand {
   style?: StyleLabel | "auto";
 }
 
+/** Anything that evaluates the network, usually a `Predictor`; a stand in for tests. */
 export interface Predicts {
   predict(input: Float32Array): Promise<RawPrediction>;
 }
 
+/** Timing, smoothing, paw pinning and style thresholds of the host. */
 export interface HostTuning {
   /** Seconds between prediction requests. */
   interval: number;
@@ -93,6 +102,7 @@ export interface HostTuning {
 }
 
 // Each value is chosen for a reason given beside it.
+/** The default host tuning; each value has its reason beside it in the source. */
 export const DEFAULT_TUNING: HostTuning = {
   // 0.1 s: ten replans a second answer a command within one step, and each
   // prediction covers 0.5 s, so a late one still has frames to play. At
@@ -278,6 +288,7 @@ function rotateArc(v: V3, a: V3, b: V3): V3 {
   return add(add(scale(v, c), cross(k, v)), scale(k, dot(k, v) / (1 + c)));
 }
 
+/** The state of one paw: contact, pin and phase. */
 export interface PawState {
   /** Raw contact value of the network, sampled now. */
   contact: number;

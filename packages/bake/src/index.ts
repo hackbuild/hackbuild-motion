@@ -10,10 +10,12 @@ export type { WasmSource } from "./load.js";
 
 const PKG = "@hackbuild/bake";
 
+/** Loads the wasm core once: from a URL, bytes or a compiled module, or from the inlined copy when you pass nothing. Call it before anything else. */
 export async function load(source?: WasmSource): Promise<void> {
   await loadWasm(source);
 }
 
+/** Loads the wasm core synchronously from bytes or a compiled module. */
 export function loadSync(source: ArrayBuffer | ArrayBufferView | WebAssembly.Module): void {
   loadWasmSync(source);
 }
@@ -23,8 +25,10 @@ const bytesOf = (b: ArrayBuffer | ArrayBufferView): Uint8Array =>
 
 // textures
 
+/** What a texture does in its material, which picks its size limit. */
 export type TextureRole = "baseColor" | "emissive" | "normal" | "orm" | "other";
 
+/** One embedded image of a GLB: index, role, mime type, size and pixel dimensions. */
 export interface TextureInfo {
   image: number;
   role: TextureRole;
@@ -35,6 +39,7 @@ export interface TextureInfo {
   height: number | null;
 }
 
+/** What the texture hook gets: the image facts, its bytes and its size limit. */
 export interface TextureRequest extends TextureInfo {
   data: Uint8Array;
   /** The limit for this role in pixels, 0 when none was set. */
@@ -44,6 +49,7 @@ export interface TextureRequest extends TextureInfo {
 /** Returns new bytes and their mime type, or null to keep the image. */
 export type TextureHook = (t: TextureRequest) => Promise<{ bytes: Uint8Array; mime: string } | null> | { bytes: Uint8Array; mime: string } | null;
 
+/** Lists the embedded images of a GLB with their roles and sizes. */
 export function listTextures(glb: ArrayBuffer | ArrayBufferView): TextureInfo[] {
   assertReady(PKG);
   return JSON.parse(wasm.listTextures(bytesOf(glb))) as TextureInfo[];
@@ -51,6 +57,7 @@ export function listTextures(glb: ArrayBuffer | ArrayBufferView): TextureInfo[] 
 
 // optimize
 
+/** Options of `optimizeModel`: simplification, texture limits and the resize hook. */
 export interface OptimizeOptions {
   /** Share of triangles to keep, 0 to 1. Default 1, no simplification. */
   ratio?: number;
@@ -64,6 +71,7 @@ export interface OptimizeOptions {
   resize?: TextureHook;
 }
 
+/** What `optimizeModel` changed: bytes, vertices, triangles, textures and skipped primitives. */
 export interface OptimizeReport {
   bytesIn: number;
   bytesOut: number;
@@ -84,6 +92,7 @@ function wasmGlb(glb: ArrayBuffer | ArrayBufferView): Uint8Array {
   return bytesOf(glb).slice();
 }
 
+/** Welds, simplifies and repacks a GLB, swapping in the images your resize hook returns. */
 export async function optimizeModel(glb: ArrayBuffer | ArrayBufferView, opts: OptimizeOptions = {}): Promise<{ glb: Uint8Array; report: OptimizeReport }> {
   assertReady(PKG);
   const input = wasmGlb(glb);
@@ -145,6 +154,7 @@ function imageViews(glb: Uint8Array): Map<number, Uint8Array> {
 
 // clips
 
+/** The rig of a clip set: role names, parents and rest translations. */
 export interface Skeleton {
   roles: string[];
   /** Parent index per role, -1 for the root; parents come first. */
@@ -153,6 +163,7 @@ export interface Skeleton {
   rest: [number, number, number][];
 }
 
+/** One clip to bake: name, loop flag, local rotations and optional root translation. */
 export interface SourceClip {
   name: string;
   loop?: boolean;
@@ -162,6 +173,7 @@ export interface SourceClip {
   p?: ArrayLike<number>;
 }
 
+/** How foot contacts are found: foot roles, height and speed limits and the shortest contact. */
 export interface ContactRule {
   feet: string[];
   height: number;
@@ -169,6 +181,7 @@ export interface ContactRule {
   minFrames: number;
 }
 
+/** Everything `bakeClips` takes: frame rate, skeleton, clips, contact rule and seam limit. */
 export interface BakeInput {
   fps: number;
   skeleton: Skeleton;
@@ -177,6 +190,7 @@ export interface BakeInput {
   seamLimitDeg?: number;
 }
 
+/** Quantization error, seam and contacts of one baked clip. */
 export interface ClipReport {
   name: string;
   frames: number;
@@ -190,6 +204,7 @@ export interface ClipReport {
   contactFrames: number[];
 }
 
+/** One clip in a pack: int16 rotations and root positions and a contact byte per frame. */
 export interface PackedClip {
   name: string;
   /** Time of the last frame, (n - 1) / fps. */
@@ -205,6 +220,7 @@ export interface PackedClip {
   contacts: Uint8Array;
 }
 
+/** A decoded clip pack: frame rate, roles, parents, feet and clips by name. */
 export interface ClipPack {
   fps: number;
   roles: string[];
@@ -213,6 +229,7 @@ export interface ClipPack {
   clips: Record<string, PackedClip>;
 }
 
+/** Bakes clips into the compact HBCP pack and reports error, seams and contacts per clip. */
 export function bakeClips(input: BakeInput): { bytes: Uint8Array; pack: ClipPack; report: ClipReport[] } {
   assertReady(PKG);
   const json = JSON.stringify({ ...input, clips: input.clips.map((c) => ({ name: c.name, loop: c.loop ?? false, q: Array.from(c.q), p: Array.from(c.p ?? []) })) });
@@ -309,6 +326,7 @@ export function sampleClip(pack: ClipPack, clip: PackedClip, t: number, out: Flo
 
 // lock
 
+/** One row of assets.lock.json: path, source, licence, SHA-256, bytes and an optional budget. */
 export interface AssetEntry {
   path: string;
   source: string;
@@ -318,11 +336,13 @@ export interface AssetEntry {
   budget?: number;
 }
 
+/** The SHA-256 of bytes as lowercase hex, computed in the wasm core. */
 export function sha256Hex(bytes: ArrayBuffer | ArrayBufferView): string {
   assertReady(PKG);
   return wasm.sha256Hex(bytesOf(bytes));
 }
 
+/** A lock row for one file, with its SHA-256 and byte count measured from the bytes. */
 export function lockEntry(path: string, bytes: ArrayBuffer | ArrayBufferView, source: string, licence: string, budget?: number): AssetEntry {
   const b = bytesOf(bytes);
   const e: AssetEntry = { path, source, licence, sha256: sha256Hex(b), bytes: b.byteLength };
@@ -336,6 +356,7 @@ export function writeLock(entries: AssetEntry[]): string {
   return wasm.writeLock(JSON.stringify(entries));
 }
 
+/** Checks files against assets.lock.json: hashes, sizes, budgets, missing licences and licences matching a forbidden substring such as "NC". */
 export function checkLock(lockText: string, files: Map<string, Uint8Array> | Record<string, Uint8Array>, forbid: string[] = []): { ok: boolean; failures: string[] } {
   assertReady(PKG);
   const list = files instanceof Map ? [...files.entries()] : Object.entries(files);
@@ -351,6 +372,7 @@ export function checkLock(lockText: string, files: Map<string, Uint8Array> | Rec
 
 // fixtures for tests and demos
 
+/** A deterministic trace of the core for one seed, compared between the native and wasm builds in tests. */
 export function goldenTrace(seed: number): Float64Array {
   assertReady(PKG);
   return wasm.goldenTrace(seed);

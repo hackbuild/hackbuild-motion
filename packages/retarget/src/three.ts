@@ -5,6 +5,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import type { FaceTrack } from "./formats.js";
 import { type Clip, type HumanoidMotion, RetargetRig, type Skeleton } from "./index.js";
 
+/** A skeleton read from a three.js scene graph, with the scene nodes behind each joint. */
 export interface SceneSkeleton {
   skeleton: Skeleton;
   nodes: Object3D[];

@@ -4,6 +4,7 @@
 // from file:// where fetch of a local file is refused.
 import initAsync, { initSync as initFromBytes } from "./wasm/bake.js";
 
+/** Where the wasm core comes from: a URL to fetch, a Response, bytes or a compiled module. */
 export type WasmSource = URL | string | Response | ArrayBuffer | ArrayBufferView | WebAssembly.Module;
 
 let pending: Promise<void> | null = null;

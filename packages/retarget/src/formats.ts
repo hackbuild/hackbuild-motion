@@ -61,6 +61,7 @@ export function faceTracks(morphs: VmdMotion["morphs"], frames: number): FaceTra
   return out;
 }
 
+/** A humanoid motion with the expression tracks over the same frames. */
 export interface MotionWithFace {
   motion: HumanoidMotion;
   /** Expression tracks over the same frames as `motion`. */
@@ -130,6 +131,7 @@ export function parseVpd(bytes: Uint8Array, decode: (b: Uint8Array) => string = 
   }
 }
 
+/** One key of a Unity curve: time in seconds and its values. */
 export interface UnityKey {
   time: number;
   value: number[];

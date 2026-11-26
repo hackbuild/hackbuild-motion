@@ -5,14 +5,17 @@ import { assertReady, loadWasm, loadWasmSync, type WasmSource } from "./load.js"
 import * as wasm from "./wasm/retarget.js";
 
 export type { WasmSource } from "./load.js";
+/** A VRM 1.0 humanoid bone name, re-exported from @hackbuild/rig/bones. */
 export type { HumanBone } from "@hackbuild/rig/bones";
 
 const PKG = "@hackbuild/retarget";
 
+/** Loads the wasm core once: from a URL, bytes or a compiled module, or from the inlined copy when you pass nothing. Call it before anything else. */
 export async function load(source?: WasmSource): Promise<void> {
   await loadWasm(source);
 }
 
+/** Loads the wasm core synchronously from bytes or a compiled module. */
 export function loadSync(source: ArrayBuffer | ArrayBufferView | WebAssembly.Module): void {
   loadWasmSync(source);
 }
@@ -103,6 +106,7 @@ export function parseBvh(text: string): { skeleton: Skeleton; clip: Clip } {
   return fromSkeletal(wasm.parseBvh(text));
 }
 
+/** A parsed VMD file: its skeleton, its clip, the unit in meters and its morph keys. */
 export interface VmdMotion {
   skeleton: Skeleton;
   clip: Clip;
@@ -208,6 +212,7 @@ export function settleOnFloor(m: HumanoidMotion): { motion: HumanoidMotion; shif
   return { motion: fromWasmMotion(w), shift };
 }
 
+/** What `analyzeMotion` finds in a motion: duration, loop, head pitch, energy and tags. */
 export interface MotionFindings {
   duration: number;
   looping: boolean;
@@ -243,6 +248,7 @@ export function packMotion(m: HumanoidMotion): Uint8Array {
   }
 }
 
+/** Reads the compact binary form back into a motion; null when the bytes are not that form. */
 export function unpackMotion(bytes: Uint8Array): HumanoidMotion | null {
   assertReady(PKG);
   const w = wasm.HumanoidMotion.unpack(bytes);
@@ -256,6 +262,7 @@ export function retargetLimb(srcTop: [number, number, number], srcEnd: [number, 
   return [o[0]!, o[1]!, o[2]!];
 }
 
+/** A deterministic trace of the core for one seed, compared between the native and wasm builds in tests. */
 export function goldenTrace(seed: number): Float64Array {
   assertReady(PKG);
   return wasm.goldenTrace(seed);

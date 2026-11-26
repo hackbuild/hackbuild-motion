@@ -17,6 +17,7 @@ export async function load(source?: WasmSource): Promise<void> {
   await loadWasm(source);
 }
 
+/** Loads the page side wasm synchronously from bytes or a compiled module. */
 export function loadSync(source: ArrayBuffer | ArrayBufferView | WebAssembly.Module): void {
   loadWasmSync(source);
 }

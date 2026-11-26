@@ -8,10 +8,12 @@ export type { WasmSource } from "./load.js";
 
 const PKG = "@hackbuild/motion-match";
 
+/** Loads the wasm core once: from a URL, bytes or a compiled module, or from the inlined copy when you pass nothing. Call it before anything else. */
 export async function load(source?: WasmSource): Promise<void> {
   await loadWasm(source);
 }
 
+/** Loads the wasm core synchronously from bytes or a compiled module. */
 export function loadSync(source: ArrayBuffer | ArrayBufferView | WebAssembly.Module): void {
   loadWasmSync(source);
 }
@@ -20,8 +22,10 @@ export function loadSync(source: ArrayBuffer | ArrayBufferView | WebAssembly.Mod
 // @hackbuild/gait, so a matcher stands in for the procedural gait without
 // this package depending on that one.
 
+/** What drives a locomotion backend. */
 export type MotorSource = "procedural" | "neural" | "motion-match" | "clip" | "other";
 
+/** Stride phase, duty and foot contacts of a backend, for layers that follow the feet. */
 export interface MotorState {
   source: MotorSource;
   /** Stride phase of the reference foot (the first), 0 at its touchdown. */
@@ -31,6 +35,7 @@ export interface MotorState {
   contacts: boolean[];
 }
 
+/** What a locomotion backend can do. */
 export interface Capabilities {
   turnInPlace: boolean;
   /** The closest this backend can stop to a goal, meters. */
@@ -39,6 +44,7 @@ export interface Capabilities {
   headPitchBias: number;
 }
 
+/** Root position, facing and velocity on the ground after one update: meters, radians, m/s and rad/s. */
 export interface RootMotion {
   x: number;
   z: number;
@@ -47,6 +53,7 @@ export interface RootMotion {
   turnRate: number;
 }
 
+/** A locomotion command: forward speed, turn rate and an optional posture blend. */
 export interface GaitCommand {
   /** Forward speed, m/s. */
   speed: number;
@@ -55,6 +62,7 @@ export interface GaitCommand {
   posture?: { sit?: number; down?: number; bow?: number; reach?: number };
 }
 
+/** The locomotion backend contract shared with @hackbuild/gait, so a matcher stands in for the procedural gait. */
 export interface LocomotionBackend {
   readonly capabilities: Capabilities;
   update(dt: number, cmd: GaitCommand): RootMotion;
@@ -76,6 +84,7 @@ export interface ClipInput {
   contacts: ArrayLike<number | boolean>;
 }
 
+/** Settings of a synthetic two foot gait clip made in code. */
 export interface SyntheticGait {
   /** Speed at the start, m/s. */
   speed: number;
@@ -120,6 +129,7 @@ export class ClipSet {
   }
 }
 
+/** Feature layout and search settings of the matching database. */
 export interface MatchConfig {
   /** Future trajectory sample times, seconds. Default 1/3, 2/3, 1. */
   trajTimes: number[];
@@ -130,6 +140,7 @@ export interface MatchConfig {
   boxLarge: number;
 }
 
+/** The default feature layout and search settings. */
 export const DEFAULT_CONFIG: MatchConfig = {
   trajTimes: [1 / 3, 2 / 3, 1],
   weights: { footPosition: 0.75, footVelocity: 1, hipVelocity: 1, trajectoryPosition: 1, trajectoryDirection: 1.5 },
@@ -138,6 +149,7 @@ export const DEFAULT_CONFIG: MatchConfig = {
   boxLarge: 64,
 };
 
+/** Runtime settings of a matcher: search interval, transition halflife and jump threshold. */
 export interface MatcherParams {
   /** Seconds between searches. */
   searchInterval: number;
@@ -149,8 +161,10 @@ export interface MatcherParams {
   trajectoryHalflife: number;
 }
 
+/** The default runtime settings of a matcher. */
 export const DEFAULT_PARAMS: MatcherParams = { searchInterval: 0.1, halflife: 0.1, minImprovement: 0.05, trajectoryHalflife: 0.25 };
 
+/** Options of a new matcher: config, params, start frame and capabilities. */
 export interface MatcherOptions {
   config?: Partial<MatchConfig>;
   params?: Partial<MatcherParams>;
@@ -159,6 +173,7 @@ export interface MatcherOptions {
   capabilities?: Partial<Capabilities>;
 }
 
+/** The blended pose of the current frame. */
 export interface MatchPose {
   /** `x y z w` per bone, local rotations after inertialization. */
   rotations: Float64Array;
@@ -168,6 +183,7 @@ export interface MatchPose {
   feet: [number, number, number][];
 }
 
+/** One matcher step: root motion plus the clip and frame playing and whether it jumped. */
 export interface MatchFrame extends RootMotion {
   clip: number;
   frame: number;
@@ -263,6 +279,7 @@ export class MotionMatcher implements LocomotionBackend {
   }
 }
 
+/** A deterministic trace of the core for one seed, compared between the native and wasm builds in tests. */
 export function goldenTrace(seed: number): Float64Array {
   assertReady(PKG);
   return wasm.goldenTrace(seed);
