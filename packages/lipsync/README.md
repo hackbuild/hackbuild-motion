@@ -170,6 +170,6 @@ Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LIC
 | `dist/index.js` (main entry, imports external) | 6,086 bytes | 6,390 bytes |
 | `dist/lipsync.iife.js` (single file build) | 9,872 bytes | 10,365 bytes |
 
-Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-26 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.

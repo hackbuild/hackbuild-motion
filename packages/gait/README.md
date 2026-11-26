@@ -179,6 +179,6 @@ Not verified by anything:
 | `dist/wasm/gait_bg.wasm` | 39,043 bytes | 40,995 bytes |
 | `dist/gait.iife.js` (single file build) | 61,421 bytes | 64,492 bytes |
 
-Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-26 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.

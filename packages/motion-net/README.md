@@ -181,6 +181,6 @@ The tests that need the weights run only when `HB_MOTION_NET_BIN` and `HB_MOTION
 | `dist/wasm/motion_net_bg.wasm` | 23,690 bytes | 24,874 bytes |
 | `dist/motion-net.iife.js` (single file build) | 48,160 bytes | 50,568 bytes |
 
-Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-26 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.

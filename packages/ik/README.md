@@ -165,6 +165,6 @@ Not verified by anything:
 | `dist/wasm/ik_bg.wasm` | 32,703 bytes | 34,338 bytes |
 | `dist/ik.iife.js` (single file build) | 51,571 bytes | 54,149 bytes |
 
-Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-26 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.

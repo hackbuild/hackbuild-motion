@@ -201,6 +201,6 @@ Not verified by anything:
 | `dist/index.js` (main entry, imports external) | 3,840 bytes | 4,032 bytes |
 | `dist/avatar-host.iife.js` (single file build) | 196,986 bytes | 206,835 bytes |
 
-Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-26 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
