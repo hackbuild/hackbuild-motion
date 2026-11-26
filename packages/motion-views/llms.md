@@ -383,6 +383,7 @@ interface CharacterStageOptions extends StageOptions {
   background?: number | null;
   body?: Omit<BodyOptions, "rng">;
   canvas?: HTMLCanvasElement;
+  clips?: string | ClipPack;
   drop?: boolean;
   environment?: string | EnvironmentRequest;
   follow?: FollowOptions;
@@ -392,6 +393,7 @@ interface CharacterStageOptions extends StageOptions {
   maxPixelRatio?: number;
   name?: string;
   normalize?: NormalizeOptions;
+  plate?: boolean;
   repair?: false | RepairOptions;
   restoreButton?: boolean;
   rng?: Rng;
@@ -403,6 +405,16 @@ interface CharacterStageOptions extends StageOptions {
 ```
 
 Options of `characterStage`: stage options plus name, model URL, verbs, framing, drop and the hello speech.
+
+```ts
+interface ClipPack {
+  clips: Record<string, { dur: number; loop: boolean; n: number; p?: string; q: string }>;
+  fps: number;
+  roles: readonly string[];
+}
+```
+
+The pack file: role names, frame rate and the clips.
 
 ```ts
 function clipStrip(host: HTMLElement, opts?: ClipStripOptions): ClipStripHandle
@@ -519,6 +531,24 @@ interface MotionViewsOptions {
 ```
 
 Options `defineMotionViews` shares with every element it defines.
+
+```ts
+function packClips(pack: ClipPack, names: readonly string[], base: ArrayLike<number>): Record<string, Clip>
+```
+
+The pack's clips as presence clips over `names` (the body's bone order).
+
+```ts
+function packCoverage(pack: ClipPack, names: readonly string[]): number
+```
+
+How many of the pack's roles land on one of `names`.
+
+```ts
+function rigGestureClip(id: Gesture, bones: readonly Object3D<Object3DEventMap>[], names: readonly string[], fps?: number): Clip | null
+```
+
+A gesture as a presence clip built on the rig itself: each bone is aimed or turned in world space, in the body's own frame (forward, left and up from its shoulders), then read back as local rotations.
 
 ```ts
 function stageOrbit(camera: PerspectiveCamera, el: HTMLElement): StageOrbit

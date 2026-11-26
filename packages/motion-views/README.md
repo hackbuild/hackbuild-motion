@@ -69,7 +69,11 @@ document.querySelector("hb-avatar-drop")!.addEventListener("picked", (e) => stag
 
 ### speech on the stage
 
-`say(speech)` plays an AudioBuffer or an audio element through an analyser whose level and bands open the mouth, with the word or phoneme timings a speech engine reports. Text alone moves the lips on estimated word timings with no sound. `speechSource` says where the last timings came from. `gesture("wave" | "nod" | "shake" | "bow")` plays a gesture written in code over the body's own bones, and `play(clip)` plays a presence clip or a three.js AnimationClip.
+`say(speech)` plays an AudioBuffer or an audio element through an analyser whose level and bands open the mouth, with the word or phoneme timings a speech engine reports. Text alone moves the lips on estimated word timings with no sound. `speechSource` says where the last timings came from. `gesture("wave" | "nod" | "shake" | "bow")` plays a gesture built on the rig itself: each bone is aimed or turned in world space in the body's own frame, so the same wave works on a VRM or on any other humanoid rig, and the arm eases up, waves and eases down (`rigGestureClip`). `play(clip)` plays a presence clip or a three.js AnimationClip.
+
+### a clip pack for the idle
+
+`clips` takes a clip pack baked onto the shown body's rig (its URL or the parsed file, the dog simulator's `anims.json` shape: roles, fps and int16 rotations per clip). Its `Idle_Loop` plays under everything once the body loads and `Idle_Talking_Loop` while the body speaks, with the clip player's fades. A body the pack does not fit (fewer than 12 roles land) keeps the rest stance. `packClips` and `packCoverage` do the conversion for any host. The name and doing plate at the top left shows only with `plate: true`.
 
 ### the rig check in plain words
 
@@ -161,6 +165,8 @@ Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LIC
 | a bvh walk retargets onto the stand-in; six clips bake into one pack and read back; a loop cut short is flagged at its seam | pass |
 | the three demo pages at 1440 and 390 px against the suite's screen gate | pass |
 | unit tests over the words and the clip items | pass |
+| unit tests: a pack maps onto the body's bone order; the rig wave raises the arm and ends where it began; the nod moves only the head | pass |
+| the owner's person glb with its clip pack in headless Chrome: idle frames differ (head and both arms), the wave raises the right arm and hands back to the idle (frame strip, looked at by the coordinator) | pass, headless |
 
 ### Not verified by anything
 
@@ -175,8 +181,8 @@ Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LIC
 | file | gzip (measured) | ceiling |
 |---|---|---|
 | `dist/index.js` (main entry, imports external) | 3,266 bytes | 3,429 bytes |
-| `dist/motion-views.iife.js` (single file build) | 215,543 bytes | 226,320 bytes |
+| `dist/motion-views.iife.js` (single file build) | 221,256 bytes | 232,318 bytes |
 
-Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
+Measured 2026-11-26 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.

@@ -343,6 +343,7 @@ Options of `characterStage`: stage options plus name, model URL, verbs, framing,
 | <a id="property-background"></a> `background?` | `number` \| `null` | Scene background; null leaves the canvas transparent. Default null. | `StageOptions.background` |
 | <a id="property-body-1"></a> `body?` | `Omit`\<`BodyOptions`, `"rng"`\> | - | `StageOptions.body` |
 | <a id="property-canvas"></a> `canvas?` | `HTMLCanvasElement` | A canvas to draw on; by default the stage makes one and appends it to the container. | `StageOptions.canvas` |
+| <a id="property-clips"></a> `clips?` | `string` \| [`ClipPack`](#clippack) | A clip pack baked onto the shown body's rig (its URL or the parsed file): its Idle_Loop plays under everything, Idle_Talking_Loop while it speaks. Ignored for bodies it does not fit (fewer than 12 bones land). | - |
 | <a id="property-drop"></a> `drop?` | `boolean` | Take files dropped on the stage. Default true. | - |
 | <a id="property-environment"></a> `environment?` | `string` \| `EnvironmentRequest` | A scene to show from the start, as `setEnvironment` takes it. | `StageOptions.environment` |
 | <a id="property-follow"></a> `follow?` | `FollowOptions` | - | `StageOptions.follow` |
@@ -352,6 +353,7 @@ Options of `characterStage`: stage options plus name, model URL, verbs, framing,
 | <a id="property-maxpixelratio"></a> `maxPixelRatio?` | `number` | Device pixels per CSS pixel, at most. Default 2 (proposed); a lit scene caps it at 1.5 (vendor). | `StageOptions.maxPixelRatio` |
 | <a id="property-name-1"></a> `name?` | `string` | The name on the corner plate. Default the body's name. | - |
 | <a id="property-normalize-1"></a> `normalize?` | `NormalizeOptions` | - | `StageOptions.normalize` |
+| <a id="property-plate"></a> `plate?` | `boolean` | Show the name and doing plate at the top left. Default false. | - |
 | <a id="property-repair-1"></a> `repair?` | `false` \| `RepairOptions` | - | `StageOptions.repair` |
 | <a id="property-restorebutton"></a> `restoreButton?` | `boolean` | A button with the restore line over a lost context. Default true. | `StageOptions.restoreButton` |
 | <a id="property-rng"></a> `rng?` | `Rng` | Seeded randomness for gaze and blinks. Default seededRng("avatar-host"). | `StageOptions.rng` |
@@ -359,6 +361,20 @@ Options of `characterStage`: stage options plus name, model URL, verbs, framing,
 | <a id="property-statsevery"></a> `statsEvery?` | `number` | Seconds between stats events. Default 1. | `StageOptions.statsEvery` |
 | <a id="property-verbs"></a> `verbs?` | readonly [`Verb`](#verb)[] | - | - |
 | <a id="property-vrm-1"></a> `vrm?` | () => `Promise`\<`VrmHook`\> | The VRM hook, imported on the first .vrm: `() => import("@hackbuild/avatar/vrm").then((m) => m.vrmHook())`. Without it a VRM loads as plain glTF. | `StageOptions.vrm` |
+
+***
+
+### ClipPack
+
+The pack file: role names, frame rate and the clips.
+
+#### Properties
+
+| Property | Type |
+| ------ | ------ |
+| <a id="property-clips-1"></a> `clips` | `Record`\<`string`, \{ `dur`: `number`; `loop`: `boolean`; `n`: `number`; `p?`: `string`; `q`: `string`; \}\> |
+| <a id="property-fps"></a> `fps` | `number` |
+| <a id="property-roles"></a> `roles` | readonly `string`[] |
 
 ***
 
@@ -678,7 +694,7 @@ Options of `walkBvh`.
 
 | Property | Type | Description |
 | ------ | ------ | ------ |
-| <a id="property-fps"></a> `fps?` | `number` | - |
+| <a id="property-fps-1"></a> `fps?` | `number` | - |
 | <a id="property-seconds-1"></a> `seconds?` | `number` | Loop length in seconds. Default 2.4. |
 | <a id="property-swing"></a> `swing?` | `number` | Stride scale: 0.6 strolls, 1.5 marches. Default 1. |
 
@@ -1096,6 +1112,89 @@ across (the camera starts 80 units out, looking down at 30 degrees).
 #### Returns
 
 [`MeshTurntable`](#meshturntable)
+
+***
+
+### packClips()
+
+```ts
+function packClips(
+   pack, 
+   names, 
+   base
+): Record<string, Clip>;
+```
+
+The pack's clips as presence clips over `names` (the body's bone order).
+`base` holds bones times 4 local rotations for the bones the pack does
+not move (fingers, eyes), usually the pose when the body loaded.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `pack` | [`ClipPack`](#clippack) |
+| `names` | readonly `string`[] |
+| `base` | `ArrayLike`\<`number`\> |
+
+#### Returns
+
+`Record`\<`string`, `Clip`\>
+
+***
+
+### packCoverage()
+
+```ts
+function packCoverage(pack, names): number;
+```
+
+How many of the pack's roles land on one of `names`.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `pack` | [`ClipPack`](#clippack) |
+| `names` | readonly `string`[] |
+
+#### Returns
+
+`number`
+
+***
+
+### rigGestureClip()
+
+```ts
+function rigGestureClip(
+   id, 
+   bones, 
+   names, 
+   fps?
+): Clip | null;
+```
+
+A gesture as a presence clip built on the rig itself: each bone is aimed
+or turned in world space, in the body's own frame (forward, left and up
+from its shoulders), then read back as local rotations. Works on any
+humanoid rig, whatever its bone axes. The arm eases up, waves and eases
+down; nod, shake and bow ease in and out. `bones` and `names` are the
+body's bone order; the pose they hold now is the base. Returns null when
+the rig lacks the gesture's bones.
+
+#### Parameters
+
+| Parameter | Type | Default value |
+| ------ | ------ | ------ |
+| `id` | [`Gesture`](#gesture-1) | `undefined` |
+| `bones` | readonly `Object3D`\<`Object3DEventMap`\>[] | `undefined` |
+| `names` | readonly `string`[] | `undefined` |
+| `fps?` | `number` | `30` |
+
+#### Returns
+
+`Clip` \| `null`
 
 ***
 

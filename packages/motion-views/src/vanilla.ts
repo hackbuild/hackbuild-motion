@@ -7,5 +7,6 @@ export * from "./character-stage.js";
 export * from "./avatar-drop.js";
 export * from "./clip-strip.js";
 export * from "./gestures.js";
+export * from "./clip-pack.js";
 export * from "./elements.js";
 export * from "./stage.js";

@@ -14,7 +14,8 @@ import type { BodySource, DroppedFile } from "@hackbuild/avatar-host";
 import { AvatarStage, type Body, type BodyCaps, type StageOptions } from "@hackbuild/avatar-host/three";
 import { dropRoutes } from "@virgilvox/hackbuild-ui/vanilla";
 import { button, el, iconButton, part } from "./dom.js";
-import { type Gesture, GESTURES, gestureClip } from "./gestures.js";
+import { type Gesture, GESTURES, gestureClip, rigGestureClip } from "./gestures.js";
+import { type ClipPack, packClips, packCoverage } from "./clip-pack.js";
 
 /** The stage shot: bust, or the full body. */
 export type Framing = "bust" | "full";
@@ -49,6 +50,14 @@ export interface CharacterStageOptions extends StageOptions {
   hello?: string | Speech | (() => Speech | Promise<Speech>);
   /** The context real speech plays through; default one made on the first audio. */
   audioContext?: AudioContext;
+  /**
+   * A clip pack baked onto the shown body's rig (its URL or the parsed
+   * file): its Idle_Loop plays under everything, Idle_Talking_Loop while it
+   * speaks. Ignored for bodies it does not fit (fewer than 12 bones land).
+   */
+  clips?: string | ClipPack;
+  /** Show the name and doing plate at the top left. Default false. */
+  plate?: boolean;
 }
 
 /** Events of CharacterStage: a body loaded or failed, what it is doing, a verb pressed, the framing changed. */
@@ -111,6 +120,7 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
   const turnBtn = iconButton(doc, "flip", "turn around");
   const frameBtn = iconButton(doc, "frame", "full body", { "aria-pressed": "false" });
   const tag = el(doc, "div", "hb-stage-tag", {}, [nameEl, doingEl]);
+  if (!opts.plate) tag.style.display = "none";
   const tagCorner = el(doc, "div", "hb-ov hb-ov-tl");
   const corner = el(doc, "div", "hb-ov hb-ov-tr", {}, [turnBtn, frameBtn]);
   // the stage first, so its canvas sits under the plate
@@ -148,10 +158,33 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
       if (!opts.name) nameEl.textContent = e.placeholder ? "stand-in" : e.name;
       applyFraming();
       setDoing("idle");
+      packed = null;
+      if (!e.placeholder) void usePack();
       emit({ type: "loaded", name: e.name, caps: e.caps, warnings: e.warnings, placeholder: e.placeholder });
     }),
     stage.on("failed", (e) => emit({ type: "failed", message: e.message })),
   );
+
+  // the clip pack: the body's own mocap idle under everything, the talking idle while it speaks
+  let packed: Record<string, Clip> | null = null;
+  let packFile: Promise<ClipPack | null> | null = null;
+  async function usePack(): Promise<void> {
+    const body = stage.body;
+    if (!opts.clips || !body) return;
+    packFile ??= typeof opts.clips === "string"
+      ? fetch(opts.clips).then((r) => (r.ok ? (r.json() as Promise<ClipPack>) : null)).catch(() => null)
+      : Promise.resolve(opts.clips);
+    const pack = await packFile;
+    if (!pack || stage.body !== body || packCoverage(pack, body.names) < 12) return;
+    const base = new Float32Array(body.bones.length * 4);
+    body.bones.forEach((b, i) => b.quaternion.toArray(base, i * 4));
+    packed = packClips(pack, body.names, base);
+    idleLoop(0.4);
+  }
+  function idleLoop(fade: number, talking = false): void {
+    const c = packed?.[talking ? "Idle_Talking_Loop" : "Idle_Loop"] ?? packed?.Idle_Loop;
+    if (c && stage.body) stage.body.play(c, { layer: "body", loop: true, background: true, fade });
+  }
 
   // bust: the knees to the top of the head, the original's opening shot; full: the follow camera
   function applyFraming(): void {
@@ -222,9 +255,12 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
   function gesture(id: Gesture): boolean {
     const body = stage.body;
     if (!body) return false;
-    const base = new Float32Array(body.bones.length * 4);
-    body.bones.forEach((b, i) => b.quaternion.toArray(base, i * 4));
-    const clip = gestureClip(id, body.names, base);
+    let clip = rigGestureClip(id, body.bones, body.names);
+    if (!clip) {
+      const base = new Float32Array(body.bones.length * 4);
+      body.bones.forEach((b, i) => b.quaternion.toArray(base, i * 4));
+      clip = gestureClip(id, body.names, base);
+    }
     if (!clip) return false;
     return play(clip, { layer: id === "bow" ? "body" : "upper" }) >= 0;
   }
@@ -300,6 +336,7 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
     body.lip.push(events);
     body.setGazeMode("talk");
     setDoing("talking");
+    idleLoop(0.5, true);
     stage.loop.sync();
     start?.();
     if (analyser && audioCtx) {
@@ -325,6 +362,7 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
     analyser?.disconnect();
     stage.body?.lip.setLevel(0);
     stage.body?.setGazeMode("listen");
+    idleLoop(0.6);
     if (doing === "talking") setDoing("idle");
   }
 

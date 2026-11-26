@@ -3,7 +3,7 @@
 // three.js AnimationClip that the clip thumbnails need. Bones a gesture
 // does not touch keep the pose they had when it was built, so an upper
 // layer wave leaves the relaxed left arm where it was.
-import { AnimationClip, Quaternion, QuaternionKeyframeTrack, Vector3 } from "three";
+import { AnimationClip, type Object3D, Quaternion, QuaternionKeyframeTrack, Vector3 } from "three";
 import type { Clip } from "@hackbuild/presence";
 
 /** A gesture written in code over the body's own bones. */
@@ -85,4 +85,83 @@ export function animationClipOf(clip: Clip, names: readonly string[]): Animation
     return new QuaternionKeyframeTrack(`${name}.quaternion`, times, values);
   });
   return new AnimationClip(clip.name, (clip.frames - 1) / clip.fps, tracks);
+}
+
+const ss = (a: number, b: number, x: number) => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+/** Seconds each rig gesture runs. */
+const RIG_SECONDS: Record<Gesture, number> = { wave: 2.6, nod: 1.2, shake: 1.4, bow: 2 };
+
+/**
+ * A gesture as a presence clip built on the rig itself: each bone is aimed
+ * or turned in world space, in the body's own frame (forward, left and up
+ * from its shoulders), then read back as local rotations. Works on any
+ * humanoid rig, whatever its bone axes. The arm eases up, waves and eases
+ * down; nod, shake and bow ease in and out. `bones` and `names` are the
+ * body's bone order; the pose they hold now is the base. Returns null when
+ * the rig lacks the gesture's bones.
+ */
+export function rigGestureClip(id: Gesture, bones: readonly Object3D[], names: readonly string[], fps = 30): Clip | null {
+  const at = (n: string) => {
+    const i = names.indexOf(n);
+    return i < 0 ? null : bones[i]!;
+  };
+  const lu = at("leftUpperArm"), ru = at("rightUpperArm"), rl = at("rightLowerArm"), rh = at("rightHand"), head = at("head");
+  const spine = at("spine"), chest = at("chest");
+  if (!lu || !ru) return null;
+  if (id === "wave" && (!rl || !rh)) return null;
+  if ((id === "nod" || id === "shake") && !head) return null;
+  if (id === "bow" && !spine) return null;
+  const n = bones.length;
+  const base = bones.map((b) => b.quaternion.clone());
+  const top = bones[0]!.parent ?? bones[0]!;
+  top.updateMatrixWorld(true);
+  const wp = (o: Object3D, v = new Vector3()) => o.getWorldPosition(v);
+  const up = new Vector3(0, 1, 0);
+  const L = wp(lu).sub(wp(ru)).setY(0).normalize();
+  const F = new Vector3().crossVectors(L, up).normalize();
+  const R = L.clone().negate();
+  const pq = new Quaternion(), bq = new Quaternion(), rq = new Quaternion();
+  const turnWorld = (b: Object3D, rw: Quaternion) => {
+    b.parent!.getWorldQuaternion(pq);
+    b.getWorldQuaternion(bq);
+    b.quaternion.copy(pq.invert().multiply(rw).multiply(bq));
+    b.updateMatrixWorld(true);
+  };
+  const aim = (b: Object3D, child: Object3D, dir: Vector3, w: number) => {
+    const cur = wp(child).sub(wp(b)).normalize();
+    const want = cur.clone().lerp(dir, w).normalize();
+    turnWorld(b, rq.setFromUnitVectors(cur, want));
+  };
+  const seconds = RIG_SECONDS[id];
+  const frames = Math.round(seconds * fps) + 1;
+  const rotations = new Float32Array(frames * n * 4);
+  const armUp = R.clone().multiplyScalar(0.55).addScaledVector(up, 0.8).addScaledVector(F, 0.22).normalize();
+  for (let f = 0; f < frames; f++) {
+    const t = f / (frames - 1);
+    bones.forEach((b, i) => b.quaternion.copy(base[i]!));
+    top.updateMatrixWorld(true);
+    if (id === "wave") {
+      const e = ss(0, 0.22, t) * (1 - ss(0.8, 1, t));
+      aim(ru, rl!, armUp, e);
+      const osc = 0.42 * Math.sin(2 * Math.PI * 3 * ss(0.18, 0.84, t)) * ss(0.12, 0.3, t) * (1 - ss(0.74, 0.86, t));
+      const fore = up.clone().addScaledVector(F, 0.12).addScaledVector(R, 0.08).applyAxisAngle(F, -osc).normalize();
+      aim(rl!, rh!, fore, e);
+    } else if (id === "nod") {
+      turnWorld(head!, rq.setFromAxisAngle(L, 0.24 * Math.sin(2 * Math.PI * t) ** 2 * (1 - ss(0.85, 1, t))));
+    } else if (id === "shake") {
+      turnWorld(head!, rq.setFromAxisAngle(up, 0.32 * Math.sin(4 * Math.PI * t) * Math.sin(Math.PI * t)));
+    } else {
+      const e = ss(0, 0.35, t) * (1 - ss(0.65, 1, t));
+      turnWorld(spine!, rq.setFromAxisAngle(L, 0.32 * e));
+      if (chest) turnWorld(chest, rq.setFromAxisAngle(L, 0.18 * e));
+      if (head) turnWorld(head, rq.setFromAxisAngle(L, -0.12 * e));
+    }
+    bones.forEach((b, i) => b.quaternion.toArray(rotations, (f * n + i) * 4));
+  }
+  bones.forEach((b, i) => b.quaternion.copy(base[i]!));
+  top.updateMatrixWorld(true);
+  return { name: id, fps, frames, bones: n, loop: false, rotations };
 }
