@@ -15,11 +15,14 @@ export async function load(source?: WasmSource): Promise<void> {
   await loadWasm(source);
 }
 
+/** Loads the wasm synchronously from bytes or a compiled module. */
 export function loadSync(source: ArrayBuffer | ArrayBufferView | WebAssembly.Module): void {
   loadWasmSync(source);
 }
 
+/** A point or direction as `[x, y, z]`, +Y up. */
 export type Vec3 = [number, number, number];
+/** A rotation as a unit quaternion `[x, y, z, w]`. */
 export type Quat = [number, number, number, number];
 
 /** A bone of the source skeleton: its name and its parent's index or name. */
@@ -28,8 +31,10 @@ export interface RigNodeInput {
   parent: number | string | null;
 }
 
+/** The naming family a rig was recognised as, from its bone names. */
 export type Dialect = "mixamo" | "mixamo-like" | "vroid" | "biped" | "unreal" | "blender" | "character-creator" | "smpl" | "mmd" | "generic";
 
+/** The result of `mapRig`: the humanoid bone of each source node, what is missing or unmapped, the dialect, and the share of required bones found. */
 export interface RigMapReport {
   /** Humanoid bone to source node index. */
   byBone: Partial<Record<HumanBone, number>>;
@@ -89,6 +94,7 @@ export function mapRig(nodes: readonly RigNodeInput[]): RigMapReport {
   }
 }
 
+/** A named chain of nodes from root to tip, with the direction its middle joint bends. */
 export interface LimbChain {
   /** LF, RF, LH, RH, tail, earL, earR, spine, neck, head. */
   name: string;
@@ -107,8 +113,10 @@ export function limbChains(nodes: readonly RigNodeInput[], rest?: readonly Vec3[
   return JSON.parse(wasm.limbChains(nodes.map((n) => n.name), parentsOf(nodes), pos)) as LimbChain[];
 }
 
+/** The length unit a rig was authored in, guessed from its height. */
 export type Units = "meters" | "centimeters" | "millimeters" | "unknown" | "decimeters" | "inches";
 
+/** What `analyzeRest` found about a rest pose: the turn, scale and floor that bring it into the normalized space, and the arm and leg fixes toward a T pose. */
 export interface RestReport {
   /** Rotation that turns the rig to face +Z with +Y up and its left on +X. */
   fix: Quat;

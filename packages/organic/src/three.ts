@@ -3,6 +3,7 @@ import type { Bone, Object3D } from "three";
 import { assertReady } from "./load.js";
 import { Inertializer } from "./wasm/organic.js";
 
+/** Options of `PoseInertializer`. */
 export interface PoseInertializerOptions {
   /** Objects whose `position` is inertialized too, such as the hips or root. */
   positions?: Object3D[];

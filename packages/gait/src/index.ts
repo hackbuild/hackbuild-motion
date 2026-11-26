@@ -8,10 +8,12 @@ export type { WasmSource } from "./load.js";
 
 const PKG = "@hackbuild/gait";
 
+/** Loads the wasm. With no argument the inlined copy is used, which works from file://. */
 export async function load(source?: WasmSource): Promise<void> {
   await loadWasm(source);
 }
 
+/** Loads the wasm synchronously from bytes or a compiled module. */
 export function loadSync(source: ArrayBuffer | ArrayBufferView | WebAssembly.Module): void {
   loadWasmSync(source);
 }
@@ -19,9 +21,12 @@ export function loadSync(source: ArrayBuffer | ArrayBufferView | WebAssembly.Mod
 /** Uniform numbers in [0, 1); the family contract. Used here only to seed the wasm streams. */
 export type Rng = () => number;
 
+/** A quadruped gait, from slowest to fastest. */
 export type GaitName = "walk" | "pace" | "trot" | "canter" | "gallop";
+/** The gait names in the order the footfall tables use. */
 export const GAIT_NAMES: readonly GaitName[] = ["walk", "pace", "trot", "canter", "gallop"];
 
+/** One gait's footfall pattern: stance start per leg, duty factor, swing clearance and the stride frequency terms. */
 export interface FootfallTable {
   name: GaitName;
   /** Stance start phase per leg, LF RF LH RH. */
@@ -33,6 +38,7 @@ export interface FootfallTable {
   freqW: number;
 }
 
+/** The footfall tables of the five quadruped gaits, read from the wasm core. */
 export function quadrupedTables(): FootfallTable[] {
   assertReady(PKG);
   const f = wasm.quadrupedTables();
@@ -51,6 +57,7 @@ export interface LegSpec {
   front: boolean;
 }
 
+/** What the caller asks of the gait each frame: forward speed, turn rate and optional posture weights. */
 export interface GaitCommand {
   /** Forward speed, m/s. */
   speed: number;
@@ -60,6 +67,7 @@ export interface GaitCommand {
   posture?: { sit?: number; down?: number; bow?: number; reach?: number };
 }
 
+/** One foot's world position this frame, whether it is in stance, and its swing progress. */
 export interface FootState {
   x: number;
   /** World height: ground plus the swing height. */
@@ -69,6 +77,7 @@ export interface FootState {
   swing: number;
 }
 
+/** One frame of the gait: blended gait weights, phase, feet, stride frequency and duty, Froude number and touchdowns. */
 export interface GaitState {
   phase: number;
   weights: Record<GaitName, number>;
@@ -83,6 +92,7 @@ export interface GaitState {
   legPhases: number[];
 }
 
+/** Ground height in meters at a world `x`, `z`. */
 export type Ground = (x: number, z: number) => number;
 
 /** Which source drives the body: show it wherever motion is diagnosed. */
@@ -194,6 +204,7 @@ export class QuadrupedGait {
   }
 }
 
+/** Where the shoulders and hips sit along the body, the track half width, and the size against the tuned default dog. */
 export interface BodyGeometry {
   frontZ: number;
   rearZ: number;
@@ -202,6 +213,7 @@ export interface BodyGeometry {
   size: number;
 }
 
+/** One frame of body state from `BodyDynamics`: root height, drop, pitch, roll, spine bend, posture weights and per leg offsets. */
 export interface BodyPose {
   rootY: number;
   drop: number;
@@ -257,8 +269,10 @@ export class BodyDynamics {
   }
 }
 
+/** The eight tail wag modes, in the order `WagInput.modeWeights` uses. */
 export const WAG_MODES = ["still", "slow wide", "fast small", "loose broad", "helicopter", "high stiff", "tucked", "tip flick"] as const;
 
+/** What drives the tail each frame: a weight per wag mode, arousal, and optional lift, bias, turn and scale terms. */
 export interface WagInput {
   modeWeights: readonly number[];
   arousal: number;
@@ -301,12 +315,14 @@ export class Ears {
   }
 }
 
+/** A circular obstacle on the ground plane: centre `x`, `z` and radius `r` in meters. */
 export interface Obstacle {
   x: number;
   z: number;
   r: number;
 }
 
+/** Steering settings: cruise speed, stop distance, obstacle clearance and influence, turn rates, and an optional fence. */
 export interface SteerParams {
   speed: number;
   stopDistance: number;
@@ -318,6 +334,7 @@ export interface SteerParams {
   fence: number;
 }
 
+/** Default steering settings, tuned on a 0.78 m dog. */
 export const DEFAULT_STEER: SteerParams = { speed: 1.6, stopDistance: 0.3, clearance: 0.3, influence: 1.6, turnSlow: 3.2, turnFast: 1.6, fence: 0 };
 
 /** Potential field steering toward a goal; a pure function. */
@@ -328,6 +345,7 @@ export function steer(pose: { x: number; z: number; yaw: number; v: number }, go
   return { speed: o[0]!, turnRate: o[1]!, arrived: o[2] === 1 };
 }
 
+/** What a locomotion backend can do: turn in place, how close it stops, and the head pitch its motion carries. */
 export interface Capabilities {
   turnInPlace: boolean;
   /** The closest this backend can stop to a goal, meters. */
@@ -336,6 +354,7 @@ export interface Capabilities {
   headPitchBias: number;
 }
 
+/** The body root after a frame: position, yaw, speed and turn rate. */
 export interface RootMotion {
   x: number;
   z: number;
@@ -384,6 +403,7 @@ export function solveLeg(a: [number, number, number], b: [number, number, number
   return { upper: [o[6]!, o[7]!, o[8]!, o[9]!] as [number, number, number, number], lower: [o[10]!, o[11]!, o[12]!, o[13]!] as [number, number, number, number], reached: o[14] === 1 };
 }
 
+/** The golden scenario run in wasm, for the native and wasm agreement test. */
 export function goldenTrace(seed: number): Float64Array {
   assertReady(PKG);
   return wasm.goldenTrace(seed);

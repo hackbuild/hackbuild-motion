@@ -4,6 +4,7 @@
 // from file:// where fetch of a local file is refused.
 import initAsync, { initSync as initFromBytes } from "./wasm/gait.js";
 
+/** Where the wasm comes from: a URL or path to fetch, a Response, the bytes, or a compiled module. */
 export type WasmSource = URL | string | Response | ArrayBuffer | ArrayBufferView | WebAssembly.Module;
 
 let pending: Promise<void> | null = null;

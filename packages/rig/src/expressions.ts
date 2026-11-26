@@ -5,6 +5,7 @@
 // Plain data in TypeScript: every reader is TypeScript and should not wait
 // for wasm to read a table.
 
+/** The VRM 1.0 expression presets. */
 export const VRM_EXPRESSIONS = [
   "happy", "angry", "sad", "relaxed", "surprised",
   "aa", "ih", "ou", "ee", "oh",
@@ -12,11 +13,15 @@ export const VRM_EXPRESSIONS = [
   "lookUp", "lookDown", "lookLeft", "lookRight",
   "neutral",
 ] as const;
+/** One VRM 1.0 expression preset. */
 export type VrmExpression = (typeof VRM_EXPRESSIONS)[number];
 
+/** The five VRM mouth vowel presets. */
 export const VRM_VOWELS = ["aa", "ih", "ou", "ee", "oh"] as const;
+/** One VRM mouth vowel preset. */
 export type VrmVowel = (typeof VRM_VOWELS)[number];
 
+/** The 52 ARKit face blendshape names. */
 export const ARKIT_52 = [
   "eyeBlinkLeft", "eyeLookDownLeft", "eyeLookInLeft", "eyeLookOutLeft", "eyeLookUpLeft", "eyeSquintLeft", "eyeWideLeft",
   "eyeBlinkRight", "eyeLookDownRight", "eyeLookInRight", "eyeLookOutRight", "eyeLookUpRight", "eyeSquintRight", "eyeWideRight",
@@ -28,14 +33,18 @@ export const ARKIT_52 = [
   "browDownLeft", "browDownRight", "browInnerUp", "browOuterUpLeft", "browOuterUpRight",
   "cheekPuff", "cheekSquintLeft", "cheekSquintRight", "noseSneerLeft", "noseSneerRight", "tongueOut",
 ] as const;
+/** One ARKit face blendshape name. */
 export type ArkitShape = (typeof ARKIT_52)[number];
 
+/** The 15 Oculus visemes, silence first. */
 export const OCULUS_VISEMES = ["sil", "PP", "FF", "TH", "DD", "kk", "CH", "SS", "nn", "RR", "aa", "E", "I", "O", "U"] as const;
+/** One Oculus viseme. */
 export type OculusViseme = (typeof OCULUS_VISEMES)[number];
 
 /** Morph name used for an Oculus viseme on Ready Player Me style models. */
 export const oculusMorph = (v: OculusViseme): string => `viseme_${v}`;
 
+/** A morph target name and the weight it gets in an expression. */
 export interface MorphWeight {
   morph: string;
   weight: number;
@@ -142,6 +151,7 @@ export const OVERRIDE_BLINK: readonly VrmExpression[] = ["happy", "relaxed"];
 
 const norm = (s: string): string => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 
+/** How one expression preset binds to a model's morphs, and where that binding came from. */
 export interface ResolvedExpression {
   /** Morphs and weights that make the preset, by morph name as found. */
   binds: MorphWeight[];

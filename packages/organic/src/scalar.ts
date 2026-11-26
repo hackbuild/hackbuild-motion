@@ -27,16 +27,20 @@ export function seededRng(seed: number | string): Rng {
   };
 }
 
+/** Position `x`, velocity `v` and acceleration `a` of one scalar spring, changed in place by the spring calls. */
 export interface SpringState {
   x: number;
   v: number;
   a: number;
 }
 
+/** A spring state at rest at `x` (default 0). */
 export const springState = (x = 0): SpringState => ({ x, v: 0, a: 0 });
 
 const EPS = 1e-5;
+/** The damping constant for a half life in seconds, the time the spring takes to cover half the distance to its goal. */
 export const halflifeToDamping = (halflife: number): number => (4 * Math.LN2) / (halflife + EPS);
+/** A rational approximation of `exp(-x)` for x of 0 or more, used when `exact` is false. */
 export const fastNegexp = (x: number): number => 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
 const negexp = (x: number, exact: boolean): number => (exact ? Math.exp(-x) : fastNegexp(x));
 

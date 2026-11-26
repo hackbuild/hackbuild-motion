@@ -4,6 +4,7 @@ import { Group, Object3D, Quaternion, Vector3 } from "three";
 import type { HumanBone } from "./bones.js";
 import { type LimbChain, type RestReport, type RigMapReport, type Vec3, analyzeRest, limbChains, mapRig } from "./index.js";
 
+/** The result of `mapObject3D`: the map report, the scene object of each humanoid bone, and the nodes in report order. */
 export interface MappedObject {
   report: RigMapReport;
   /** Humanoid bone to scene object. */
@@ -59,6 +60,7 @@ export function restOf(bones: Partial<Record<HumanBone, Object3D>>): RestReport 
   return analyzeRest(pos);
 }
 
+/** Options of `applyRestFix`. */
 export interface RestFixOptions {
   /** Target height for the head joint in meters; default keeps the measured size. */
   headHeight?: number;

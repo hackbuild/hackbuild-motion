@@ -5,17 +5,22 @@ import { assertReady, loadWasm, loadWasmSync, type WasmSource } from "./load.js"
 import * as wasm from "./wasm/ik.js";
 
 export type { WasmSource } from "./load.js";
+/** Holds a foot where it landed while contact is high and releases it smoothly when contact drops. `new ContactLock(threshold, release)`, then `update(dt, target, contact, out)` per frame writes the shown foot position into `out`; call `free()` when done. */
 export { ContactLock } from "./wasm/ik.js";
 
+/** A point or direction as `[x, y, z]` in meters, +Y up. */
 export type Vec3 = [number, number, number];
+/** A rotation as a unit quaternion `[x, y, z, w]`. */
 export type Quat = [number, number, number, number];
 
 const PKG = "@hackbuild/ik";
 
+/** Loads the wasm. With no argument the inlined copy is used, which works from file://. */
 export async function load(source?: WasmSource): Promise<void> {
   await loadWasm(source);
 }
 
+/** Loads the wasm synchronously from bytes or a compiled module. */
 export function loadSync(source: ArrayBuffer | ArrayBufferView | WebAssembly.Module): void {
   loadWasmSync(source);
 }
@@ -24,6 +29,7 @@ const f64 = (...v: number[][]): Float64Array => Float64Array.from(v.flat());
 const v3 = (a: Float64Array, i: number): Vec3 => [a[i]!, a[i + 1]!, a[i + 2]!];
 const q4 = (a: Float64Array, i: number): Quat => [a[i]!, a[i + 1]!, a[i + 2]!, a[i + 3]!];
 
+/** The solved middle and end joints of a two bone chain and the world rotation deltas that put the bones there. */
 export interface TwoBoneResult {
   mid: Vec3;
   end: Vec3;
@@ -41,13 +47,16 @@ export function twoBone(a: Vec3, b: Vec3, c: Vec3, target: Vec3, pole: Vec3, sof
   return { mid: v3(o, 0), end: v3(o, 3), upper: q4(o, 6), lower: q4(o, 10), reached: o[14] === 1 };
 }
 
+/** A joint limit for `fabrik`: none, a cone of `max` radians around the parent segment, or a hinge around `axis`. */
 export type JointLimit = { kind: "none" } | { kind: "cone"; max: number } | { kind: "hinge"; axis: Vec3 };
 
+/** Iteration cap and goal tolerance in meters for `fabrik` and `ccd`. */
 export interface ChainOptions {
   iterations?: number;
   tolerance?: number;
 }
 
+/** How a chain solve ended: the iterations used and the remaining distance to the target in meters. */
 export interface SolveInfo {
   iterations: number;
   error: number;
@@ -81,6 +90,7 @@ export function segmentDeltas(old: readonly Vec3[], next: readonly Vec3[]): Quat
   return Array.from({ length: o.length / 4 }, (_, i) => q4(o, i * 4));
 }
 
+/** Yaw and pitch limits in radians for a look at, measured from the frame's forward. */
 export interface LookLimits {
   yawMin: number;
   yawMax: number;
@@ -88,8 +98,10 @@ export interface LookLimits {
   pitchMax: number;
 }
 
+/** Head limits: yaw within 1.25 rad either side, pitch from 0.8 rad down to 0.6 rad up. */
 export const DEFAULT_LOOK_LIMITS: LookLimits = { yawMin: -1.25, yawMax: 1.25, pitchMin: -0.8, pitchMax: 0.6 };
 
+/** The clamped yaw and pitch of a look at, and what is left over for the body to turn. */
 export interface LookResult {
   yaw: number;
   pitch: number;
@@ -125,6 +137,7 @@ export function clampDirection(head: Quat, dir: Vec3, maxYaw = 0.43, maxPitch = 
   return v3(wasm.clampDirection(f64(head), f64(dir), maxYaw, maxPitch), 0);
 }
 
+/** A palm frame, the grip point, and the curl axes and angles for the fingers and thumb. */
 export interface HandCurl {
   forward: Vec3;
   across: Vec3;
@@ -161,6 +174,7 @@ export function pelvisDrop(hip: Vec3, foot: Vec3, reach: number, up: Vec3 = [0, 
   return wasm.pelvisDrop(f64(hip), f64(foot), reach, f64(up));
 }
 
+/** The golden scenario run in wasm, for the native and wasm agreement test. */
 export function goldenTrace(seed: number): Float64Array {
   assertReady(PKG);
   return wasm.goldenTrace(seed);

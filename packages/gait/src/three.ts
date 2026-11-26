@@ -3,6 +3,7 @@
 import { type Object3D, Quaternion, Vector3 } from "three";
 import { type BodyGeometry, type BodyPose, type GaitState, type LegSpec, solveLeg } from "./index.js";
 
+/** Bone names of one leg: upper, middle and end joints, then the toe bones. */
 export interface LegNames {
   up: string;
   mid: string;
@@ -11,6 +12,7 @@ export interface LegNames {
   toes: string[];
 }
 
+/** Bone names of a quadruped: the four legs, the hips, and optional spine, tail and ear bones. */
 export interface QuadrupedNames {
   legs: { LF: LegNames; RF: LegNames; LH: LegNames; RH: LegNames };
   /** The bone that carries the body's pitch, roll and drop. */
@@ -30,6 +32,7 @@ interface MeasuredLeg {
   endRest: Quaternion;
 }
 
+/** A quadruped rig measured from its rest pose by `measureQuadruped`, ready for `driveQuadruped`. */
 export interface QuadrupedRig {
   root: Object3D;
   hips: Object3D;
@@ -117,6 +120,7 @@ function setWorld(o: Object3D, q: Quaternion): void {
   o.updateMatrixWorld(true);
 }
 
+/** Optional tail, ear and IK settings for `driveQuadruped`. */
 export interface DriveExtras {
   /** Tail link yaw angles and the root link lift, from `TailWag`. */
   tail?: { yaw: number[]; lift: number };

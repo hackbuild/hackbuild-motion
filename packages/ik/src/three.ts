@@ -62,6 +62,7 @@ export function lookAtChain(bones: Object3D[], weights: number[], target: Vector
   return a;
 }
 
+/** The finger and thumb bones of one hand that `curlFingers` rotates; missing bones are skipped. */
 export interface FingerBones {
   thumb?: Object3D[];
   index?: Object3D[];

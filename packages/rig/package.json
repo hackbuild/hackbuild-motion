@@ -43,6 +43,7 @@
   "files": [
     "dist",
     "README.md",
+    "llms.md",
     "LICENSE",
     "how.ts"
   ],
