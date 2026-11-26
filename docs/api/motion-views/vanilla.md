@@ -500,6 +500,48 @@ Options of `clipStrip`: the items, the picked clip, the play button and stills.
 
 ***
 
+### MeshTurntable
+
+A running turntable: its stage, what it shows, and how to stop it.
+
+#### Properties
+
+| Property | Type |
+| ------ | ------ |
+| <a id="property-stage-1"></a> `stage` | [`ThreeStage`](#threestage) |
+
+#### Methods
+
+##### dispose()
+
+```ts
+dispose(): void;
+```
+
+###### Returns
+
+`void`
+
+##### show()
+
+```ts
+show(o): void;
+```
+
+Shows `o` in place of what was shown; the old one's meshes are freed.
+
+###### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `o` | `Object3D` |
+
+###### Returns
+
+`void`
+
+***
+
 ### MotionViewsOptions
 
 Options `defineMotionViews` shares with every element it defines.
@@ -509,7 +551,44 @@ Options `defineMotionViews` shares with every element it defines.
 | Property | Type | Description |
 | ------ | ------ | ------ |
 | <a id="property-drop-1"></a> `drop?` | [`AvatarDropOptions`](#avatardropoptions) | Options every hb-avatar-drop shares: the vrm hook. |
-| <a id="property-stage-1"></a> `stage?` | [`CharacterStageOptions`](#characterstageoptions) | Options every hb-character-stage shares: the vrm hook, lights, follow. |
+| <a id="property-stage-2"></a> `stage?` | [`CharacterStageOptions`](#characterstageoptions) | Options every hb-character-stage shares: the vrm hook, lights, follow. |
+
+***
+
+### StageOrbit
+
+Drag to turn the camera round `target`, wheel or pinch to move in and out.
+
+#### Properties
+
+| Property | Modifier | Type | Description |
+| ------ | ------ | ------ | ------ |
+| <a id="property-enabled"></a> `enabled` | `public` | `boolean` | Off, the pointer leaves the camera alone (a page that drives it itself). |
+| <a id="property-target"></a> `target` | `readonly` | `Vector3` | The point the camera looks at and turns round. |
+
+#### Methods
+
+##### dispose()
+
+```ts
+dispose(): void;
+```
+
+###### Returns
+
+`void`
+
+##### update()
+
+```ts
+update(): void;
+```
+
+Points the camera at the target; the stage calls it each frame.
+
+###### Returns
+
+`void`
 
 ***
 
@@ -537,6 +616,46 @@ A clip in the strip; `animation` lets the strip draw its still.
 
 ***
 
+### ThreeStage
+
+A running stage: its scene, camera, renderer and orbit, and how to stop it.
+
+#### Properties
+
+| Property | Type | Description |
+| ------ | ------ | ------ |
+| <a id="property-camera"></a> `camera` | `PerspectiveCamera` | - |
+| <a id="property-orbit"></a> `orbit` | [`StageOrbit`](#stageorbit) | The drag orbit; set `orbit.enabled = false` to drive the camera from the page. |
+| <a id="property-renderer"></a> `renderer` | `WebGLRenderer` | - |
+| <a id="property-scene"></a> `scene` | `Scene` | - |
+
+#### Methods
+
+##### dispose()
+
+```ts
+dispose(): void;
+```
+
+###### Returns
+
+`void`
+
+***
+
+### ThreeStageOptions
+
+Options of `threeStage`.
+
+#### Properties
+
+| Property | Type | Description |
+| ------ | ------ | ------ |
+| <a id="property-ground"></a> `ground?` | `boolean` | A paper coloured ground plane, 40 m square. Default on. |
+| <a id="property-renderer-1"></a> `renderer?` | `WebGLRenderer` | Pass a renderer the page already made; the stage still sizes and frees it. |
+
+***
+
 ### Verb
 
 One verb on the stage. `go` makes it the one pink action; give it to one verb at most.
@@ -548,6 +667,20 @@ One verb on the stage. `go` makes it the one pink action; give it to one verb at
 | <a id="property-go-2"></a> `go?` | `boolean` |
 | <a id="property-id-1"></a> `id` | `string` |
 | <a id="property-label-2"></a> `label` | `string` |
+
+***
+
+### WalkBvhOptions
+
+Options of `walkBvh`.
+
+#### Properties
+
+| Property | Type | Description |
+| ------ | ------ | ------ |
+| <a id="property-fps"></a> `fps?` | `number` | - |
+| <a id="property-seconds-1"></a> `seconds?` | `number` | Loop length in seconds. Default 2.4. |
+| <a id="property-swing"></a> `swing?` | `number` | Stride scale: 0.6 strolls, 1.5 marches. Default 1. |
 
 ## Type Aliases
 
@@ -707,6 +840,45 @@ A gesture written in code over the body's own bones.
 
 ## Variables
 
+### BOX\_DOG\_BONES
+
+```ts
+const BOX_DOG_BONES: object;
+```
+
+The bone names of `boxDog`, in the shape `@hackbuild/gait` reads (hips, spine, tail, four legs).
+
+#### Type Declaration
+
+| Name | Type | Default value |
+| ------ | ------ | ------ |
+| <a id="property-hips"></a> `hips` | `"hips"` | `"hips"` |
+| <a id="property-legs"></a> `legs` | `object` | - |
+| `legs.LF` | `object` | - |
+| `legs.LF.end` | `"frontHorselink.L"` | `"frontHorselink.L"` |
+| `legs.LF.mid` | `"frontLeg.L_03"` | `"frontLeg.L_03"` |
+| `legs.LF.toes` | readonly \[`"frontToe.L"`\] | - |
+| `legs.LF.up` | `"frontUpr.L"` | `"frontUpr.L"` |
+| `legs.LH` | `object` | - |
+| `legs.LH.end` | `"rearHorselink.L"` | `"rearHorselink.L"` |
+| `legs.LH.mid` | `"rearLwr.L"` | `"rearLwr.L"` |
+| `legs.LH.toes` | readonly \[`"rearFoot.L"`, `"rearToe.L"`\] | - |
+| `legs.LH.up` | `"rearUpr.L"` | `"rearUpr.L"` |
+| `legs.RF` | `object` | - |
+| `legs.RF.end` | `"frontHorselink.R"` | `"frontHorselink.R"` |
+| `legs.RF.mid` | `"frontLeg.R_03"` | `"frontLeg.R_03"` |
+| `legs.RF.toes` | readonly \[`"frontToe.R"`\] | - |
+| `legs.RF.up` | `"frontUpr.R"` | `"frontUpr.R"` |
+| `legs.RH` | `object` | - |
+| `legs.RH.end` | `"rearHorselink.R"` | `"rearHorselink.R"` |
+| `legs.RH.mid` | `"rearLwr.R"` | `"rearLwr.R"` |
+| `legs.RH.toes` | readonly \[`"rearFoot.R"`, `"rearToe.R"`\] | - |
+| `legs.RH.up` | `"rearUpr.R"` | `"rearUpr.R"` |
+| <a id="property-spine"></a> `spine` | readonly \[`"spine2"`, `"chest"`\] | - |
+| <a id="property-tail"></a> `tail` | readonly \[`"tail1"`, `"tail3"`, `"tail_03"`\] | - |
+
+***
+
 ### DEFAULT\_VERBS
 
 ```ts
@@ -766,6 +938,28 @@ Mounts the drop card into `host`.
 #### Returns
 
 [`AvatarDropHandle`](#avatardrophandle)
+
+***
+
+### boxDog()
+
+```ts
+function boxDog(color?): Group;
+```
+
+A dog of bones and boxes facing +z, about 0.78 m nose to tail with the
+hips 0.38 m up; bone names are `BOX_DOG_BONES`. Each bone carries a box
+to its child, so the legs show what a gait does to them.
+
+#### Parameters
+
+| Parameter | Type | Default value |
+| ------ | ------ | ------ |
+| `color?` | `string` | `"#c9a36b"` |
+
+#### Returns
+
+`Group`
 
 ***
 
@@ -831,6 +1025,26 @@ Defines hb-character-stage, hb-avatar-drop and hb-clip-strip once.
 
 ***
 
+### freeMeshes()
+
+```ts
+function freeMeshes(root): void;
+```
+
+Frees the geometry and materials of every mesh under `root`.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `root` | `Object3D` |
+
+#### Returns
+
+`void`
+
+***
+
 ### gestureClip()
 
 ```ts
@@ -858,6 +1072,101 @@ lacks are skipped; returns null when it has none of the gesture's bones.
 #### Returns
 
 `Clip` \| `null`
+
+***
+
+### meshTurntable()
+
+```ts
+function meshTurntable(host, opts?): MeshTurntable;
+```
+
+A turntable that fills `host`: hemisphere light, drag to turn, one
+object at a time, sized for a relief or a depth surface tens of units
+across (the camera starts 80 units out, looking down at 30 degrees).
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `host` | `HTMLElement` |
+| `opts?` | \{ `renderer?`: `WebGLRenderer`; \} |
+| `opts.renderer?` | `WebGLRenderer` |
+
+#### Returns
+
+[`MeshTurntable`](#meshturntable)
+
+***
+
+### stageOrbit()
+
+```ts
+function stageOrbit(camera, el): StageOrbit;
+```
+
+A drag orbit on `el` for `camera`: horizontal drag turns, vertical drag tilts, the wheel moves in and out.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `camera` | `PerspectiveCamera` |
+| `el` | `HTMLElement` |
+
+#### Returns
+
+[`StageOrbit`](#stageorbit)
+
+***
+
+### threeStage()
+
+```ts
+function threeStage(
+   host, 
+   tick, 
+   opts?
+): ThreeStage;
+```
+
+A stage lit in paper light that fills `host`: it sizes with the host,
+calls `tick(dt, t)` each frame (dt capped at 50 ms), draws, and on
+dispose stops the loop and frees the renderer, the orbit and every mesh.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `host` | `HTMLElement` |
+| `tick` | (`dt`, `t`) => `void` |
+| `opts?` | [`ThreeStageOptions`](#threestageoptions) |
+
+#### Returns
+
+[`ThreeStage`](#threestage)
+
+***
+
+### walkBvh()
+
+```ts
+function walkBvh(o?): string;
+```
+
+A two step walk loop as bvh text for a humanoid that is not ours: other
+bone names (Hips, LeftUpLeg, RightForeArm and so on), centimetres, arms
+down, ZXY channels. A retarget has real work to do on it.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `o?` | [`WalkBvhOptions`](#walkbvhoptions) |
+
+#### Returns
+
+`string`
 
 ## References
 

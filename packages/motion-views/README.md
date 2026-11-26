@@ -94,6 +94,12 @@ The stage writes a `.hb-lay-stage`, the card is `.hb-avcard`, the strip `.hb-cli
 | [`clipStrip`](../../docs/api/motion-views/vanilla.md#clipstrip) | mount the clip strip |
 | [`defineMotionViews`](../../docs/api/motion-views/vanilla.md#definemotionviews) | define the three custom elements |
 | [`gestureClip`](../../docs/api/motion-views/vanilla.md#gestureclip) | a gesture written in code as a clip |
+| [`threeStage`](../../docs/api/motion-views/vanilla.md#threestage) | a lit stage that fills an element, ticks and frees itself |
+| [`meshTurntable`](../../docs/api/motion-views/vanilla.md#meshturntable) | one object on a stage you drag to turn, for a relief or a surface |
+| [`stageOrbit`](../../docs/api/motion-views/vanilla.md#stageorbit) | drag to turn a camera round a target, the wheel moves in and out |
+| [`boxDog`](../../docs/api/motion-views/vanilla.md#boxdog) | a dog of bones and boxes with the bone names in `BOX_DOG_BONES` |
+| [`walkBvh`](../../docs/api/motion-views/vanilla.md#walkbvh) | a walk loop as bvh text for another rig, to retarget |
+| [`freeMeshes`](../../docs/api/motion-views/vanilla.md#freemeshes) | free the geometry and materials under an object |
 | [`CharacterStage`](../../docs/api/motion-views/vue.md#characterstage) | the stage as a Vue component |
 | [`AvatarDrop`](../../docs/api/motion-views/vue.md#avatardrop) | the drop card as a Vue component |
 | [`ClipStrip`](../../docs/api/motion-views/vue.md#clipstrip) | the strip as a Vue component |
