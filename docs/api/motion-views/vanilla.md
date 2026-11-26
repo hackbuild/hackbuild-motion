@@ -563,7 +563,7 @@ Drag to turn the camera round `target`, wheel or pinch to move in and out.
 
 | Property | Modifier | Type | Description |
 | ------ | ------ | ------ | ------ |
-| <a id="property-enabled"></a> `enabled` | `public` | `boolean` | Off, the pointer leaves the camera alone (a page that drives it itself). |
+| <a id="property-enabled"></a> `enabled` | `public` | `boolean` | Off, the pointer and update leave the camera alone (a page that drives it itself). |
 | <a id="property-target"></a> `target` | `readonly` | `Vector3` | The point the camera looks at and turns round. |
 
 #### Methods
@@ -584,7 +584,7 @@ dispose(): void;
 update(): void;
 ```
 
-Points the camera at the target; the stage calls it each frame.
+Points the camera at the target while enabled; the stage calls it each frame.
 
 ###### Returns
 
