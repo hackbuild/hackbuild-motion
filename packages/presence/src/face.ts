@@ -12,9 +12,10 @@ export interface ExpressionSink {
   setValue(name: string, weight: number): void;
 }
 
-/** The weights a quiet face rests at (vendor, from earlier work). */
+/** The weights a quiet face rests at (vendor). */
 export const RESTING_FACE: Readonly<Record<string, number>> = { happy: 0.25, relaxed: 0.3 };
 
+/** Easing rate, resting weights and lid channel name of a face. */
 export interface FaceOptions {
   /** Easing rate per second: a mood reaches 1 - 1/e (0.63) of its target in 1/rate s. Default 8 (vendor). */
   rate?: number;
@@ -26,6 +27,7 @@ export interface FaceOptions {
 
 const clamp01 = (x: number): number => (x < 0 ? 0 : x > 1 ? 1 : x);
 
+/** The face driver: eases moods toward their targets, rests at a slight smile, and writes lid, mouth and clip face weights to one expression sink. */
 export class Face {
   /** Mouth shapes from speech for this frame; call lipsync's `drive` on it before `update`. */
   readonly mouth: ExpressionSink;

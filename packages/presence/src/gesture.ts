@@ -4,6 +4,7 @@
 // caller's own rig code turns them into bone rotations.
 import { type Rng, keyed, minimumJerk, sample } from "@hackbuild/organic";
 
+/** One frame of a pointing gesture: arm weight toward the target and the apex and done flags. */
 export interface PointPhase {
   /** Arm weight toward the target, 0 to 1. */
   weight: number;
@@ -19,12 +20,14 @@ export interface PointPhase {
  */
 export const POINT_TIMING = { onset: 0.53, travel: 0.83, apex: 1.37, holdEnd: 2.56, retract: 0.6, end: 3.3 } as const;
 
+/** The pointing gesture at `t` seconds since it began: arm weight, apex and done. */
 export function pointGesture(t: number): PointPhase {
   const P = POINT_TIMING;
   const weight = minimumJerk((t - P.onset) / P.travel) * (1 - minimumJerk((t - P.holdEnd) / P.retract));
   return { weight, apex: t >= P.apex, done: t >= P.end };
 }
 
+/** Timing of one reach: seconds to the target, hold and retract. */
 export interface ReachPlan {
   /** Seconds to the target. */
   duration: number;
@@ -51,6 +54,7 @@ export function reachWeight(t: number, plan: ReachPlan): number {
   return minimumJerk(t / plan.duration) * (1 - minimumJerk((t - out) / plan.retract));
 }
 
+/** Timing and effort of one throw: phase ends, body lags, aim error and distance factor. */
 export interface ThrowPlan {
   effort: number;
   /** Total time in seconds. */
@@ -98,6 +102,7 @@ export function planThrow(effort: number, rng: Rng): ThrowPlan {
   };
 }
 
+/** One frame of a throw: pelvis, thorax, shoulder, elbow and lean angles, with release and done flags. */
 export interface ThrowPose {
   /** Pelvis and thorax yaw toward the throw, radians. */
   pelvis: number;
@@ -127,8 +132,10 @@ export function throwPose(plan: ThrowPlan, t: number): ThrowPose {
   };
 }
 
+/** The kinds of idle action: fidget, weight shift or face touch. */
 export type IdleKind = "fidget" | "weightShift" | "faceTouch";
 
+/** One idle action the scheduler started: a fidget, weight shift or face touch, with its timing and side. */
 export interface IdleEvent {
   kind: IdleKind;
   /** Seconds since the scheduler started. */
@@ -141,6 +148,7 @@ export interface IdleEvent {
   mouth?: boolean;
 }
 
+/** What the idle scheduler started this step, what runs with its weight, and the current weight shift. */
 export interface IdleState {
   /** Events that started this step. */
   started: IdleEvent[];

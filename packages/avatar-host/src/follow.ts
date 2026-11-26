@@ -6,6 +6,7 @@
 // and comes closer only once it is clearly too far.
 import { Box3, MathUtils, type PerspectiveCamera, Vector3 } from "three";
 
+/** Follow switch, ease rate, dead zone and margin of a `FollowCamera`. */
 export interface FollowOptions {
   /** Follow the body; false leaves the camera where the person or the last framing put it. Default true. */
   follow?: boolean;
@@ -19,6 +20,7 @@ export interface FollowOptions {
   margin?: number;
 }
 
+/** Keeps a body framed: eases toward a new framing with a dead zone, and leaves a distance or pan the person picked alone. */
 export class FollowCamera {
   /** Set when the person picked a distance; fitting then leaves it alone. */
   zoomed = false;

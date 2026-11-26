@@ -5,11 +5,13 @@
 // runtimes of other keys are destroyed when the key changes. A source's
 // `release` runs once, whether its load wins, loses or throws.
 
+/** The least a host source carries: its kind and an optional release call. */
 export interface HostSource {
   kind: string;
   release?(): void;
 }
 
+/** Loads one kind of source: makes a runtime once, loads sources into it, and may destroy it. */
 export interface Adapter<S extends HostSource, T, R = unknown> {
   /** Runtimes are shared by adapters with the same key. Default: the kind. */
   key?: string;
@@ -18,6 +20,7 @@ export interface Adapter<S extends HostSource, T, R = unknown> {
   destroy?(runtime: R): void;
 }
 
+/** The adapters by kind, the exclusive switch and the discard call of an `AvatarHost`. */
 export interface AvatarHostOptions<S extends HostSource, T> {
   /** By kind. Each adapter carries its own runtime type; the host only passes it back. */
   adapters: Partial<Record<string, Adapter<S, T, unknown>>>;
@@ -33,6 +36,7 @@ interface Slot {
   destroy: ((runtime: unknown) => void) | undefined;
 }
 
+/** Shows one source at a time through adapters: each show takes a ticket, a load that a later show overtook is discarded, and runtimes are shared or destroyed by key. */
 export class AvatarHost<S extends HostSource, T> {
   private readonly slots = new Map<string, Slot>();
   private ticket = 0;

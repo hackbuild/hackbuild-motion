@@ -1,7 +1,7 @@
 // The rest stance: arms relaxed at the sides instead of the T pose, the
 // base layer when a body has no idle clip. Turns are about the body's +Z
 // (forward) axis in the normalized humanoid space, so a left arm that
-// points +X swings down toward -Y (values vendor, from earlier work).
+// points +X swings down toward -Y (values vendor).
 import type { Clip } from "./clip.js";
 
 /** Radians about the body's forward axis, per bone. */

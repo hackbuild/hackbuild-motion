@@ -43,6 +43,7 @@ export const SAMPLES = 24;
 /** Bones that judge a frame; fingers would outvote them by count. */
 export const MEASURED: readonly HumanBone[] = ["spine", "chest", "neck", "head", "leftShoulder", "leftUpperArm", "leftLowerArm", "rightShoulder", "rightUpperArm", "rightLowerArm", "leftUpperLeg", "leftLowerLeg", "rightUpperLeg", "rightLowerLeg"];
 
+/** Image width, height and canvas of a preview. */
 export interface PortraitOptions {
   /** Image width in pixels. Default 192. */
   width?: number;
@@ -178,6 +179,7 @@ export interface ClipThumbJob {
   hold?: boolean;
 }
 
+/** Image size, clay colour and figure of clip previews. */
 export interface ClipPortraitOptions extends PortraitOptions {
   /** Clay colour. Default a warm grey. */
   color?: string | number;
@@ -251,6 +253,7 @@ export interface AvatarThumbJob {
   source: BodySource;
 }
 
+/** Image size, canvas and body load options of avatar previews. */
 export interface AvatarPortraitOptions extends PortraitOptions, BodyLoadOptions {}
 
 /** Avatar previews: each character loads, is drawn at rest with its own materials, and is freed. */

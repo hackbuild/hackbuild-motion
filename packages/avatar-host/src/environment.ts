@@ -6,6 +6,7 @@ import type { Scene, WebGLRenderer } from "three";
 import type { EnvironmentPreset } from "@hackbuild/environment";
 import type { LoadedEnvironment, Resolve } from "@hackbuild/environment/three";
 
+/** What an environment slot writes to: the scene, the renderer and the call that swaps the shown scene. */
 export interface EnvironmentTarget {
   readonly scene: Scene;
   readonly renderer: WebGLRenderer;
@@ -13,6 +14,7 @@ export interface EnvironmentTarget {
   setEnvironment(env: LoadedEnvironment | null): void;
 }
 
+/** A scene preset by id or value, and how its files resolve. */
 export interface EnvironmentRequest {
   /** A preset id (studio, room, cafe, outdoors) or a preset. */
   preset: string | EnvironmentPreset;
@@ -20,6 +22,7 @@ export interface EnvironmentRequest {
   resolve?: Resolve;
 }
 
+/** Loads a scene preset onto a target; the default imports `@hackbuild/environment/three` on first use. */
 export type EnvironmentLoader = (req: EnvironmentRequest, target: EnvironmentTarget) => Promise<LoadedEnvironment>;
 
 const defaultLoad: EnvironmentLoader = async (req, target) => {
@@ -27,6 +30,7 @@ const defaultLoad: EnvironmentLoader = async (req, target) => {
   return loadEnvironment(req.preset, target.scene, target.renderer, req.resolve ? { resolve: req.resolve } : {});
 };
 
+/** Shows one lit scene at a time on a stage; a later request overtakes one still loading. */
 export class EnvironmentSlot {
   private ticket = 0;
   private shown: string | null = null;

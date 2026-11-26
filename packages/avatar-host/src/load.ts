@@ -10,6 +10,7 @@ import { type Avatar, type NormalizeOptions, type RepairOptions, type VrmHook, l
 import type { Adapter } from "./host.js";
 import type { BodyKind, BodySource } from "./source.js";
 
+/** The VRM hook, normalize and repair options used when a body loads. */
 export interface BodyLoadOptions {
   /** The VRM hook, imported on the first .vrm: `() => import("@hackbuild/avatar/vrm").then((m) => m.vrmHook())`. Without it a VRM loads as plain glTF. */
   vrm?: () => Promise<VrmHook>;

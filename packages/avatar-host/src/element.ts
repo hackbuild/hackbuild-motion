@@ -9,6 +9,7 @@
 import { AvatarStage, type StageEvent, type StageOptions } from "./stage.js";
 import type { DroppedFile } from "./source.js";
 
+/** The `hb-avatar-host` custom element: a stage in the element, and a call to show dropped files. */
 export interface AvatarHostElement extends HTMLElement {
   readonly stage: AvatarStage | null;
   /** Shows dropped or picked files; resolves when the load settles. */

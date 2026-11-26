@@ -1,158 +1,173 @@
 # @hackbuild/presence
 
-The procedural layers that make a standing humanoid read as present,
-written for this library from an earlier in-house humanoid and published
-research on gaze and idle motion. Plain TypeScript over the `@hackbuild/organic` springs and samplers,
-with a three.js adapter under `/three`. No wasm.
+Make a standing humanoid look present: gaze, blink, breath, idle moves, gestures, a layered clip player and a face driver.
 
-- `GazeController`: aversion episodes timed after Andrist 2014 per mode
-  (listen, talk, think), direction bins after Lee, Badler and Badler 2002,
-  small saccades inside a fixation, head recruitment past a 16 degree eye
-  only range with slope 0.77 (Stahl 1999, vendor) and a 20 to 50 ms head
-  latency, eyes clamped to 25 degrees yaw and 10 degrees pitch from where
-  the head points, gaze evoked blinks, and a `bodyTurn` output for targets
-  past the head range.
-- `SeamHold`: hysteresis at the atan2 seam. Past 2.2 rad with a sign flip
-  the previous side is kept, so a target crossing behind does not whip the
-  head 180 degrees.
-- `Blink` (1 to 8 s gaps, 85 percent single, triangle lid curve) and
-  `Breath` (inhale 40 percent of the cycle, a slow rate drift).
-- `IdleScheduler`: a postural change about every 20 s (fidget, weight shift,
-  recentre) and face touches about 23 an hour, cancelled when the body moves.
-- `pointGesture` (Peeters 2013 timing, apex at 1.37 s), `planReach` and
-  `reachWeight` (duration grows with distance), `planThrow` and
-  `throwPose` (proximal to distal chain, Owens 2024 phase shares, seeded
-  jitter and order swaps).
-- `ClipPlayer`: one owner for every bone. A base layer (idle loop, blended
-  by speed into locomotion loops that share a normalized phase for cadence
-  matching), a body layer and an upper body layer masked to a bone set.
-  Plays replace or queue; a background loop waits for a running one shot;
-  a one shot fades back to the base (idle handback, with `ended` and
-  `handback` events); `hold: Infinity` holds until `release()`. Loops whose
-  first and last frames differ by more than 2 degrees blend their last
-  0.4 s into the start and restart from 0.4 s. A clip may carry `faces`,
-  one weight per frame per expression; after each `update`,
-  `player.faces` holds this frame's weights, each scaled by its layer
-  weight.
-- `Face`: one owner for every expression weight, over any sink with
-  `setValue(name, weight)` (`ExpressionRig` or a three-vrm expression
-  manager); it keeps its own weights, so the sink needs no read call.
-  `set(mood, weight)` eases at rate 8 per second (a mood reaches 0.63 of
-  its target in 1/8 s); with no mood the face rests at `RESTING_FACE`
-  (happy 0.25, relaxed 0.3, vendor; `setResting({})` for a neutral face).
-  `lid(w)` takes the lid weight from `Blink` or the gaze controller, and
-  `blink = false` writes the lid open at once. Mouth shapes from speech go
-  in through `face.mouth` (pass it to lipsync's `drive`) and win their
-  channels; other channels show the larger of the clip weight and the
-  mood, and return to the mood when the clip lets go.
-- `restStance(names)` and `restStanceFromThree(bones, names, root)`: the
-  base layer for a body with no idle clip, upper arms turned 1.18 rad and
-  forearms 0.08 rad down about the body's forward axis (`RELAXED`,
-  vendor). The three.js version expresses the turn in each bone's own
-  frame, so rigs whose bones rest in other frames still lower their arms.
-- `HeadLevel`: low passes the clip's head pitch (1.2 s) and lifts the slow
-  part by up to 10 degrees, so a mocap idle stops glaring while nods pass.
-- `/three`: `clipFromThree` (AnimationClip to a flat clip), `applyPose`,
-  `applyGaze` (neck and head share, eye bones inside 12 degrees sideways
-  and 8 up and down by default, `eyeLimitDeg`), `aimBone`, `reachArm` and
-  `restStanceFromThree`.
+[![npm](https://img.shields.io/npm/v/@hackbuild/presence)](https://www.npmjs.com/package/@hackbuild/presence) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 11.3 kB measured](https://img.shields.io/badge/gzip-11.3%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
-Every random draw comes from an injected `Rng`.
+## What it does
+
+- Points the eyes and head at a target with aversion episodes, small saccades, head recruitment past the eye range and clamped eye aim, and tells you when the body should turn.
+- Blinks, breathes and schedules idle fidgets, weight shifts and face touches from an injected random source.
+- Times pointing, reaching and throwing as weight and angle curves you apply to your own rig.
+- Plays clips on a base, body and upper body layer that write every bone, with loop seams and a hand back to idle.
+- Drives every expression weight through one face: moods ease in, a quiet face rests at a slight smile, and speech and clip face tracks take their channels.
 
 ## Install
 
-Not published yet. From a clone:
+```sh
+npm install @hackbuild/presence @hackbuild/organic
+```
 
-    npm ci && npm run build -w @hackbuild/organic -w @hackbuild/presence
+`@hackbuild/organic` is a dependency and installs with it; the quick start imports `seededRng` from it, so the line names it too. The core entry is plain TypeScript with no wasm and no three.js. `three` is an optional peer used only by the `/three` subpath.
 
-## Use
+| subpath | needs | pin |
+|---|---|---|
+| `@hackbuild/presence` | nothing beyond `@hackbuild/organic` | none |
+| `@hackbuild/presence/three` | `three` (optional peer) | 0.186.1 or later |
+| `@hackbuild/presence/iife` | a page with a `THREE` global for the three.js parts | none |
+
+## Quick start
 
 ```ts
 import { seededRng } from "@hackbuild/organic";
-import { ClipPlayer, GazeController, HeadLevel, Breath } from "@hackbuild/presence";
-import { applyGaze, applyPose, clipFromThree } from "@hackbuild/presence/three";
+import { ClipPlayer, Face, GazeController, restStance } from "@hackbuild/presence";
 
-const rng = seededRng("ada");
-const idle = clipFromThree(idleClip, boneNames, { loop: true });
-const player = new ClipPlayer({ idle, upperBones: armIndices });
-const gaze = new GazeController({ rng });
-const level = new HeadLevel();
+// the rest stance as the idle clip: arms down, made in code, no model file
+const bones = ["hips", "spine", "head", "leftUpperArm", "rightUpperArm"];
+const player = new ClipPlayer({ idle: restStance(bones) });
+const gaze = new GazeController({ rng: seededRng("quick") });
+const face = new Face({ setValue: (name, weight) => console.log(name, weight.toFixed(2)) });
 
-function frame(dt: number) {
-  const pose = player.update(dt);
-  level.apply(dt, pose, headIndex);
-  applyPose(pose, bones);
-  gaze.setTarget(listenerHead);
-  const g = gaze.update(dt, eyePoint, bodyYaw);
-  applyGaze(g, { neck, head, leftEye, rightEye });
-  face.blink = g.blink;
-  if (g.bodyTurn) turnBodyBy(g.bodyTurn);
+gaze.setTarget([0.4, 1.6, 1.2]); // a listener's head, meters, +Z forward
+face.set("happy", 0.6);
+for (let i = 0; i < 60; i++) {
+  const pose = player.update(1 / 60); // local rotations x y z w per bone
+  const g = gaze.update(1 / 60, [0, 1.6, 0], 0);
+  face.lid(g.blink);
+  face.update(1 / 60, player.faces);
+  if (i === 59) console.log(pose.rotations.length, g.headYaw.toFixed(3), g.eyeYaw.toFixed(3));
 }
 ```
 
-`dist/presence.iife.js` is the single file build (`HackbuildPresence`,
-`THREE` read from the page).
+## Live example
 
-## Develop
+The package page, with how each layer works, is at [hackbuild-motion/presence](https://hackbuild.github.io/hackbuild-motion/presence/). The [avatar-host page](https://hackbuild.github.io/hackbuild-motion/avatar-host/) runs the whole presence frame on the placeholder body or a model you drop.
 
-    npm run build -w @hackbuild/presence
-    npx vitest run packages/presence
+## Concepts
+
+### one owner per channel
+
+`ClipPlayer` writes every bone each frame and `Face` writes every expression weight. Nothing else should write to the same bones or channels, so two systems never fight over a value. Gaze is added after the pose is written (`applyPose`, then `applyGaze`).
+
+### layers
+
+The base layer is the idle loop, blended by speed into locomotion loops that share a phase so the cadence matches. A body layer plays one shots and loops over it, and an upper body layer is masked to the bone set you name. A play replaces or queues; a background loop waits for a running one shot; a finished one shot fades back to the base and reports `ended` and `handback`. `hold: Infinity` holds the last frame until `release()`.
+
+```ts
+const wave = player.play(waveClip, { layer: "upper", fade: 0.12 });
+player.setLocomotion(1.4); // meters per second picks and blends the locomotion loops
+```
+
+### loop seams
+
+A loop whose first and last frames differ by more than 2 degrees blends its last 0.4 s into the start and restarts from 0.4 s, so it wraps without a pop. `planLoop` shows the plan for a clip.
+
+### gaze modes and the seam behind
+
+`setMode("listen" | "talk" | "think")` changes how often and how long the gaze looks away. Eyes cover a small range alone; past it the head joins. When the target crosses behind the body, the controller keeps the side it was on instead of whipping the head across, and `bodyTurn` says how far the body should turn.
+
+### faces
+
+A clip may carry face tracks, one weight per frame per expression. After `update`, `player.faces` holds this frame's weights; pass them to `face.update`. `face.set(mood, weight)` eases toward the mood; with no mood the face rests at `RESTING_FACE`, and `setResting({})` gives a neutral face. Mouth shapes from speech go in through `face.mouth` and win their channels.
+
+### randomness is injected
+
+Every random draw comes from the `Rng` you pass, such as `seededRng("name")` from `@hackbuild/organic`, so a seed replays the same blinks, aversions and idle moves.
+
+## API overview
+
+| export | what it does |
+|---|---|
+| [`ClipPlayer`](../../docs/api/presence/index.md#clipplayer) | layered clip player with loop seams and idle handback |
+| [`GazeController`](../../docs/api/presence/index.md#gazecontroller) | eyes and head toward a target, with aversion and saccades |
+| [`Face`](../../docs/api/presence/index.md#face) | the one owner of every expression weight |
+| [`Blink`](../../docs/api/presence/index.md#blink) | spontaneous blinks and gaze evoked ones |
+| [`Breath`](../../docs/api/presence/index.md#breath) | breathing phase, fill, chest pitch and shoulder rise |
+| [`IdleScheduler`](../../docs/api/presence/index.md#idlescheduler) | fidgets, weight shifts and face touches while idle |
+| [`HeadLevel`](../../docs/api/presence/index.md#headlevel) | lifts a head that a clip holds low, keeping nods |
+| [`pointGesture`](../../docs/api/presence/index.md#pointgesture) | arm weight of a pointing gesture over time |
+| [`planReach`](../../docs/api/presence/index.md#planreach) | reach timing that grows with distance |
+| [`planThrow`](../../docs/api/presence/index.md#planthrow) | a throw as a proximal to distal chain with jitter |
+| [`restStance`](../../docs/api/presence/index.md#reststance) | a one frame idle clip with the arms down |
+| [`clipFromThree`](../../docs/api/presence/three.md#clipfromthree) | a three.js AnimationClip as a flat clip |
+| [`applyPose`](../../docs/api/presence/three.md#applypose) | write a pose onto three.js bones |
+| [`applyGaze`](../../docs/api/presence/three.md#applygaze) | add a gaze frame onto neck, head and eye bones |
+| [`reachArm`](../../docs/api/presence/three.md#reacharm) | swing an arm toward a world point |
+
+The full reference is in [docs/api/presence](../../docs/api/presence/README.md).
+
+## Browser support
+
+| part | needs | Chrome | Safari | Firefox | phone |
+|---|---|---|---|---|---|
+| core entry | ES2022 | yes (measured) | yes (inferred) | yes (inferred) | yes (inferred) |
+| `/three` | three.js and WebGL for drawing | yes (measured) | yes (inferred) | yes (inferred) | yes (inferred) |
+| single file build | a classic script, file:// included | yes (measured) | unknown | unknown | unknown |
+
+There is no wasm and no worker, so nothing falls back. The single file build `dist/presence.iife.js` sets a `HackbuildPresence` global and reads `THREE` from the page.
+
+## Errors and troubleshooting
+
+Nothing in this package throws. What can go wrong shows as motion:
+
+- The head glares down on a mocap idle: the clip holds the head low. Run `HeadLevel.apply` on the pose before `applyPose`.
+- Eyes show the socket on a non VRM rig: its eye bones are not made for wide turns. Lower `eyeLimitDeg` in the `GazeRig`.
+- Arms stay in a T pose: there is no idle clip. Pass `restStance(names)` or `restStanceFromThree(...)` as the idle.
+- The gaze stares without drifting: `organic` is off. Leave it on for aversion and saccades.
+
+### mistakes to avoid
+
+- Writing bones or expression channels from two places. Let `ClipPlayer` own the bones and `Face` own the weights, and add gaze after the pose.
+- Calling `Math.random` or passing a fresh seed each frame. Pass one `Rng`, such as `seededRng("name")`, when you build each controller.
+- Feeding bones that are not in the normalized humanoid space (+Y up, +Z forward). Load the model through `@hackbuild/avatar` first.
+- Forgetting `face.update(dt, player.faces)` each frame: clip face tracks and mood easing only show after it.
+
+## Works with
+
+- [@hackbuild/organic](../organic/README.md) gives the springs, samplers and the seeded `Rng`.
+- [@hackbuild/avatar](../avatar/README.md) loads models into the normalized space this package expects, and its `ExpressionRig` is a face sink.
+- [@hackbuild/lipsync](../lipsync/README.md) writes mouth shapes into `face.mouth`.
+- [@hackbuild/avatar-host](../avatar-host/README.md) runs the whole presence frame on a three.js stage.
+- [@hackbuild/retarget](../retarget/README.md) brings clips from other rigs into the bone order the player uses.
+
+## Changelog and licences
+
+Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LICENSE](../../LICENSE)); this README is CC-BY-4.0 with its code samples also MIT. No models or weights ship here.
 
 ## What is verified, and what is not
 
-### Verified on this machine
+| check | result |
+|---|---|
+| `npx vitest run packages/presence` | 37 of 37 tests pass (counted), two fast-check properties |
+| a target circling behind a still body | head moved under 0.02 rad per frame across the seam, and the body was asked to turn (computed) |
+| the body turning as asked at 2 rad/s, two full circles | head moved under 0.1 rad per frame (computed) |
+| eyes for random targets, seeds and modes | inside 25 degrees yaw and 10 degrees pitch from the head (property, 60 runs) |
+| averted share over 10 minutes per mode | listen below talk below think; listen 0.08 to 0.25, talk 0.3 to 0.55 (computed against published ratios) |
+| head yaw jerk tracking a moving target | under 2,000 rad/s^3 (computed) |
+| blink, breath and idle over two simulated hours | blink gaps 1 to 8.4 s with 5 to 25 percent doubles; 27 to 33 breaths in 2 minutes at 15 per minute; 2.4 to 3.6 idle changes a minute; 14 to 32 face touches an hour (computed) |
+| a loop with a 17 degree seam | wraps with a step under 0.02 rad, against 0.3 rad unblended (computed) |
+| handback, hold and release, background waiting, upper body mask, walk to jog cadence | hold in synthetic clip tests |
+| the three.js adapter | samples an AnimationClip, writes bones, aims an arm within 0.02 rad, splits head yaw between neck and head (measured in the test) |
+| face driver | a mood reaches 0.63 of its target in 1/8 s within 1e-6; clip weights above the mood win and let go; speech wins the mouth; blink off mid blink writes 0 (computed) |
+| rest stance on a rig whose left arm rests turned 90 degrees | hands more than 0.4 m below the shoulders, beside the body (computed) |
+| headless Chrome, the avatar-host page | the placeholder stands in the rest stance (looked at in a screenshot) |
 
-- 2026-11-22: `npx vitest run packages/presence` passed 26 of 26 tests
-  (counted), two of them fast-check properties.
-- 2026-11-22: a target circling behind a still body moved the head less
-  than 0.02 rad per frame while it crossed the seam, and the controller
-  asked the body to turn; with the body turning as asked at 2 rad/s, the
-  head moved less than 0.1 rad per frame over two full circles (computed).
-- 2026-11-22: eyes stayed inside 25 degrees yaw and 10 degrees pitch from
-  the head for random targets, seeds and modes (property, 60 runs).
-- 2026-11-22: over 10 minutes per mode, the averted share ranked listen
-  below talk below think, with listen between 0.08 and 0.25 and talk
-  between 0.3 and 0.55 (computed against the Andrist ratios).
-- 2026-11-22: head yaw jerk under 2,000 rad/s^3 while tracking a moving
-  target with aversion on (computed).
-- 2026-11-22: blink gaps between 1 and 8.4 s with 5 to 25 percent doubles;
-  breathing at 15 per minute counted 27 to 33 cycles in 2 minutes; idle
-  changes 2.4 to 3.6 a minute and face touches 14 to 32 an hour over two
-  simulated hours (computed).
-- 2026-11-22: a loop with a 17 degree seam wrapped with a step under 0.02
-  rad, against 0.3 rad unblended (computed); one shot handback, hold and
-  release, background waiting, the upper body mask and walk to jog cadence
-  matching hold in synthetic clip tests.
-- 2026-11-22: the three.js adapter sampled an AnimationClip, wrote it to
-  bones, aimed an arm within 0.02 rad of a target and split head yaw
-  between neck and head (measured in the adapter test).
+Not verified by anything:
 
-- 2026-11-24: `npx vitest run packages/presence` passed 37 of 37 tests
-  (counted), with the face driver: a mood eases to 0.63 of its target in
-  1/8 s within 1e-6; with no mood the face sits at the resting weights; a
-  clip weight above the mood wins and returns to the mood when the clip
-  ends; speech wins the mouth and a shape it stopped writing is released;
-  turning blink off mid blink writes 0; face tracks sample between frames
-  and fade with their layer; the rest stance keeps the hands more than
-  0.4 m below the shoulders on a rig whose left arm rests turned 90
-  degrees, with the arms hanging beside the body.
-- 2026-11-24, headless Chrome, the avatar-host example: the placeholder
-  stands in the rest stance; the builder looked at a screenshot.
-
-### Not verified by anything
-
-- Nobody has looked at any of this on a real avatar in a real browser at
-  real frame rate. Gaze, aversion, head level and the seam blend on a mocap
-  idle are unchecked by eye.
-- The idle scheduler emits events and weights; the arm and face touch poses
-  that consume them are left to the caller (the `reachArm` helper covers
-  the arm part).
-- Clip transitions crossfade with minimum jerk weights; inertialized
-  transitions over the organic `Inertializer` are open.
-- The face driver on a real VRM or morph rig face in a browser, and the
-  resting smile on a real face, have not been looked at.
-- Procedural nod, shake and think gestures, foot
-  locking and turn in place steps are not in this package yet.
+- Nobody has looked at gaze, aversion, head level, the seam blend or the face driver on a real avatar in a real browser at real frame rate.
+- The idle scheduler emits events and weights; the arm and face touch poses that use them are left to you (`reachArm` covers the arm).
+- Clip transitions crossfade with minimum jerk weights; inertialized transitions are not in this package yet.
+- Procedural nod, shake and think gestures, foot locking and turn in place steps are not in this package yet.
 - Reach duration constants and the 0.6 s point retract are inferred.
 
 ## Size budget
@@ -165,8 +180,3 @@ function frame(dt: number) {
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
-
-## Licence
-
-Code MIT (`LICENSE` in this package and at the repository root). This
-README is CC-BY-4.0, its code samples also MIT.

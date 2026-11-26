@@ -7,6 +7,7 @@ import { Bone, CapsuleGeometry, Group, Mesh, MeshStandardMaterial, type Object3D
 import type { HumanBone } from "@hackbuild/rig/bones";
 import { type Avatar, ExpressionRig, HeadHider, Wardrobe, disposeObject } from "@hackbuild/avatar/three";
 
+/** Body colour, joint colour and height scale of the placeholder body built in code. */
 export interface PlaceholderOptions {
   /** Body colour. Default a warm grey. */
   color?: number;

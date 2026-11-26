@@ -1,6 +1,7 @@
 // Format sniffing from the first bytes, the glTF JSON chunk, an FBX
 // character or clip probe, and the redistribution gate for VRM metadata.
 
+/** The file format an avatar was sniffed as. */
 export type AvatarFormat = "vrm" | "vrma" | "glb" | "gltf" | "fbx" | "unknown";
 
 const ascii = (b: Uint8Array, from: number, n: number) => String.fromCharCode(...b.subarray(from, Math.min(b.length, from + n)));
@@ -48,6 +49,7 @@ function indexOf(hay: Uint8Array, needle: string, from = 0): number {
   return -1;
 }
 
+/** What the first 256 KB of an FBX file say: a character, a clip or unknown, and whether it holds geometry and deformers. */
 export interface FbxProbe {
   kind: "character" | "clip" | "unknown";
   geometry: boolean;
@@ -79,6 +81,7 @@ export interface VrmMetaLike {
   otherLicenseUrl?: string;
 }
 
+/** Whether an avatar may go into a shareable bundle, whether the user must confirm, and why not. */
 export interface RedistributionVerdict {
   ok: boolean;
   needsConfirm?: boolean;

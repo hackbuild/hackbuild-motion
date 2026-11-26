@@ -24,6 +24,7 @@ const NEAR = 30;
 /** Least coverage for a sibling's image to be taken (vendor). */
 export const SIBLING_MIN = 0.6;
 
+/** A material's share of a mesh: the UV tile it lies in and how many vertices use it. */
 export interface TileGroup<M> {
   material: M;
   /** "u,v" of the unit cell the group's UVs lie in, or null when they span more than one. */
@@ -207,13 +208,16 @@ export function coverage(img: ImageSample, uvs: Float32Array): number {
   return painted / n;
 }
 
+/** The rule that picked a color map: UV tile, material name or coverage. */
 export type MapVia = "tile" | "name" | "coverage";
 
+/** The image file chosen for a material and the rule that chose it. */
 export interface PickedMap {
   file: string;
   via: MapVia;
 }
 
+/** Where `pickMap` looks for a material's color map: its own map, a file named like it, and image samples. */
 export interface MapSources {
   /** The file a material's own map came from, or null when it has none. */
   own(m: Material): string | null;

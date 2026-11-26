@@ -9,7 +9,9 @@ import { ThumbQueue, type ThumbQueueOptions } from "./thumb-queue.js";
 export * from "./thumb-queue.js";
 export * from "./portrait.js";
 
+/** Queue and portrait options of `clipThumbs`. */
 export type ClipThumbOptions = Omit<ThumbQueueOptions<ClipThumbJob>, "renderer"> & { portrait?: ClipPortraitOptions };
+/** Queue and portrait options of `avatarThumbs`. */
 export type AvatarThumbOptions = Omit<ThumbQueueOptions<AvatarThumbJob>, "renderer"> & { portrait?: AvatarPortraitOptions };
 
 /** A queue of clip previews on one clay figure, 192 px square by default. */

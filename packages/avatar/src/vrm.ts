@@ -23,6 +23,7 @@ import { HUMAN_BONES, type HumanBone } from "@hackbuild/rig/bones";
 import type { VrmMetaLike } from "./format.js";
 import type { Avatar, ExpressionSink, VrmHook, VrmResult } from "./three.js";
 
+/** Vertex cleanup and skeleton merge options of the VRM loader hook. */
 export interface VrmHookOptions {
   /** Drop vertices no bone or morph uses. Default true. */
   removeUnusedVertices?: boolean;
@@ -89,6 +90,7 @@ export function vrmHook(opts: VrmHookOptions = {}): VrmHook {
 /** Eye turn limits for non VRM eye bones, degrees: sideways 12, up and down 8 (vendor). Wider turns show the socket. */
 export const EYE_RANGE = { yaw: 12, pitch: 8 } as const;
 
+/** Spring bones and meta name for turning a loaded avatar into a VRM. */
 export interface ToVrmOptions {
   /** Spring bones, built once the model is in meters and at rest. */
   springs?(root: Object3D): VRMSpringBoneManager | null;

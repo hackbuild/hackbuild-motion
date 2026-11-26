@@ -1,5 +1,6 @@
 // Quaternion helpers on flat arrays, x y z w, for the clip player.
 
+/** A flat array of quaternions, x y z w. */
 export type QuatArray = Float32Array | Float64Array | number[];
 
 /** Shortest arc slerp of q[a..a+4] and r[b..b+4] into out[o..o+4]. */

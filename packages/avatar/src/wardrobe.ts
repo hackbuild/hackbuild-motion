@@ -4,13 +4,16 @@
 // "earring" goes to the ear slot and never to the hand slot through "ring".
 // Plain data and string work, no three.js.
 
+/** The wardrobe group of a part: clothing, accessory, hair or base. */
 export type PartGroup = "clothing" | "accessory" | "hair" | "base";
 
+/** Every wardrobe slot a part can be sorted into, accessories first and the base body last. */
 export const SLOT_LABELS = [
   "eyewear", "headwear", "hairAccessory", "neck", "ear", "hand", "prop",
   "outerwear", "onepiece", "top", "bottom", "legwear", "footwear", "underwear",
   "hair", "face", "body",
 ] as const;
+/** One wardrobe slot name from `SLOT_LABELS`. */
 export type SlotLabel = (typeof SLOT_LABELS)[number];
 
 const GROUP: Record<SlotLabel, PartGroup> = {
@@ -59,6 +62,7 @@ export function tokens(name: string): string[] {
     .filter(Boolean);
 }
 
+/** The wardrobe slot a part name scores best for: group, label and score. */
 export interface Category {
   group: PartGroup;
   label: SlotLabel;

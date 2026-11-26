@@ -3,8 +3,10 @@
 // their path below the model's folder, then by file name anywhere in the
 // drop, ignoring case (models made on Windows often differ in case).
 
+/** The model formats a body source can be. */
 export type BodyKind = "vrm" | "glb" | "gltf" | "fbx";
 
+/** A model to show: its kind, its file as a URL, bytes or Blob, its name, and how its referenced files resolve. */
 export interface BodySource {
   kind: BodyKind;
   /** The model file: a URL, bytes or a Blob (a dropped File). */
@@ -52,6 +54,7 @@ export function normalizeRef(ref: string): string {
   return r.replace(/^(\.\/)+/, "").toLowerCase();
 }
 
+/** Makes and revokes object URLs; swap it in tests. */
 export interface UrlFactory {
   create(b: Blob): string;
   revoke(url: string): void;

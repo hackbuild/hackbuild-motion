@@ -33,12 +33,14 @@ const words = (s: string) =>
     .split(/[^\p{L}\p{N}]+/u)
     .filter(Boolean);
 
+/** One candidate file for a texture reference and how well it matched. */
 export interface TextureMatch {
   file: string;
   /** 4 exact path, 3 same file name, 2 same cleaned stem, 1 same key words. */
   score: number;
 }
 
+/** Finds the dropped image file a model's texture reference means, by exact path, file name, cleaned stem or key words. */
 export class TextureIndex {
   readonly files: string[];
   private readonly modelWords: string[];

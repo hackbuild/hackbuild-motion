@@ -1,6 +1,7 @@
 // Blink and breath: the two rhythms a resting body never stops.
 import { type Rng, sample } from "@hackbuild/organic";
 
+/** Gap, single or double share, and lid timing of spontaneous blinks. */
 export interface BlinkOptions {
   /** Shortest and longest gap between blinks in seconds. */
   minGap?: number;
@@ -74,6 +75,7 @@ export class Blink {
   }
 }
 
+/** One breathing frame: cycle phase, lung fill, chest pitch and shoulder rise. */
 export interface BreathState {
   /** Phase in the cycle, 0 to 1, 0 at the start of an inhale. */
   phase: number;

@@ -8,6 +8,7 @@
 import { minimumJerk, spring, springState } from "@hackbuild/organic";
 import { quatAngle, quatPitch, slerpInto } from "./quat.js";
 
+/** A clip on flat arrays: local bone rotations per frame, an optional root track and optional face tracks. */
 export interface Clip {
   name: string;
   fps: number;
@@ -22,6 +23,7 @@ export interface Clip {
   faces?: ClipFace[];
 }
 
+/** One expression track of a clip, a weight per frame. */
 export interface ClipFace {
   /** Expression or morph name. */
   name: string;
@@ -40,19 +42,23 @@ export function sampleFace(c: Clip, face: ClipFace, t: number): number {
   return a + (b - a) * (f - i);
 }
 
+/** A pose on flat arrays: local rotations per bone, x y z w, and the root position. */
 export interface Pose {
   rotations: Float32Array;
   root: Float32Array;
 }
 
+/** Length of a clip in seconds, from its frame count and rate. */
 export const clipDuration = (c: Clip): number => Math.max(0, c.frames - 1) / c.fps;
 
+/** A pose of the given bone count with every rotation at identity and the root at the origin. */
 export function createPose(bones: number): Pose {
   const rotations = new Float32Array(bones * 4);
   for (let i = 0; i < bones; i++) rotations[i * 4 + 3] = 1;
   return { rotations, root: new Float32Array(3) };
 }
 
+/** Copies the rotations and root of one pose into another of the same size. */
 export function copyPose(from: Pose, to: Pose): void {
   to.rotations.set(from.rotations);
   to.root.set(from.root);
@@ -80,6 +86,7 @@ export function sampleClip(c: Clip, t: number, out: Pose, mask?: Uint8Array): vo
   if (c.root) for (let k = 0; k < 3; k++) out.root[k] = c.root[i0 * 3 + k]! * (1 - u) + c.root[i1 * 3 + k]! * u;
 }
 
+/** When a loop seam gets a blend, and how many seconds are blended. */
 export interface SeamOptions {
   /** Seams wider than this (degrees) get the blend. Default 2. */
   thresholdDeg?: number;
@@ -94,6 +101,7 @@ export interface LoopPlan {
   seamDeg: number;
 }
 
+/** How a loop wraps: the seam width in degrees, the blend window and the restart time. */
 export function planLoop(c: Clip, opts: SeamOptions = {}): LoopPlan {
   const seamDeg = seamDegrees(c);
   const d = clipDuration(c);
@@ -155,8 +163,10 @@ export function blendPose(a: Pose, b: Pose, w: number, out: Pose, mask?: Uint8Ar
   if (!mask) for (let k = 0; k < 3; k++) out.root[k] = a.root[k]! + (b.root[k]! - a.root[k]!) * Math.min(1, w);
 }
 
+/** A clip player layer: the whole body, or the masked upper body. */
 export type Layer = "body" | "upper";
 
+/** Layer, loop, fade, hold, speed and queue policy of one play call. */
 export interface PlayOptions {
   layer?: Layer;
   /** Loop the clip; defaults to the clip's own flag. */
@@ -174,6 +184,7 @@ export interface PlayOptions {
   speed?: number;
 }
 
+/** A clip player event: a clip started, ended, or handed back to the base layer. */
 export interface PlayerEvent {
   type: "started" | "ended" | "handback";
   layer: Layer;
@@ -199,12 +210,14 @@ interface Track {
   started: boolean;
 }
 
+/** A locomotion loop and the speed it was recorded at, in meters per second. */
 export interface LocomotionEntry {
   clip: Clip;
   /** Speed the clip was recorded at, m/s. */
   speed: number;
 }
 
+/** The idle clip, locomotion loops by speed, the upper body bone set and seam options of a clip player. */
 export interface ClipPlayerOptions {
   idle: Clip;
   /** Locomotion loops by recorded speed; blended by speed with a shared phase. */
@@ -214,6 +227,7 @@ export interface ClipPlayerOptions {
   seam?: SeamOptions;
 }
 
+/** Layered clip player that writes every bone each frame: a base of idle and speed matched locomotion, a body layer and a masked upper body layer, with loop seams and idle handback. */
 export class ClipPlayer {
   readonly pose: Pose;
   /** This frame's expression weights from the clips' face tracks, each weighted by its layer weight; read after `update`. */

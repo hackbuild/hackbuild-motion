@@ -5,8 +5,10 @@ import { type Rng, sample, spring, springState } from "@hackbuild/organic";
 import { DEG, SeamHold, type Vec3, clamp, direction, yawPitch } from "./angles.js";
 import { Blink, type BlinkOptions } from "./blink.js";
 
+/** The conversation state that sets aversion timing: listen, talk or think. */
 export type GazeMode = "listen" | "talk" | "think";
 
+/** Random source, eye and head ranges, spring halflife and the organic switch of a gaze controller. */
 export interface GazeOptions {
   rng: Rng;
   /** Half width of the range the eyes cover alone before the head joins, degrees. */
@@ -29,6 +31,7 @@ export interface GazeOptions {
   blink?: BlinkOptions;
 }
 
+/** One gaze frame: head and eye angles, world direction, lid weight, aversion flag and the body turn asked for. */
 export interface GazeOutput {
   /** Head angles from the body, radians. */
   headYaw: number;
@@ -76,6 +79,7 @@ const AVERSION = {
   think: { dur: [2.6, 0.5, 0.9], gap: [3, 0.6, 1] },
 } as const;
 
+/** Where the eyes and head point each frame, with aversion episodes, saccades, head recruitment, clamped eye aim, blinks and a seam hold behind the body. */
 export class GazeController {
   readonly blinker: Blink;
   private readonly rng: Rng;

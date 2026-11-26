@@ -129,8 +129,10 @@ export function spineUnderHips(bones: Partial<Record<HumanBone, Object3D>>): boo
   return true;
 }
 
+/** What `loadMmd` reads: a file, bytes or a URL. */
 export type MmdSource = Blob | ArrayBuffer | ArrayBufferView | string | URL;
 
+/** Name, dropped textures, loading manager, unit and physics options of `loadMmd`. */
 export interface MmdLoadOptions {
   /** File name, for the meta and the wardrobe. */
   name?: string;
@@ -152,6 +154,7 @@ export interface MmdLoaderLike {
   loadAsync(url: string): Promise<{ mesh: SkinnedMesh; pmx: MmdModelData }>;
 }
 
+/** An MMD model loaded as an avatar, with its VRM result and the spring physics built from its rigid bodies. */
 export interface MmdAvatar extends Avatar {
   format: "unknown";
   vrm: VrmResult;

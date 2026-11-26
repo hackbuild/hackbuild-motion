@@ -26,6 +26,7 @@ export interface ThumbRenderer<J> {
   dispose(): void;
 }
 
+/** The renderer factory, the save call, the failure and progress calls of a `ThumbQueue`. */
 export interface ThumbQueueOptions<J> {
   /** Builds the renderer, on first need and after a lost context. Null or a throw ends the run. */
   renderer(): Promise<ThumbRenderer<J> | null>;
@@ -48,6 +49,7 @@ export interface ThumbQueueOptions<J> {
 
 const reasonOf = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
+/** Draws previews one at a time in the background, saves each image and remembers failures, paced so the page stays responsive. */
 export class ThumbQueue<J extends { id: string }> {
   private readonly state: ThumbProgress = { active: false, done: 0, total: 0 };
   private readonly queue: J[] = [];

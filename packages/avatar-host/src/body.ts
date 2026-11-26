@@ -15,6 +15,7 @@ import { LipSync, type MouthTarget, drive } from "@hackbuild/lipsync";
 import { HUMAN_BONES, type HumanBone } from "@hackbuild/rig/bones";
 import type { Avatar, Part } from "@hackbuild/avatar/three";
 
+/** Random source, gaze, head levelling, mouth target and clip options of a `Body`. */
 export interface BodyOptions {
   rng: Rng;
   /** Gaze on neck, head and eyes. auto turns it on when the head's rest frame is upright and facing +Z. Default auto. */
@@ -49,6 +50,7 @@ interface VrmLike {
   lookAt?: { yaw: number; pitch: number; target?: unknown };
 }
 
+/** A loaded character driven in the presence frame order: clip player, gaze, lip sync and face, written to its bones each frame. */
 export class Body {
   readonly names: HumanBone[] = [];
   readonly bones: Object3D[] = [];

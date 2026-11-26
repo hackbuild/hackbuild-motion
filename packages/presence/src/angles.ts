@@ -1,11 +1,15 @@
 // Angles in the normalized humanoid space: +Y up, +Z forward, yaw positive
 // toward +X (a turn about +Y), pitch positive up.
 
+/** A point or direction as x, y, z in the normalized humanoid space. */
 export type Vec3 = readonly [number, number, number];
 
+/** Radians per degree. */
 export const DEG = Math.PI / 180;
+/** Two pi, one full turn in radians. */
 export const TAU = Math.PI * 2;
 
+/** Clamps a number to the range lo to hi. */
 export const clamp = (x: number, lo: number, hi: number): number => (x < lo ? lo : x > hi ? hi : x);
 
 /** Wraps to (-pi, pi]. */

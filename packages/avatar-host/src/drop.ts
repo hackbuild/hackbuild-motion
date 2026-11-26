@@ -11,6 +11,7 @@ export interface EntryLike {
   createReader?(): { readEntries(ok: (batch: EntryLike[]) => void, fail?: (e: unknown) => void): void };
 }
 
+/** The parts of a DataTransfer that `filesFromDrop` reads: entries and files. */
 export interface DropLike {
   items?: ArrayLike<{ webkitGetAsEntry?(): EntryLike | null }>;
   files?: ArrayLike<File>;

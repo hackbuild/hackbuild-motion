@@ -43,6 +43,7 @@ import { GROUP_ORDER, type PartGroup, type SlotLabel, alternates, categorize, pa
 
 // ---------------------------------------------------------------- materials
 
+/** Alpha cutoff, double sided faces and the broken texture test of the material repair. */
 export interface RepairOptions {
   /** Alpha cutoff for materials turned into cutouts. Default 0.5. */
   cutoff?: number;
@@ -52,6 +53,7 @@ export interface RepairOptions {
   isBroken?: (t: Texture) => boolean;
 }
 
+/** What the material repair changed, counted per kind. */
 export interface RepairReport {
   /** Phong and Lambert materials replaced by MeshStandardMaterial. */
   converted: number;
@@ -195,6 +197,7 @@ export function repairMaterials(root: Object3D, opts: RepairOptions = {}): Repai
 export const readyOf = (t: Texture | null | undefined): Promise<boolean> =>
   (t?.userData.ready as Promise<boolean> | undefined) ?? Promise.resolve(!!t?.image);
 
+/** A loading manager over dropped files that resolves texture references through a `TextureIndex`, with the references it could not match. */
 export interface FileTextures {
   manager: LoadingManager;
   index: TextureIndex;
@@ -360,6 +363,7 @@ export function applyStartingVisibility(root: Object3D, hidden: ReadonlySet<stri
 
 // ---------------------------------------------------------------- humanoid
 
+/** Head height, T pose arms, straight legs and unit options for placing a model in the normalized humanoid space. */
 export interface NormalizeOptions {
   /** Head joint height in meters; default keeps the measured size. */
   headHeight?: number;
@@ -373,6 +377,7 @@ export interface NormalizeOptions {
   deform?: boolean;
 }
 
+/** A model placed in the normalized humanoid space: its root group, mapped bones, rig and rest reports and head height. */
 export interface Humanoid {
   /** Group that holds the model in the normalized space. */
   root: Group;
@@ -413,6 +418,7 @@ export function normalizeHumanoid(model: Object3D, opts: NormalizeOptions = {}):
 
 // ---------------------------------------------------------------- wardrobe
 
+/** One wardrobe part: its slot, group, meshes and, for a merged mesh, its material. */
 export interface Part {
   id: string;
   name: string;
@@ -623,6 +629,7 @@ export function posedBounds(bones: Partial<Record<HumanBone, Object3D>>, margin 
 
 // ---------------------------------------------------------------- loading
 
+/** What `loadAvatar` reads: a URL, bytes or a file. */
 export type AvatarSource = string | URL | ArrayBuffer | ArrayBufferView | Blob;
 
 /** What `/vrm` hands to `loadAvatar` so VRM files load through @pixiv/three-vrm. */
@@ -632,6 +639,7 @@ export interface VrmHook {
   finish(gltf: GLTF): VrmResult | null;
 }
 
+/** A VRM as the loader hands it back: root, bones, expressions, the per frame update and the VRM metadata. */
 export interface VrmResult {
   root: Object3D;
   bones: Partial<Record<HumanBone, Object3D>>;
@@ -641,6 +649,7 @@ export interface VrmResult {
   vrm: unknown;
 }
 
+/** Name, resource path, manager, dropped textures, VRM hook, repair and normalize options of `loadAvatar`. */
 export interface LoadOptions {
   /** File name, used to sniff when the bytes say nothing and to clean texture names. */
   name?: string;
@@ -655,6 +664,7 @@ export interface LoadOptions {
   normalize?: NormalizeOptions;
 }
 
+/** A loaded character in the normalized humanoid space: root, bones, wardrobe, expressions, clips and metadata. */
 export interface Avatar {
   format: AvatarFormat;
   /** Rig family the mapper saw: mixamo, unreal (UAL), vroid and so on. */

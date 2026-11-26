@@ -7,6 +7,7 @@ import { type Clip, type Pose } from "./clip.js";
 import { RELAXED } from "./stance.js";
 import { type GazeOutput } from "./gaze.js";
 
+/** Frame rate, loop flag, root bone and rest rotations for `clipFromThree`. */
 export interface ClipFromThreeOptions {
   fps?: number;
   loop?: boolean;
@@ -68,6 +69,7 @@ function yawPitchQuat(yaw: number, pitch: number, out: Quaternion): Quaternion {
   return out.setFromAxisAngle(new Vector3(0, 1, 0), yaw).multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -pitch));
 }
 
+/** The neck, head and eye bones that `applyGaze` writes to, and the eye bone limits. */
 export interface GazeRig {
   neck?: Object3D | null;
   head: Object3D;
@@ -124,6 +126,7 @@ export function aimBone(bone: Object3D, child: Object3D, target: Vector3, weight
   bone.updateWorldMatrix(false, true);
 }
 
+/** The upper arm, forearm and hand bones that `reachArm` swings toward a target. */
 export interface ArmChain {
   upper: Object3D;
   lower: Object3D;

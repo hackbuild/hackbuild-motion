@@ -19,8 +19,10 @@ import { type PlaceholderOptions, placeholderBody } from "./placeholder.js";
 import { EnvironmentSlot, type EnvironmentRequest, stagePixelRatio } from "./environment.js";
 import type { LoadedEnvironment } from "@hackbuild/environment/three";
 
+/** The line a stage shows when the browser drops its 3D context. */
 export const LOST_COPY = "the 3d view was lost. press to restore.";
 
+/** Canvas, random source, pixel ratio, background, environment and body load options of an `AvatarStage`. */
 export interface StageOptions extends BodyLoadOptions {
   /** A canvas to draw on; by default the stage makes one and appends it to the container. */
   canvas?: HTMLCanvasElement;
@@ -42,6 +44,7 @@ export interface StageOptions extends BodyLoadOptions {
   environment?: EnvironmentRequest | string;
 }
 
+/** Frames per second, frame count, draw calls, triangles and buffer size of a stage. */
 export interface StageStats {
   /** Frames per second over the last window (measured from the loop clock). */
   fps: number;
@@ -55,6 +58,7 @@ export interface StageStats {
   pixelRatio: number;
 }
 
+/** What a stage reports: a body loaded or failed, stats, loop state, and the 3D context lost or restored. */
 export type StageEvent =
   | { type: "loaded"; body: Body; name: string; caps: BodyCaps; warnings: string[]; placeholder: boolean }
   | { type: "failed"; message: string; cause: unknown }
@@ -68,6 +72,7 @@ type Of<K extends StageEvent["type"]> = Extract<StageEvent, { type: K }>;
 /** Pointer moves count as attention for this long, seconds (vendor). */
 const POINTER_WINDOW = 2;
 
+/** A three.js stage in a container: renderer, camera, orbit controls, follow camera, loop, environment slot and the body it shows. */
 export class AvatarStage {
   readonly scene = new Scene();
   readonly camera = new PerspectiveCamera(30, 1, 0.05, 200);

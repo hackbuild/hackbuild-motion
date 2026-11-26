@@ -1,194 +1,199 @@
 # @hackbuild/avatar
 
-Characters from VRM, Mixamo, UAL, generic GLB and FBX files in the
-normalized humanoid space every package in this repository works in: VRM
-1.0 bone names, T pose, +Z forward, meters, feet at y = 0. Bone naming and
-rest analysis come from `@hackbuild/rig`; this package does the loading,
-the repair and the parts a person sees.
+Load VRM, Mixamo, UAL, generic GLB, FBX and MMD characters into one humanoid space, with material repair, a wardrobe, expressions and a first person head hider.
 
-- `loadAvatar(source, opts)`: a URL, bytes or a dropped File. The format is
-  sniffed from content (GLB, glTF, VRM, VRMA, binary and ASCII FBX).
-  glTF and FBX go through the three.js loaders; VRM goes through
-  `@pixiv/three-vrm` when you pass `vrmHook()` from `/vrm`, and loads as
-  plain glTF with a warning otherwise.
-- `normalizeHumanoid(model)`: maps bones with no per rig table, bakes
-  centimeter and millimeter units into the model (`bakeScale`), wraps it
-  so it faces +Z, stands it on y = 0 and lifts A pose arms into the T pose. A missing
-  required bone throws with the list of missing bones.
-- `repairMaterials(root)`: Phong and Lambert to MeshStandardMaterial with a
-  roughness from shininess; opaque materials flagged transparent become
-  alpha cutouts (teeth and eye sorting); zero opacity over a texture
-  becomes a cutout; black base color under a texture becomes white; an
-  alpha map that repeats the color map is dropped; failed maps are
-  dropped; color maps are sRGB; skinned meshes are never frustum culled.
-- `bakeScale(root, s)`: units into node positions, vertex and morph
-  positions and the translation column of bind and inverse bind matrices,
-  so the root and the wrapper group stay at scale 1 and spring bones see
-  meters.
-- `TextureIndex` and `managerForFiles(files, modelName)`: lenient texture
-  lookup for dropped folders. Backslash paths, any case, copy suffixes
-  (`eyes.png.004`), generic words and the model's own name as a prefix are
-  ignored; nearer files win ties. Words split on Unicode letters and
-  digits, so a Japanese file name keeps its key words; MMD sphere maps
-  (`.spa`, `.sph`) never match as a color. Every image an FBX asks for
-  goes through a picking loader whose textures carry `userData.ready` and
-  `userData.file`; TGA loads through TGALoader.
-- `fillMaps(root, files, report)`, run by `loadAvatar` when you pass
-  `files: managerForFiles(...)`: drops color maps that failed and fills
-  missing ones from the dropped files, first the image that owns the
-  material's UV tile on a UDIM style mesh (`tileGroups`, `resolveTiles`),
-  then an image named like the material, then a sibling material's image
-  when it covers at least 0.6 of the material's UVs (`uvCenters`,
-  `sampleImage`, `coverage`, `pickMaps`). `RepairReport` counts `byTile`,
-  `byName`, `byCoverage` and lists `misses`. Images are sampled one at a
-  time at 128 px through `createImageBitmap` with a yield between images.
-- `hiddenInFile(bytes)` and `applyStartingVisibility(root, hidden)`: FBX
-  meshes the file stores with Visibility 0 or Show false start hidden;
-  `loadAvatar` runs both on FBX before the wardrobe reads visibility.
-- `toVrm(avatar, { springs })` from `/vrm`: a three-vrm `VRM` around a
-  loaded GLB or FBX avatar, with normalized bones at identity rest
-  rotations, expressions from the rig expression table, eye bone look at
-  limited to 12 degrees sideways and 8 up and down (`EYE_RANGE`, vendor),
-  and optional spring bones, so one frame loop drives every format.
-- `loadMmd(file, { files })` from `/mmd`: a dropped PMX or PMD model as a
-  three-vrm `VRM` in the normalized humanoid space. The parser is
-  `@moeru/three-mmd` (MIT, 0.2.0-beta.3, vendor), an optional peer imported
-  on the first call only. Bones map through the rig mapper's mmd dialect
-  with the D deform leg bones, the upper body moves under the lower body
-  (`spineUnderHips`), units are 0.08 m (`MMD_UNIT`, vendor), and rigid
-  bodies become spring bones (`buildSprings`): a body that follows its bone
-  becomes a collider, a simulated body a joint, skirts a little stiffer.
-  MMD IK and append rotation are not run; PMD materials have no names.
-  Most MMD models forbid redistribution, so the result carries
-  `local: true` and `MMD_LOCAL_COPY`; keep the file on the device.
-  `mmdFormat(bytes)` tells pmx and pmd from the first bytes.
-- `Wardrobe.from(root)`: parts per mesh, or per material on merged meshes,
-  classified into 17 slots (eyewear, headwear, top, bottom, footwear,
-  hair, face, body and so on) by a scored keyword match that includes the
-  romanized Japanese names VRoid and Booth models use. Alternate garment
-  states (`Shorts_down`, `No_stocking_L`) start hidden. `equip` shows one
-  part and hides the rest of its slot; `snapshot` and `restore` save a
-  look.
-- `ExpressionRig`: VRM presets on a plain model through the rig expression
-  table (direct names, VRChat and MMD aliases, ARKit composites, Oculus
-  visemes). A morph name found on several meshes drives all of them.
-  `@hackbuild/lipsync` writes to it, or to a three-vrm expression manager,
-  through the same `setValue(name, weight)`.
-- `HeadHider`: first person view. The head bone scales to 0.001 for one
-  render and is restored after it, also when the draw throws, so the body
-  still shows in mirrors and shadows.
-- `checkRedistribution(meta, { modified })`: the licence gate for exporting
-  or composing avatars, for VRM 1.0 and 0.x metadata.
-- `probeFbx(bytes)`: tells a rigged character from an animation only FBX
-  from the first 256 KB.
-- `posedBounds(bones)`: framing bounds from the posed skeleton, since
-  skinned bounds stay at the rest pose.
+[![npm](https://img.shields.io/npm/v/@hackbuild/avatar)](https://www.npmjs.com/package/@hackbuild/avatar) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 5.5 kB measured](https://img.shields.io/badge/gzip-5.5%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+
+Browser status: no real model file has been loaded in a browser yet; every load in the tests runs on models built in memory by the test.
+
+## What it does
+
+- Loads a URL, bytes or a dropped file, sniffs the format from its content (GLB, glTF, VRM, VRMA, binary and ASCII FBX), and places the model in the normalized humanoid space: VRM 1.0 bone names, T pose, +Z forward, meters, feet at y = 0.
+- Repairs materials that render wrong in three.js: Phong and Lambert to standard, cutouts for hair and lashes, black base colors under a texture, duplicate and failed maps.
+- Finds the textures of a dropped folder by path, name, cleaned stem or key words, and fills missing color maps from the files you dropped.
+- Sorts meshes into 17 wardrobe slots, drives expressions on any model through one `setValue(name, weight)`, and hides the head for a first person camera.
+- Checks VRM licence metadata before an avatar goes into a shareable bundle.
 
 ## Install
 
-Not published yet. From a clone:
+```sh
+npm install @hackbuild/avatar three @pixiv/three-vrm
+```
 
-    npm ci && npm run build -w @hackbuild/rig -w @hackbuild/avatar
+It depends on `@hackbuild/rig`, which maps bone names in wasm. three.js and the VRM and MMD loaders are optional peers behind their subpaths; install the ones you use.
 
-`@pixiv/three-vrm` (MIT) is an optional peer, needed for `/vrm` and
-`/mmd`. `@moeru/three-mmd` (MIT, a beta) is an optional peer, needed only
-for `/mmd`.
+| subpath | needs | pin |
+|---|---|---|
+| `@hackbuild/avatar` | nothing; format sniffing, the FBX probe, wardrobe classifier, texture index and licence gate | none |
+| `@hackbuild/avatar/three` | `three` (optional peer) | 0.186.1 or later |
+| `@hackbuild/avatar/vrm` | `three` and `@pixiv/three-vrm` (optional peers) | three-vrm 3.5.5 or later |
+| `@hackbuild/avatar/mmd` | `three`, `@pixiv/three-vrm` and `@moeru/three-mmd` (optional peers, three-mmd is a beta) | three-mmd 0.2.0-beta.3 or later |
+| `@hackbuild/avatar/iife` | a page with a `THREE` global; leaves out `/vrm` and `/mmd` | none |
 
-## Use
+## Quick start
 
 ```ts
 import { load } from "@hackbuild/avatar";
-import { loadAvatar, managerForFiles } from "@hackbuild/avatar/three";
+import { loadAvatar } from "@hackbuild/avatar/three";
 import { vrmHook } from "@hackbuild/avatar/vrm";
+import * as THREE from "three";
 
-await load(); // the rig wasm
-const avatar = await loadAvatar(file, { name: file.name, vrm: vrmHook() });
-scene.add(avatar.root);
-avatar.warnings.forEach((w) => console.info(w)); // "model was in centimeters and was scaled to meters."
+await load(); // the rig wasm that maps bone names
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(innerWidth, innerHeight);
+const scene = new THREE.Scene().add(new THREE.HemisphereLight(0xffffff, 0x444444, 2.5));
+const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.05, 50);
+camera.position.set(0, 1.4, 3.2);
+const input = Object.assign(document.createElement("input"), { type: "file", accept: ".vrm,.glb,.gltf,.fbx" });
+document.body.append(input, renderer.domElement);
 
-avatar.wardrobe.equip(avatar.wardrobe.slot("outerwear")[0]!.id);
-avatar.expressions.setValue("happy", 0.4);
-
-function frame(dt: number) {
-  avatar.update(dt); // three-vrm update, or morph weights for a plain model
-  avatar.head?.render(renderer, scene, firstPersonCamera);
-}
+// you pick the model file; it keeps its own licence
+input.onchange = async () => {
+  const file = input.files?.[0];
+  if (!file) return;
+  const avatar = await loadAvatar(file, { name: file.name, vrm: vrmHook() });
+  console.log(avatar.format, avatar.dialect, avatar.warnings);
+  scene.add(avatar.root);
+  renderer.setAnimationLoop(() => (avatar.update(1 / 60), renderer.render(scene, camera)));
+};
 ```
 
-`avatar.dispose()` takes the body out of the scene and frees its geometry,
-materials, maps and bone textures; `repairMaterials` frees the materials it
-replaces.
+## Live example
 
-For a dropped folder, `managerForFiles(new Map(files.map((f) => [f.webkitRelativePath || f.name, f])), "model")`
-gives a LoadingManager to pass as `opts.manager`.
+The demo page loads a VRM, GLB or FBX you drop and shows the rig mapping, T pose fix, material repair, clips and the head hider: [hackbuild-motion/avatar](https://hackbuild.github.io/hackbuild-motion/avatar/). The suite's avatar screen runs on this package: [hackbuild-suite avatar](https://hackbuild.github.io/hackbuild-suite/#/motion/avatar).
 
-`dist/avatar.iife.js` is the single file build (`HackbuildAvatar`, the rig
-wasm inlined, `THREE` read from the page). It leaves out `/vrm`; a page
-that wants VRM loads three-vrm itself and passes a hook with the same
-shape.
+## Concepts
 
-## Develop
+### the normalized humanoid space
 
-    npm run build -w @hackbuild/avatar
-    npx vitest run packages/avatar
+Every package in this repository works in one space: VRM 1.0 bone names, T pose, +Z forward, meters, feet at y = 0. `normalizeHumanoid` maps the bones with no per rig table (`@hackbuild/rig`), bakes centimeter and millimeter units into the model (`bakeScale`), turns it to face +Z, stands it on the floor and lifts A pose arms to the T pose. `avatar.root` is the group to add to your scene; `avatar.bones` holds the bones by VRM name.
+
+### VRM through a hook
+
+A `.vrm` loads through `@pixiv/three-vrm` only when you pass `vrm: vrmHook()` from `/vrm`; without it the file loads as plain glTF with a warning. `toVrm(avatar)` wraps a loaded GLB or FBX avatar in a three-vrm `VRM`, so one frame loop drives every format. `avatar.update(dt)` runs the three-vrm update or the morph weights of a plain model.
+
+### dropped folders
+
+`managerForFiles(files, modelName)` gives a loading manager whose texture lookup forgives backslash paths, any case, copy suffixes such as `eyes.png.004`, and the model's own name as a prefix. Pass it as `files` and `loadAvatar` also fills missing color maps: first the image that owns a material's UV tile, then one named like the material, then a sibling material's image that covers at least 0.6 of its UVs.
+
+```ts
+const files = new Map([...dropped].map((f) => [f.webkitRelativePath || f.name, f] as const));
+const avatar = await loadAvatar(model, { name: model.name, files: managerForFiles(files, "model") });
+console.log(avatar.repair?.misses); // references no dropped file matched
+```
+
+### wardrobe and expressions
+
+`avatar.wardrobe` holds parts per mesh, or per material on a merged mesh, sorted into slots by keywords that include the romanized Japanese names VRoid and Booth models use. `equip(id)` shows one part and hides the rest of its slot; `snapshot` and `restore` keep a look. `avatar.expressions.setValue("happy", 0.4)` works on a VRM and on a plain model, through VRChat, MMD, ARKit and Oculus viseme names.
+
+### MMD models stay local
+
+`loadMmd(file, { files })` from `/mmd` loads a PMX or PMD model as a three-vrm `VRM`, with rigid bodies as spring bones and 0.08 m per unit. Most MMD models forbid redistribution, so the result carries `local: true`, and `MMD_LOCAL_COPY` is the line to show: keep the file on the device.
+
+### the licence gate
+
+`checkRedistribution(meta, { modified })` reads VRM 1.0 and 0.x licence metadata and says whether an avatar may go into a shareable bundle, or asks the person to confirm. Run it for every donor of a composite.
+
+## API overview
+
+| export | what it does |
+|---|---|
+| [`loadAvatar`](../../docs/api/avatar/three.md#loadavatar) | load a URL, bytes or file into the normalized space |
+| [`Avatar`](../../docs/api/avatar/three.md#avatar) | the loaded character: root, bones, wardrobe, expressions, update, dispose |
+| [`normalizeHumanoid`](../../docs/api/avatar/three.md#normalizehumanoid) | map bones, fix units, face +Z, stand on the floor, lift to T pose |
+| [`repairMaterials`](../../docs/api/avatar/three.md#repairmaterials) | fix materials that render wrong in three.js |
+| [`managerForFiles`](../../docs/api/avatar/three.md#managerforfiles) | a loading manager over dropped files |
+| [`Wardrobe`](../../docs/api/avatar/three.md#wardrobe) | parts by slot, equip, snapshot and restore |
+| [`ExpressionRig`](../../docs/api/avatar/three.md#expressionrig) | VRM expression presets on a plain model |
+| [`HeadHider`](../../docs/api/avatar/three.md#headhider) | hide the head for one first person render |
+| [`posedBounds`](../../docs/api/avatar/three.md#posedbounds) | framing bounds from the posed skeleton |
+| [`vrmHook`](../../docs/api/avatar/vrm.md#vrmhook) | load VRM files through three-vrm |
+| [`toVrm`](../../docs/api/avatar/vrm.md#tovrm) | wrap a GLB or FBX avatar in a three-vrm VRM |
+| [`loadMmd`](../../docs/api/avatar/mmd.md#loadmmd) | a PMX or PMD model as a VRM, kept on the device |
+| [`sniffFormat`](../../docs/api/avatar/index.md#sniffformat) | tell the format from the first bytes |
+| [`probeFbx`](../../docs/api/avatar/index.md#probefbx) | tell a character from an animation only FBX |
+| [`checkRedistribution`](../../docs/api/avatar/index.md#checkredistribution) | the VRM licence gate for sharing |
+| [`TextureIndex`](../../docs/api/avatar/index.md#textureindex) | find the file a texture reference means |
+| [`load`](../../docs/api/avatar/index.md#load) | load the rig wasm |
+
+The full reference is in [docs/api/avatar](../../docs/api/avatar/README.md).
+
+## Models and weights
+
+No models ship with this package. You give a URL or a file, and each model keeps its own licence. For a VRM the licence comes from the file's own metadata (`vrmMeta`, then `checkRedistribution`); GLB, FBX and MMD files carry no licence field this package reads, so state the licence where you got the file.
+
+| source | id | size | licence | loads from |
+|---|---|---|---|---|
+| a VRM you give | none | unknown | the file's VRM metadata | the URL or file you pass |
+| a GLB, glTF or FBX you give | none | unknown | stated where you got it | the URL or file you pass |
+| a PMX or PMD you give | none | unknown | usually forbids sharing; kept on the device | the file you drop |
+
+## Browser support
+
+| part | needs | Chrome | Safari | Firefox | phone |
+|---|---|---|---|---|---|
+| core entry | ES2022 and the rig wasm (SIMD128) | yes (measured in tests) | unknown | unknown | unknown |
+| `/three` loading and repair | three.js; WebGL to draw | yes (inferred) | unknown | unknown | unknown |
+| color map fill by coverage | `createImageBitmap` | yes (inferred) | unknown | unknown | unknown |
+| single file build | a classic script, rig wasm inlined, file:// included | yes (inferred) | unknown | unknown | unknown |
+
+The wasm uses SIMD128 and no threads, so no page needs cross origin isolation. Without `createImageBitmap` (in Node, for instance) `sampleImage` returns null and the coverage fallback picks nothing.
+
+## Errors and troubleshooting
+
+| message | cause | what to do |
+|---|---|---|
+| `@hackbuild/rig: wasm not loaded. call load() first.` | bone mapping ran before the rig wasm loaded | `await load()` from `@hackbuild/avatar` first |
+| `avatar: missing required bones: <bones>.` | the mapper found no hips, spine, arms or legs | check the file is a rigged humanoid; a prop or clip only file has no skeleton |
+| `avatar: rest analysis needs hips, head and both arms.` | the rest pose could not be measured | use a full humanoid rig |
+| `avatar: a vrma file is an animation. load it with a clip loader.` | a VRMA was passed to `loadAvatar` | load it as a clip with `@hackbuild/retarget` |
+| `avatar: unknown model format.` | the bytes and the name match no format | pass `name` with the extension, or check the file |
+| `avatar: fetch failed with <status> for <url>.` | the URL answered with an error | check the URL and that the server allows the page's origin |
+| `avatar: no humanoid skeleton, missing <bones>.` | `toVrm` found too few normalized bones | load the model through `loadAvatar` first and check `avatar.bones` |
+| `avatar: the mmd file did not parse. <reason>` | three-mmd could not read the PMX or PMD | check the file and drop its folder so textures resolve |
+
+Warnings that do not throw land in `avatar.warnings`, for instance `vrm loaded as plain gltf. pass vrmHook() from @hackbuild/avatar/vrm for spring bones and expressions.`
+
+### mistakes to avoid
+
+- Loading a `.vrm` without `vrm: vrmHook()`: it loads as plain glTF with no spring bones or expressions.
+- Forgetting `await load()` before `loadAvatar`: the rig wasm maps the bones.
+- Adding `avatar.humanoid.model` or the raw glTF scene to your scene instead of `avatar.root`, which holds the normalized wrapper.
+- Sharing or bundling a model without `checkRedistribution`, or uploading an MMD model the result marks `local: true`.
+- Using skinned mesh bounds for framing: they stay at the rest pose. Use `posedBounds(avatar.bones)`.
+
+## Works with
+
+- [@hackbuild/rig](../rig/README.md) maps the bone names and measures the rest pose.
+- [@hackbuild/avatar-host](../avatar-host/README.md) shows an avatar on a stage with a follow camera and a frame loop.
+- [@hackbuild/presence](../presence/README.md) drives gaze, blink and clips on the loaded bones.
+- [@hackbuild/lipsync](../lipsync/README.md) writes mouth shapes through `avatar.expressions`.
+- [@hackbuild/retarget](../retarget/README.md) puts clips from other rigs onto the loaded skeleton.
+
+## Changelog and licences
+
+Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LICENSE](../../LICENSE)); this README is CC-BY-4.0 with its code samples also MIT. No models ship here; each model you load keeps its own licence. `@pixiv/three-vrm` and `@moeru/three-mmd` are MIT.
 
 ## What is verified, and what is not
 
-### Verified on this machine
+| check | result |
+|---|---|
+| `npx vitest run packages/avatar` | 75 of 75 tests pass (counted); fixtures are GLB files built in memory, no model files are read or committed |
+| a Mixamo named GLB in centimeters, turned 180 degrees, arms 40 degrees down | loads to the T pose facing +Z, toes on y = 0 within 1e-5 m, head height within 1 mm of the reference (computed) |
+| a UAL style GLB in meters | loads with no warnings; a two bone model fails with the missing bone list |
+| a VRM 1.0 GLB through three-vrm 3.5.5 in Node | gives normalized bones by VRM name; its metadata passes the licence gate unmodified and fails it modified |
+| `bakeScale` by 0.01 | skinned vertex world positions equal the scaled originals within 1e-5, root at scale 1 (computed) |
+| texture fill | a two tile mesh with crossed material names gets each tile's own file; a sibling image under 0.6 coverage is refused; a Japanese file name matches by key words; a `.sph` reference returns null |
+| FBX fragments with Visibility 0 | give the hidden mesh names, binary and ASCII |
+| `toVrm` on a Mixamo named GLB | normalized bones at identity rest rotations drive the raw bones |
+| `/mmd` with a stand in parser | rigid bodies give colliders and joints; skirt stiffness 1.6, hair 1.2; the upper body moved under the lower body keeps its world matrix within 1e-6; 1.2 m head height for 15 units (computed) |
 
-- 2026-11-22: `npx vitest run packages/avatar` passed 14 of 14 tests
-  (counted). Fixtures are GLB files built in memory by the test; no model
-  files are read or committed.
-- 2026-11-22: a Mixamo named GLB in centimeters, turned 180 degrees, arms
-  40 degrees down, loads to the T pose facing +Z with its toes on y = 0
-  within 1e-5 m and head height within 1 mm of the reference (computed).
-- 2026-11-22: a UAL style GLB in meters loads with no warnings; a two bone
-  model fails with the missing bone list.
-- 2026-11-22: a VRM 1.0 GLB loads through `@pixiv/three-vrm` 3.5.5 in Node,
-  gives its normalized bones by VRM name, and its metadata passes the
-  redistribution gate unmodified and fails it modified.
-- 2026-11-24: `npx vitest run packages/avatar` passed 55 of 55 tests
-  (counted), 15 of them in `test/repair.test.ts`: `bakeScale` by 0.01
-  leaves skinned vertex world positions equal to the scaled originals
-  within 1e-5 and the root at scale 1; a two tile mesh with crossed
-  material names gets each tile's own file; a material with no texture
-  takes the sibling image that covers its UVs and refuses one under 0.6;
-  binary and ASCII FBX fragments with Visibility 0 give the hidden names;
-  a missing map resolves `ready` false and is dropped; a Japanese file name
-  matches by key words; a `.sph` reference returns null; `toVrm` on a
-  Mixamo named GLB gives normalized bones with identity rest rotations
-  that drive the raw bones.
-- 2026-11-22: material repair, the texture index, the wardrobe classifier
-  (13 names), alternate detection, ARKit expression binding and the head
-  hider each have a test.
+Not verified by anything:
 
-- 2026-11-24: `npx vitest run packages/avatar/` passed 33 of 33 tests
-  (counted), 6 of them in `test/mmd.test.ts` on a skeleton and a rigid
-  body list built in the test: four bodies that follow bones give four
-  colliders and four simulated bones give four joints, a skirt named bone
-  gets stiffness 1.6 and hair 1.2, the upper body moved under the lower
-  body keeps its world matrix within 1e-6, and `loadMmd` with a stand in
-  parser maps the D leg bones, puts the spine under the hips and reports
-  1.2 m head height for 15 units (computed).
-
-### Not verified by anything
-
-- No real model file has been loaded: no VRoid VRM, Mixamo export, UAL
-  pack or FBX from a store. The FBX path, stored visibility, the picking
-  loader, tile and coverage fallbacks run on fragments built by the tests,
-  untested on a store pack. `sampleImage` needs a browser; in Node it
-  returns null and a candidate scores 0. The 0.6 threshold and the eye
-  ranges are vendor figures from earlier work, not measured here.
-- Nothing has been looked at in a browser. Listed in
-  `docs/browser-checks.md`: skinned meshes after the A to T lift, cutout
-  materials on hair and lashes, the head hider in a first person camera.
-- `toVrm` springs: the option takes a builder; no spring bones are
-  derived from a GLB or FBX by this package.
-- No PMX or PMD file has been parsed here: the `/mmd` tests replace
-  three-mmd with a stand in that returns a synthetic mesh. The springs
-  have not been looked at in a browser, and the spring settings are vendor
-  figures from earlier work.
-- Part grafting between models is not built.
+- No real model file has been loaded: no VRoid VRM, Mixamo export, UAL pack, store FBX, PMX or PMD. The FBX path, stored visibility, the picking loader and the tile and coverage fallbacks run only on fragments built by the tests.
+- Nothing has been looked at in a browser: skinned meshes after the A to T lift, cutout materials on hair and lashes, the head hider in a first person camera, MMD springs.
+- The 0.6 coverage threshold, the eye ranges and the MMD spring settings are vendor figures, not measured here.
+- `toVrm` takes a spring builder; this package derives no spring bones from a GLB or FBX. Part grafting between models is not built.
 
 ## Size budget
 
@@ -200,8 +205,3 @@ shape.
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
-
-## Licence
-
-Code MIT (`LICENSE` at the repository root). This README is CC-BY-4.0, its
-code samples also MIT.
