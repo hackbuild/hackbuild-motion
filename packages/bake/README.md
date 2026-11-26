@@ -2,7 +2,7 @@
 
 Optimize GLB models, bake animation clips into compact packs, and keep an asset lock with licences and hashes, in the browser, in Node or on the command line.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/bake)](https://www.npmjs.com/package/@hackbuild/bake) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 204.7 kB measured](https://img.shields.io/badge/gzip-204.7%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/bake)](https://www.npmjs.com/package/@hackbuild/bake) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 205.2 kB measured](https://img.shields.io/badge/gzip-205.2%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 ## What it does
 
@@ -186,9 +186,9 @@ Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LIC
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 204,749 bytes | 214,986 bytes |
+| `dist/index.js` (main entry, imports external) | 205,156 bytes | 215,413 bytes |
 | `dist/wasm/bake_bg.wasm` | 148,883 bytes | 156,327 bytes |
-| `dist/bake.iife.js` (single file build) | 204,855 bytes | 215,097 bytes |
+| `dist/bake.iife.js` (single file build) | 205,266 bytes | 215,529 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

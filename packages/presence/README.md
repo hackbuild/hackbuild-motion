@@ -2,7 +2,7 @@
 
 Make a standing humanoid look present: gaze, blink, breath, idle moves, gestures, a layered clip player and a face driver.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/presence)](https://www.npmjs.com/package/@hackbuild/presence) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 11.3 kB measured](https://img.shields.io/badge/gzip-11.3%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/presence)](https://www.npmjs.com/package/@hackbuild/presence) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 11.7 kB measured](https://img.shields.io/badge/gzip-11.7%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 ## What it does
 
@@ -167,8 +167,8 @@ Not verified by anything:
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 11,295 bytes | 11,859 bytes |
-| `dist/presence.iife.js` (single file build) | 14,561 bytes | 15,289 bytes |
+| `dist/index.js` (main entry, imports external) | 11,661 bytes | 12,244 bytes |
+| `dist/presence.iife.js` (single file build) | 15,031 bytes | 15,782 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

@@ -2,7 +2,7 @@
 
 Motion matching over a clip database, with inertialized transitions, on a Rust core compiled to wasm.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/motion-match)](https://www.npmjs.com/package/@hackbuild/motion-match) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 64.7 kB measured](https://img.shields.io/badge/gzip-64.7%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/motion-match)](https://www.npmjs.com/package/@hackbuild/motion-match) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 64.8 kB measured](https://img.shields.io/badge/gzip-64.8%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 ## What it does
 
@@ -148,9 +148,9 @@ Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LIC
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 64,669 bytes | 67,902 bytes |
+| `dist/index.js` (main entry, imports external) | 64,828 bytes | 68,069 bytes |
 | `dist/wasm/motion_match_bg.wasm` | 44,165 bytes | 46,373 bytes |
-| `dist/motion-match.iife.js` (single file build) | 64,724 bytes | 67,960 bytes |
+| `dist/motion-match.iife.js` (single file build) | 64,882 bytes | 68,126 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

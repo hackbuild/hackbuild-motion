@@ -2,7 +2,7 @@
 
 Procedural locomotion for legged rigs: Froude gait choice, leg oscillators, footfall tables, posture springs, tail and ears, with a Rust core in wasm.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/gait)](https://www.npmjs.com/package/@hackbuild/gait) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 59.3 kB measured](https://img.shields.io/badge/gzip-59.3%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/gait)](https://www.npmjs.com/package/@hackbuild/gait) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 59.5 kB measured](https://img.shields.io/badge/gzip-59.5%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 ## What it does
 
@@ -175,9 +175,9 @@ Not verified by anything:
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 59,334 bytes | 62,300 bytes |
+| `dist/index.js` (main entry, imports external) | 59,539 bytes | 62,515 bytes |
 | `dist/wasm/gait_bg.wasm` | 39,043 bytes | 40,995 bytes |
-| `dist/gait.iife.js` (single file build) | 61,216 bytes | 64,276 bytes |
+| `dist/gait.iife.js` (single file build) | 61,421 bytes | 64,492 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

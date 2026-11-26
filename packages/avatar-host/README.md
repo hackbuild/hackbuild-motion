@@ -2,7 +2,7 @@
 
 Host a character on a three.js stage in any container, with a follow camera, the presence frame order and a loop that pauses when nobody can see it.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/avatar-host)](https://www.npmjs.com/package/@hackbuild/avatar-host) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 3.7 kB measured](https://img.shields.io/badge/gzip-3.7%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/avatar-host)](https://www.npmjs.com/package/@hackbuild/avatar-host) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 3.8 kB measured](https://img.shields.io/badge/gzip-3.8%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 Browser status: no real VRM, GLB or FBX file has been shown on this stage in a browser yet; the browser checks ran on the placeholder body built in code.
 
@@ -198,8 +198,8 @@ Not verified by anything:
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 3,700 bytes | 3,885 bytes |
-| `dist/avatar-host.iife.js` (single file build) | 195,992 bytes | 205,791 bytes |
+| `dist/index.js` (main entry, imports external) | 3,840 bytes | 4,032 bytes |
+| `dist/avatar-host.iife.js` (single file build) | 196,986 bytes | 206,835 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

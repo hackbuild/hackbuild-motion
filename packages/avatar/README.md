@@ -2,7 +2,7 @@
 
 Load VRM, Mixamo, UAL, generic GLB, FBX and MMD characters into one humanoid space, with material repair, a wardrobe, expressions and a first person head hider.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/avatar)](https://www.npmjs.com/package/@hackbuild/avatar) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 5.5 kB measured](https://img.shields.io/badge/gzip-5.5%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/avatar)](https://www.npmjs.com/package/@hackbuild/avatar) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 5.6 kB measured](https://img.shields.io/badge/gzip-5.6%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 Browser status: no real model file has been loaded in a browser yet; every load in the tests runs on models built in memory by the test.
 
@@ -191,8 +191,8 @@ Not verified by anything:
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 5,539 bytes | 5,815 bytes |
-| `dist/avatar.iife.js` (single file build) | 151,987 bytes | 159,586 bytes |
+| `dist/index.js` (main entry, imports external) | 5,627 bytes | 5,908 bytes |
+| `dist/avatar.iife.js` (single file build) | 152,141 bytes | 159,748 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

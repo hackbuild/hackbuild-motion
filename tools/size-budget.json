@@ -4,68 +4,68 @@
   "margin": 0.05,
   "packages": {
     "@hackbuild/avatar": {
-      "main: dist/index.js bundled": 5539,
-      "dist/avatar.iife.js": 151987
+      "main: dist/index.js bundled": 5627,
+      "dist/avatar.iife.js": 152141
     },
     "@hackbuild/bake": {
-      "main: dist/index.js bundled": 204749,
+      "main: dist/index.js bundled": 205156,
       "dist/wasm/bake_bg.wasm": 148883,
-      "dist/bake.iife.js": 204855
+      "dist/bake.iife.js": 205266
     },
     "@hackbuild/gait": {
-      "main: dist/index.js bundled": 59334,
+      "main: dist/index.js bundled": 59539,
       "dist/wasm/gait_bg.wasm": 39043,
-      "dist/gait.iife.js": 61216
+      "dist/gait.iife.js": 61421
     },
     "@hackbuild/ik": {
-      "main: dist/index.js bundled": 49806,
+      "main: dist/index.js bundled": 49950,
       "dist/wasm/ik_bg.wasm": 32703,
-      "dist/ik.iife.js": 51424
+      "dist/ik.iife.js": 51571
     },
     "@hackbuild/lipsync": {
-      "main: dist/index.js bundled": 6021,
-      "dist/lipsync.iife.js": 9774
+      "main: dist/index.js bundled": 6086,
+      "dist/lipsync.iife.js": 9872
     },
     "@hackbuild/motion-match": {
-      "main: dist/index.js bundled": 64669,
+      "main: dist/index.js bundled": 64828,
       "dist/wasm/motion_match_bg.wasm": 44165,
-      "dist/motion-match.iife.js": 64724
+      "dist/motion-match.iife.js": 64882
     },
     "@hackbuild/motion-net": {
-      "main: dist/index.js bundled": 47768,
+      "main: dist/index.js bundled": 47951,
       "dist/wasm/motion_net_bg.wasm": 23690,
-      "dist/motion-net.iife.js": 47978
+      "dist/motion-net.iife.js": 48160
     },
     "@hackbuild/organic": {
-      "main: dist/index.js bundled": 46415,
+      "main: dist/index.js bundled": 46530,
       "dist/wasm/organic_bg.wasm": 27822,
-      "dist/organic.iife.js": 46978
+      "dist/organic.iife.js": 47091
     },
     "@hackbuild/presence": {
-      "main: dist/index.js bundled": 11295,
-      "dist/presence.iife.js": 14561
+      "main: dist/index.js bundled": 11661,
+      "dist/presence.iife.js": 15031
     },
     "@hackbuild/retarget": {
-      "main: dist/index.js bundled": 154498,
+      "main: dist/index.js bundled": 154668,
       "dist/wasm/retarget_bg.wasm": 111212,
-      "dist/retarget.iife.js": 184822
+      "dist/retarget.iife.js": 185056
     },
     "@hackbuild/rig": {
-      "main: dist/index.js bundled": 88908,
+      "main: dist/index.js bundled": 89029,
       "dist/wasm/rig_bg.wasm": 57198,
-      "dist/rig.iife.js": 90016
+      "dist/rig.iife.js": 90127
     },
     "@hackbuild/avatar-host": {
-      "main: dist/index.js bundled": 3700,
-      "dist/avatar-host.iife.js": 195992
+      "main: dist/index.js bundled": 3840,
+      "dist/avatar-host.iife.js": 196986
     },
     "@hackbuild/environment": {
-      "main: dist/index.js bundled": 3088,
-      "dist/environment.iife.js": 34995
+      "main: dist/index.js bundled": 3211,
+      "dist/environment.iife.js": 35128
     },
     "@hackbuild/motion-views": {
       "main: dist/index.js bundled": 3266,
-      "dist/motion-views.iife.js": 214660
+      "dist/motion-views.iife.js": 215543
     }
   }
 }

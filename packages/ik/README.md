@@ -2,7 +2,7 @@
 
 Inverse kinematics for characters on the web: two bone, FABRIK, CCD, clamped look at, finger curl and foot locking, with a Rust core in wasm.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/ik)](https://www.npmjs.com/package/@hackbuild/ik) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 49.8 kB measured](https://img.shields.io/badge/gzip-49.8%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/ik)](https://www.npmjs.com/package/@hackbuild/ik) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 50.0 kB measured](https://img.shields.io/badge/gzip-50.0%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 ## What it does
 
@@ -161,9 +161,9 @@ Not verified by anything:
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 49,806 bytes | 52,296 bytes |
+| `dist/index.js` (main entry, imports external) | 49,950 bytes | 52,447 bytes |
 | `dist/wasm/ik_bg.wasm` | 32,703 bytes | 34,338 bytes |
-| `dist/ik.iife.js` (single file build) | 51,424 bytes | 53,995 bytes |
+| `dist/ik.iife.js` (single file build) | 51,571 bytes | 54,149 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

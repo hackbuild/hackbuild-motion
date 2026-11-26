@@ -2,7 +2,7 @@
 
 Light a three.js scene around a character with a key light, a rim light, image light and a set built from kit models.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/environment)](https://www.npmjs.com/package/@hackbuild/environment) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 3.1 kB measured](https://img.shields.io/badge/gzip-3.1%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/environment)](https://www.npmjs.com/package/@hackbuild/environment) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 3.2 kB measured](https://img.shields.io/badge/gzip-3.2%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 Browser status: no preset with a real HDRI or kit model has loaded in a browser yet; only the studio, which needs no file, has drawn, in headless Chrome under the avatar host page.
 
@@ -171,8 +171,8 @@ Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LIC
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 3,088 bytes | 3,242 bytes |
-| `dist/environment.iife.js` (single file build) | 34,995 bytes | 36,744 bytes |
+| `dist/index.js` (main entry, imports external) | 3,211 bytes | 3,371 bytes |
+| `dist/environment.iife.js` (single file build) | 35,128 bytes | 36,884 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

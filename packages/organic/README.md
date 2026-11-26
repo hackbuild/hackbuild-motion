@@ -2,7 +2,7 @@
 
 Critically damped springs, inertialization, seeded noise and samplers for procedural animation, with a Rust core in wasm.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/organic)](https://www.npmjs.com/package/@hackbuild/organic) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 46.4 kB measured](https://img.shields.io/badge/gzip-46.4%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/organic)](https://www.npmjs.com/package/@hackbuild/organic) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 46.5 kB measured](https://img.shields.io/badge/gzip-46.5%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 ## What it does
 
@@ -160,9 +160,9 @@ Not verified by anything:
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 46,415 bytes | 48,735 bytes |
+| `dist/index.js` (main entry, imports external) | 46,530 bytes | 48,856 bytes |
 | `dist/wasm/organic_bg.wasm` | 27,822 bytes | 29,213 bytes |
-| `dist/organic.iife.js` (single file build) | 46,978 bytes | 49,326 bytes |
+| `dist/organic.iife.js` (single file build) | 47,091 bytes | 49,445 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

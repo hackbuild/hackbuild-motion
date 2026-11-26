@@ -2,7 +2,7 @@
 
 Move a character's mouth from speech timings or the audio level, out to Oculus visemes, VRM vowels or ARKit blendshapes.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/lipsync)](https://www.npmjs.com/package/@hackbuild/lipsync) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 6.0 kB measured](https://img.shields.io/badge/gzip-6.0%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/lipsync)](https://www.npmjs.com/package/@hackbuild/lipsync) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 6.1 kB measured](https://img.shields.io/badge/gzip-6.1%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 ## What it does
 
@@ -167,8 +167,8 @@ Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LIC
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 6,021 bytes | 6,322 bytes |
-| `dist/lipsync.iife.js` (single file build) | 9,774 bytes | 10,262 bytes |
+| `dist/index.js` (main entry, imports external) | 6,086 bytes | 6,390 bytes |
+| `dist/lipsync.iife.js` (single file build) | 9,872 bytes | 10,365 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

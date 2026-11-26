@@ -2,7 +2,7 @@
 
 Run the published quadruped categorical codebook matching network in the browser and drive a dog's gait from it.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/motion-net)](https://www.npmjs.com/package/@hackbuild/motion-net) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 47.8 kB measured](https://img.shields.io/badge/gzip-47.8%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/motion-net)](https://www.npmjs.com/package/@hackbuild/motion-net) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 48.0 kB measured](https://img.shields.io/badge/gzip-48.0%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 Browser status: Chrome 150 on an Apple M1 has run the demo page on the published weights at real frame rate, with the network in a blob worker; no other browser or device has run real weights yet.
 
@@ -177,9 +177,9 @@ The tests that need the weights run only when `HB_MOTION_NET_BIN` and `HB_MOTION
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 47,768 bytes | 50,156 bytes |
+| `dist/index.js` (main entry, imports external) | 47,951 bytes | 50,348 bytes |
 | `dist/wasm/motion_net_bg.wasm` | 23,690 bytes | 24,874 bytes |
-| `dist/motion-net.iife.js` (single file build) | 47,978 bytes | 50,376 bytes |
+| `dist/motion-net.iife.js` (single file build) | 48,160 bytes | 50,568 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than

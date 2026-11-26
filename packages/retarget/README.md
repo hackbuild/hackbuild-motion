@@ -2,7 +2,7 @@
 
 Move clips between any rigs through one normalized humanoid space, with readers for BVH, VMD, VPD, VRMA and Unity text clips.
 
-[![npm](https://img.shields.io/npm/v/@hackbuild/retarget)](https://www.npmjs.com/package/@hackbuild/retarget) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 154.5 kB measured](https://img.shields.io/badge/gzip-154.5%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+[![npm](https://img.shields.io/npm/v/@hackbuild/retarget)](https://www.npmjs.com/package/@hackbuild/retarget) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 154.7 kB measured](https://img.shields.io/badge/gzip-154.7%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
 
 Browser status: the demo page has run in Chrome on a BVH walk written in code; no real clip file has been loaded in a browser yet.
 
@@ -188,9 +188,9 @@ Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LIC
 
 | file | gzip (measured) | ceiling |
 |---|---|---|
-| `dist/index.js` (main entry, imports external) | 154,498 bytes | 162,222 bytes |
+| `dist/index.js` (main entry, imports external) | 154,668 bytes | 162,401 bytes |
 | `dist/wasm/retarget_bg.wasm` | 111,212 bytes | 116,772 bytes |
-| `dist/retarget.iife.js` (single file build) | 184,822 bytes | 194,063 bytes |
+| `dist/retarget.iife.js` (single file build) | 185,056 bytes | 194,308 bytes |
 
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
