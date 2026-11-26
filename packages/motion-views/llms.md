@@ -364,6 +364,7 @@ interface CharacterStageHandle {
   dispose(): void;
   frame(mode: Framing): void;
   gesture(id: Gesture): boolean;
+  move(speed: number): void;
   on(fn: (e: CharacterStageEvent) => void): () => void;
   play(clip: string | Clip | AnimationClip, opts?: PlayOptions): number;
   say(speech: string | Speech, seconds?: number): Promise<void>;

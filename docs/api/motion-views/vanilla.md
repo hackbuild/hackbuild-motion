@@ -207,6 +207,26 @@ gesture(id): boolean;
 
 `boolean`
 
+##### move()
+
+```ts
+move(speed): void;
+```
+
+Tells the stage how fast the body moves over the ground, in metres a
+second, when the host walks it: with a clip pack loaded its walk loop
+plays at a matching rate, and the idle comes back at 0.
+
+###### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `speed` | `number` |
+
+###### Returns
+
+`void`
+
 ##### on()
 
 ```ts

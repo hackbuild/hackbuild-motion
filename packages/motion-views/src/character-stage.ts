@@ -90,6 +90,12 @@ export interface CharacterStageHandle {
   /** Where the mouth timings of the last speech came from. */
   readonly speechSource: SpeechSource | null;
   gesture(id: Gesture): boolean;
+  /**
+   * Tells the stage how fast the body moves over the ground, in metres a
+   * second, when the host walks it: with a clip pack loaded its walk loop
+   * plays at a matching rate, and the idle comes back at 0.
+   */
+  move(speed: number): void;
   /** Plays a clip on the body; the corner plate shows its name. Returns the ticket, -1 when it cannot play. */
   play(clip: Clip | AnimationClip | string, opts?: PlayOptions): number;
   stop(): void;
@@ -180,6 +186,18 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
     body.bones.forEach((b, i) => b.quaternion.toArray(base, i * 4));
     packed = packClips(pack, body.names, base);
     idleLoop(0.4);
+  }
+  let walking = false;
+  function move(speed: number): void {
+    const walk = packed?.Walk_Loop;
+    if (!walk || !stage.body) return;
+    if (speed > 0.15) {
+      if (!walking) stage.body.play(walk, { layer: "body", loop: true, background: true, fade: 0.25, speed: Math.min(2, Math.max(0.5, speed / 1.24)) });
+      walking = true;
+    } else if (walking) {
+      walking = false;
+      idleLoop(0.35);
+    }
   }
   function idleLoop(fade: number, talking = false): void {
     const c = packed?.[talking ? "Idle_Talking_Loop" : "Idle_Loop"] ?? packed?.Idle_Loop;
@@ -336,7 +354,7 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
     body.lip.push(events);
     body.setGazeMode("talk");
     setDoing("talking");
-    idleLoop(0.5, true);
+    if (!walking) idleLoop(0.5, true);
     stage.loop.sync();
     start?.();
     if (analyser && audioCtx) {
@@ -362,7 +380,7 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
     analyser?.disconnect();
     stage.body?.lip.setLevel(0);
     stage.body?.setGazeMode("listen");
-    idleLoop(0.6);
+    if (!walking) idleLoop(0.6);
     if (doing === "talking") setDoing("idle");
   }
 
@@ -446,6 +464,7 @@ export function characterStage(host: HTMLElement, opts: CharacterStageOptions = 
     showPlaceholder: () => void stage.showPlaceholder(),
     say,
     gesture,
+    move,
     play,
     stop,
     turn,

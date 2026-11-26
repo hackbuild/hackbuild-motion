@@ -73,7 +73,7 @@ document.querySelector("hb-avatar-drop")!.addEventListener("picked", (e) => stag
 
 ### a clip pack for the idle
 
-`clips` takes a clip pack baked onto the shown body's rig (its URL or the parsed file, the dog simulator's `anims.json` shape: roles, fps and int16 rotations per clip). Its `Idle_Loop` plays under everything once the body loads and `Idle_Talking_Loop` while the body speaks, with the clip player's fades. A body the pack does not fit (fewer than 12 roles land) keeps the rest stance. `packClips` and `packCoverage` do the conversion for any host. The name and doing plate at the top left shows only with `plate: true`.
+`clips` takes a clip pack baked onto the shown body's rig (its URL or the parsed file, the dog simulator's `anims.json` shape: roles, fps and int16 rotations per clip). Its `Idle_Loop` plays under everything once the body loads and `Idle_Talking_Loop` while the body speaks, with the clip player's fades; `move(speed)` plays its `Walk_Loop` at a matching rate while the host walks the body, and the idle again at 0. A body the pack does not fit (fewer than 12 roles land) keeps the rest stance. `packClips` and `packCoverage` do the conversion for any host. The name and doing plate at the top left shows only with `plate: true`.
 
 ### the rig check in plain words
 
@@ -181,7 +181,7 @@ Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LIC
 | file | gzip (measured) | ceiling |
 |---|---|---|
 | `dist/index.js` (main entry, imports external) | 3,266 bytes | 3,429 bytes |
-| `dist/motion-views.iife.js` (single file build) | 221,256 bytes | 232,318 bytes |
+| `dist/motion-views.iife.js` (single file build) | 221,384 bytes | 232,453 bytes |
 
 Measured 2026-11-26 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
