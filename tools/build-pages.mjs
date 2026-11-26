@@ -129,7 +129,6 @@ const foldHtml = (p) => {
         (h.how.length ? `<div><span class="hb-how-k">how it works</span>${h.how.map((t) => `<p>${prose(t)}</p>`).join("")}</div>\n` : "") +
         `<div class="hb-how-pkgs"><span class="hb-how-k">packages</span>${h.packages.map((x) => `<code class="hb-code">${esc(x)}</code>`).join(" ")}</div>\n` +
         `<div class="hb-how-install"><span class="hb-how-k">install</span>${codeBlockHtml(h.install, "sh", "install line", true)}` +
-        (h.today ? `<p class="hb-how-note">not on npm yet. the lines below work today.</p>${codeBlockHtml(h.today, "sh", "install lines that work today", true)}` : `<p class="hb-how-note">not on npm yet.</p>`) +
         `</div>\n<div class="hb-how-code"><span class="hb-how-k">code</span>${codeBlockHtml(h.code, h.lang ?? "ts", "minimal code", false)}</div>\n` +
         (links.length ? `<div class="hb-how-links">${links.join("")}</div>\n` : "") +
         `</div>\n</details>\n`
