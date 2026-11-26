@@ -6,8 +6,7 @@ Live examples: <https://hackbuild.github.io/hackbuild-motion/>
 
 Every tool in one app: the suite, <https://hackbuild.github.io/hackbuild-suite/> (source <https://github.com/hackbuild/hackbuild-suite>).
 
-Status: phases A and C landed, 2026-11-22. Packages land in `packages/` as
-they pass their tests; the table below grows with them.
+Published to npm under @hackbuild. Each package's README has its quick start; the llms.txt at the site root lists every package for coding agents.
 
 | package | crate | what |
 |---|---|---|
@@ -41,7 +40,9 @@ it runs from file://, and ships a single file IIFE build.
 
 ## Install
 
-Not published to npm yet. From a clone, build the packages you want:
+    npm install @hackbuild/ik three
+
+Each package lists its own peers in its README. From a clone:
 
     npm ci && npm run build -w @hackbuild/organic -w @hackbuild/gait
 

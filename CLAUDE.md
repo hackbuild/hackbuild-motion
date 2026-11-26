@@ -45,5 +45,5 @@ dog-simulator) share the contracts below; change a contract in all of them toget
 
 - `npm run typecheck`, `npm test`, `cargo test --workspace` when crates changed.
 - `node tools/lint-voice.mjs` on the changed files.
-- Commit and push to main after the gates pass (owner delegation, 2026-10-14). Never publish
-  to npm; the npm org does not exist yet.
+- Commit and push to main after the gates pass (owner delegation, 2026-10-14). Builders never
+  publish; the coordinator publishes to npm under @hackbuild after the gates (owner, 2026-11-24).
