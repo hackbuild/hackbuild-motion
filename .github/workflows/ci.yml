@@ -21,7 +21,7 @@ jobs:
       - run: node tools/vendor/pin-ui.mjs --check
       - run: npm ci
       - run: node --test tools/test/*.test.mjs
-      - run: git ls-files -z | grep -zEv '\.(png|jpe?g|gif|webp|glb|gltf|bin|wasm|onnx|wav|ico|woff2?|ttf)$|^(LICENSES/|RULES.md|CLAUDE.md|tools/)|package-lock.json|Cargo.lock' | xargs -0 node tools/lint-voice.mjs
+      - run: git ls-files -z | grep -zEv '\.(png|jpe?g|gif|webp|glb|gltf|bin|wasm|onnx|wav|ico|woff2?|ttf)$|^(LICENSES/|RULES.md|CLAUDE.md|tools/)|package-lock.json|Cargo.lock|^docs/llms-full.txt$' | xargs -0 node tools/lint-voice.mjs
       - run: node tools/lint-authors.mjs
       - run: node tools/lint-commits.mjs
         env:
@@ -67,6 +67,29 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
+  docs:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: npm install -g npm@11.21.0
+      - run: rustup toolchain install && rustc --version
+      - run: cargo install wasm-pack --version 0.13.1 --locked
+      - run: npm ci
+      # TypeDoc needs the TypeScript 6 compiler API, so it has its own install
+      - run: npm ci --prefix tools/typedoc
+      - run: npm run build --if-present
+      # every README follows the template; its quick start is examples/<pkg>/quick.ts, which npm run typecheck compiles
+      - run: node tools/check-readme.mjs
+      # a TSDoc comment on every exported symbol, and docs/api is what TypeDoc writes from the code now
+      - run: node tools/api-docs.mjs --check
+      # packages/*/llms.md, docs/llms.txt and docs/llms-full.txt are what tools/llms.mjs writes now
+      - run: node tools/llms.mjs --check
+      - run: node tools/build-pages.mjs --hosted && node tools/build-docs.mjs
+      # llms.txt, llms-full.txt and docs pages load in headless chrome with no failed fetch or dead link
+      - run: node tools/check-docs.mjs
   browser:
     needs: packages
     runs-on: ubuntu-24.04
