@@ -30,7 +30,7 @@ const root = resolve(import.meta.dirname, "..");
 const BUDGET = join(root, "tools", "size-budget.json");
 const PACK = join(root, ".pack");
 export const MARGIN = 0.05;
-export const ALLOW = [/^(package\.json|README\.md|LICENSE|THIRD-PARTY-NOTICES\.txt|CHANGELOG\.md|how\.ts)$/, /^dist\/.+\.(js|mjs|d\.ts|wasm)$/, /^wasm\/[^/]+\.wasm$/, /^bin\/[^/]+\.m?js$/];
+export const ALLOW = [/^(package\.json|README\.md|LICENSE|THIRD-PARTY-NOTICES\.txt|CHANGELOG\.md|how\.ts|llms\.md)$/, /^dist\/.+\.(js|mjs|d\.ts|wasm)$/, /^wasm\/[^/]+\.wasm$/, /^bin\/[^/]+\.m?js$/];
 export const DENY = [/(^|\/)(test|tests|__tests__|fixtures?|src)\//, /\.test\./, /\.tsbuildinfo$/, /\.map$/, /(^|\/)\./];
 const REQUIRED = ["package.json", "README.md", "LICENSE"];
 
