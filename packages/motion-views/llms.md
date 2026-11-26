@@ -320,6 +320,18 @@ interface AvatarReport {
 What AvatarDrop learned about a dropped avatar: name, format, size, rig check, licence and still.
 
 ```ts
+const BOX_DOG_BONES: { readonly hips: "hips"; readonly legs: { readonly LF: { readonly end: "frontHorselink.L"; readonly mid: "frontLeg.L_03"; readonly toes: readonly ["frontToe.L"]; readonly up: "frontUpr.L" }; readonly LH: { readonly end: "rearHorselink.L"; readonly mid: "rearLwr.L"; readonly toes: readonly ["rearFoot.L", "rearToe.L"]; readonly up: "rearUpr.L" }; readonly RF: { readonly end: "frontHorselink.R"; readonly mid: "frontLeg.R_03"; readonly toes: readonly ["frontToe.R"]; readonly up: "frontUpr.R" }; readonly RH: { readonly end: "rearHorselink.R"; readonly mid: "rearLwr.R"; readonly toes: readonly ["rearFoot.R", "rearToe.R"]; readonly up: "rearUpr.R" } }; readonly spine: readonly ["spine2", "chest"]; readonly tail: readonly ["tail1", "tail3", "tail_03"] }
+```
+
+The bone names of `boxDog`, in the shape `@hackbuild/gait` reads (hips, spine, tail, four legs).
+
+```ts
+function boxDog(color?: string): Group
+```
+
+A dog of bones and boxes facing +z, about 0.78 m nose to tail with the hips 0.38 m up; bone names are `BOX_DOG_BONES`.
+
+```ts
 function characterStage(host: HTMLElement, opts?: CharacterStageOptions): CharacterStageHandle
 ```
 
@@ -460,6 +472,12 @@ type Framing = "bust" | "full"
 The stage shot: bust, or the full body.
 
 ```ts
+function freeMeshes(root: Object3D): void
+```
+
+Frees the geometry and materials of every mesh under `root`.
+
+```ts
 type Gesture = "wave" | "nod" | "shake" | "bow"
 ```
 
@@ -478,6 +496,22 @@ const GESTURES: readonly Gesture[]
 Every gesture `gestureClip` can make.
 
 ```ts
+function meshTurntable(host: HTMLElement, opts?: { renderer?: WebGLRenderer }): MeshTurntable
+```
+
+A turntable that fills `host`: hemisphere light, drag to turn, one object at a time, sized for a relief or a depth surface tens of units across (the camera starts 80 units out, looking down at 30 degrees).
+
+```ts
+interface MeshTurntable {
+  stage: ThreeStage;
+  dispose(): void;
+  show(o: Object3D): void;
+}
+```
+
+A running turntable: its stage, what it shows, and how to stop it.
+
+```ts
 interface MotionViewsOptions {
   drop?: AvatarDropOptions;
   stage?: CharacterStageOptions;
@@ -485,6 +519,23 @@ interface MotionViewsOptions {
 ```
 
 Options `defineMotionViews` shares with every element it defines.
+
+```ts
+function stageOrbit(camera: PerspectiveCamera, el: HTMLElement): StageOrbit
+```
+
+A drag orbit on `el` for `camera`: horizontal drag turns, vertical drag tilts, the wheel moves in and out.
+
+```ts
+interface StageOrbit {
+  enabled: boolean;
+  readonly target: Vector3;
+  dispose(): void;
+  update(): void;
+}
+```
+
+Drag to turn the camera round `target`, wheel or pinch to move in and out.
 
 ```ts
 interface StripItem extends ClipItem {
@@ -503,6 +554,33 @@ interface StripItem extends ClipItem {
 A clip in the strip; `animation` lets the strip draw its still.
 
 ```ts
+function threeStage(host: HTMLElement, tick: (dt: number, t: number) => void, opts?: ThreeStageOptions): ThreeStage
+```
+
+A stage lit in paper light that fills `host`: it sizes with the host, calls `tick(dt, t)` each frame (dt capped at 50 ms), draws, and on dispose stops the loop and frees the renderer, the orbit and every mesh.
+
+```ts
+interface ThreeStage {
+  camera: PerspectiveCamera;
+  orbit: StageOrbit;
+  renderer: WebGLRenderer;
+  scene: Scene;
+  dispose(): void;
+}
+```
+
+A running stage: its scene, camera, renderer and orbit, and how to stop it.
+
+```ts
+interface ThreeStageOptions {
+  ground?: boolean;
+  renderer?: WebGLRenderer;
+}
+```
+
+Options of `threeStage`.
+
+```ts
 interface Verb {
   go?: boolean;
   id: string;
@@ -511,6 +589,22 @@ interface Verb {
 ```
 
 One verb on the stage.
+
+```ts
+function walkBvh(o?: WalkBvhOptions): string
+```
+
+A two step walk loop as bvh text for a humanoid that is not ours: other bone names (Hips, LeftUpLeg, RightForeArm and so on), centimetres, arms down, ZXY channels.
+
+```ts
+interface WalkBvhOptions {
+  fps?: number;
+  seconds?: number;
+  swing?: number;
+}
+```
+
+Options of `walkBvh`.
 
 ### @hackbuild/motion-views/vue
 

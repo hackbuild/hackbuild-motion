@@ -1,6 +1,6 @@
 {
   "name": "@hackbuild/motion-views",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "The motion views: CharacterStage, AvatarDrop and ClipStrip, binding the motion packages to hackbuild-ui, each as a Vue component and a custom element.",
   "type": "module",
   "license": "MIT",
