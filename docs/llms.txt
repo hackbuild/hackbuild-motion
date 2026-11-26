@@ -1,0 +1,63 @@
+# hackbuild-motion
+
+> hackbuild-motion is a set of ESM packages under @hackbuild for moving 3D characters on the web: springs and seeded noise, a humanoid bone mapper, inverse kinematics, procedural legged gait, clip retargeting with BVH and VMD readers, a runtime for a quadruped motion network, motion matching, gaze, blink and idle presence, avatar loading for VRM, GLB and FBX, a three.js stage host, lit scenes, lip sync, a GLB and clip baker, and Vue and custom element views. The cores are Rust compiled to wasm, three.js is a peer, model and weight files are never bundled and load from a URL or a file you give, and every package has a single file build that runs from file://.
+
+Every package is ESM only with types included, installs from npm under @hackbuild, and is MIT. Each llms.md below lists the package's exports with signatures, minimal examples and the mistakes to avoid. Code: https://github.com/hackbuild/hackbuild-motion
+
+## Packages
+
+- [@hackbuild/avatar](https://hackbuild.github.io/hackbuild-motion/docs/avatar/llms.md): Load VRM, Mixamo, UAL, generic GLB, FBX and MMD characters into one humanoid space, with material repair, a wardrobe, expressions and a first person head hider.
+- [@hackbuild/avatar-host](https://hackbuild.github.io/hackbuild-motion/docs/avatar-host/llms.md): Host a character on a three.js stage in any container, with a follow camera, the presence frame order and a loop that pauses when nobody can see it.
+- [@hackbuild/bake](https://hackbuild.github.io/hackbuild-motion/docs/bake/llms.md): Optimize GLB models, bake animation clips into compact packs, and keep an asset lock with licences and hashes, in the browser, in Node or on the command line.
+- [@hackbuild/environment](https://hackbuild.github.io/hackbuild-motion/docs/environment/llms.md): Light a three.js scene around a character with a key light, a rim light, image light and a set built from kit models.
+- [@hackbuild/gait](https://hackbuild.github.io/hackbuild-motion/docs/gait/llms.md): Procedural locomotion for legged rigs: Froude gait choice, leg oscillators, footfall tables, posture springs, tail and ears, with a Rust core in wasm.
+- [@hackbuild/ik](https://hackbuild.github.io/hackbuild-motion/docs/ik/llms.md): Inverse kinematics for characters on the web: two bone, FABRIK, CCD, clamped look at, finger curl and foot locking, with a Rust core in wasm.
+- [@hackbuild/lipsync](https://hackbuild.github.io/hackbuild-motion/docs/lipsync/llms.md): Move a character's mouth from speech timings or the audio level, out to Oculus visemes, VRM vowels or ARKit blendshapes.
+- [@hackbuild/motion-match](https://hackbuild.github.io/hackbuild-motion/docs/motion-match/llms.md): Motion matching over a clip database, with inertialized transitions, on a Rust core compiled to wasm.
+- [@hackbuild/motion-net](https://hackbuild.github.io/hackbuild-motion/docs/motion-net/llms.md): Run the published quadruped categorical codebook matching network in the browser and drive a dog's gait from it.
+- [@hackbuild/motion-views](https://hackbuild.github.io/hackbuild-motion/docs/motion-views/llms.md): Put a character stage, an avatar drop card and a clip strip on your page, drawn with the hackbuild-ui stylesheet, as custom elements or Vue components.
+- [@hackbuild/organic](https://hackbuild.github.io/hackbuild-motion/docs/organic/llms.md): Critically damped springs, inertialization, seeded noise and samplers for procedural animation, with a Rust core in wasm.
+- [@hackbuild/presence](https://hackbuild.github.io/hackbuild-motion/docs/presence/llms.md): Make a standing humanoid look present: gaze, blink, breath, idle moves, gestures, a layered clip player and a face driver.
+- [@hackbuild/retarget](https://hackbuild.github.io/hackbuild-motion/docs/retarget/llms.md): Move clips between any rigs through one normalized humanoid space, with readers for BVH, VMD, VPD, VRMA and Unity text clips.
+- [@hackbuild/rig](https://hackbuild.github.io/hackbuild-motion/docs/rig/llms.md): Bring any humanoid or legged skeleton into one normalized space: bone name mapping with no per rig table, limb chains, rest pose analysis, and the expression and viseme table.
+
+## Quick starts
+
+- [avatar quick start](https://hackbuild.github.io/hackbuild-motion/docs/avatar/quick.ts): the smallest program for @hackbuild/avatar, typechecked in CI
+- [avatar-host quick start](https://hackbuild.github.io/hackbuild-motion/docs/avatar-host/quick.ts): the smallest program for @hackbuild/avatar-host, typechecked in CI
+- [bake quick start](https://hackbuild.github.io/hackbuild-motion/docs/bake/quick.ts): the smallest program for @hackbuild/bake, typechecked in CI
+- [environment quick start](https://hackbuild.github.io/hackbuild-motion/docs/environment/quick.ts): the smallest program for @hackbuild/environment, typechecked in CI
+- [gait quick start](https://hackbuild.github.io/hackbuild-motion/docs/gait/quick.ts): the smallest program for @hackbuild/gait, typechecked in CI
+- [ik quick start](https://hackbuild.github.io/hackbuild-motion/docs/ik/quick.ts): the smallest program for @hackbuild/ik, typechecked in CI
+- [lipsync quick start](https://hackbuild.github.io/hackbuild-motion/docs/lipsync/quick.ts): the smallest program for @hackbuild/lipsync, typechecked in CI
+- [motion-match quick start](https://hackbuild.github.io/hackbuild-motion/docs/motion-match/quick.ts): the smallest program for @hackbuild/motion-match, typechecked in CI
+- [motion-net quick start](https://hackbuild.github.io/hackbuild-motion/docs/motion-net/quick.ts): the smallest program for @hackbuild/motion-net, typechecked in CI
+- [motion-views quick start](https://hackbuild.github.io/hackbuild-motion/docs/motion-views/quick.ts): the smallest program for @hackbuild/motion-views, typechecked in CI
+- [organic quick start](https://hackbuild.github.io/hackbuild-motion/docs/organic/quick.ts): the smallest program for @hackbuild/organic, typechecked in CI
+- [presence quick start](https://hackbuild.github.io/hackbuild-motion/docs/presence/quick.ts): the smallest program for @hackbuild/presence, typechecked in CI
+- [retarget quick start](https://hackbuild.github.io/hackbuild-motion/docs/retarget/quick.ts): the smallest program for @hackbuild/retarget, typechecked in CI
+- [rig quick start](https://hackbuild.github.io/hackbuild-motion/docs/rig/quick.ts): the smallest program for @hackbuild/rig, typechecked in CI
+
+## Docs
+
+- [getting started](https://hackbuild.github.io/hackbuild-motion/docs/): install, the first program, and how the packages fit
+- [concepts](https://hackbuild.github.io/hackbuild-motion/docs/concepts.html): the normalized humanoid space, loading the wasm cores, three.js as a peer, files you give, file:// builds, labels on numbers
+- [examples](https://hackbuild.github.io/hackbuild-motion/): the live demo pages
+
+## Optional
+
+- [@hackbuild/avatar API reference](https://hackbuild.github.io/hackbuild-motion/docs/avatar/api/): every export, generated by TypeDoc
+- [@hackbuild/avatar-host API reference](https://hackbuild.github.io/hackbuild-motion/docs/avatar-host/api/): every export, generated by TypeDoc
+- [@hackbuild/bake API reference](https://hackbuild.github.io/hackbuild-motion/docs/bake/api/): every export, generated by TypeDoc
+- [@hackbuild/environment API reference](https://hackbuild.github.io/hackbuild-motion/docs/environment/api/): every export, generated by TypeDoc
+- [@hackbuild/gait API reference](https://hackbuild.github.io/hackbuild-motion/docs/gait/api/): every export, generated by TypeDoc
+- [@hackbuild/ik API reference](https://hackbuild.github.io/hackbuild-motion/docs/ik/api/): every export, generated by TypeDoc
+- [@hackbuild/lipsync API reference](https://hackbuild.github.io/hackbuild-motion/docs/lipsync/api/): every export, generated by TypeDoc
+- [@hackbuild/motion-match API reference](https://hackbuild.github.io/hackbuild-motion/docs/motion-match/api/): every export, generated by TypeDoc
+- [@hackbuild/motion-net API reference](https://hackbuild.github.io/hackbuild-motion/docs/motion-net/api/): every export, generated by TypeDoc
+- [@hackbuild/motion-views API reference](https://hackbuild.github.io/hackbuild-motion/docs/motion-views/api/): every export, generated by TypeDoc
+- [@hackbuild/organic API reference](https://hackbuild.github.io/hackbuild-motion/docs/organic/api/): every export, generated by TypeDoc
+- [@hackbuild/presence API reference](https://hackbuild.github.io/hackbuild-motion/docs/presence/api/): every export, generated by TypeDoc
+- [@hackbuild/retarget API reference](https://hackbuild.github.io/hackbuild-motion/docs/retarget/api/): every export, generated by TypeDoc
+- [@hackbuild/rig API reference](https://hackbuild.github.io/hackbuild-motion/docs/rig/api/): every export, generated by TypeDoc
+- [llms-full.txt](https://hackbuild.github.io/hackbuild-motion/llms-full.txt): this file and every llms.md in one file
