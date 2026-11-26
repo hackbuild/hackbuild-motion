@@ -1,0 +1,8 @@
+{
+  "mistakes": [
+    "Calling a wasm class or `PoseInertializer` before `await load()`; the scalar functions are the only part that runs without it.",
+    "Calling `Math.random` for motion. Pass `seededRng(seed)` as the `rng` argument so a seed replays the same motion.",
+    "Passing a stiffness or a frequency where a half life in seconds is wanted.",
+    "Calling `PoseInertializer.capture()` before writing the new pose, or every frame; call it once, on the frame the source changes, then `apply` every frame."
+  ]
+}

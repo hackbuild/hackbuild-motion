@@ -1,0 +1,8 @@
+{
+  "mistakes": [
+    "Do not add the loaded scene by hand or expect `loadEnvironment` to show it; call `attach()` when you want it on screen and `dispose()` on the old one.",
+    "Do not bundle the HDRIs or kit models with your page build; give them through `resolve` from a drop or a URL and show the licence from the preset.",
+    "Do not move the character away from the origin to fit a set; layouts are built around the origin facing +Z.",
+    "Import `loadEnvironment` from `@hackbuild/environment/three`, not the main entry, which has no three.js."
+  ]
+}

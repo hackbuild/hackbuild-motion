@@ -144,14 +144,6 @@ No WebGPU, workers or wasm threads. From file:// use `dist/retarget.iife.js`, wh
 | `no VRMC_vrm_animation humanoid in this file. it may be a model, not a vrma.` | `readVrma` got a file without the VRMA extension | load a `.vrma` file |
 | `this vrma holds no animation` | the VRMA has no clip | check the file |
 
-### mistakes to avoid
-
-- Calling a parser or `new RetargetRig()` before `await load()`.
-- Retargeting rig to rig directly: read the source into a `HumanoidMotion` with `toHumanoid`, then `bind` it on the target, so any pair of rigs works.
-- Passing hip travel in meters: `HumanoidMotion` stores it in hip heights; `bind` scales it to the target.
-- Importing `@hackbuild/retarget/three` without three.js installed, or using the single file build on a page without a `THREE` global.
-- Forgetting `dispose()` on a `RetargetRig`: it holds wasm memory.
-
 ## Works with
 
 - [@hackbuild/rig](../rig/README.md) maps bone names to the humanoid and holds the expression table the face tracks use.

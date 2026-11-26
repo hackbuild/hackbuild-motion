@@ -128,13 +128,6 @@ Nothing falls back: a browser without wasm SIMD128 cannot load the core, while t
 | `@hackbuild/organic: wasm not loaded. call load() first.` | a wasm class or `PoseInertializer` was made before `load()` resolved | `await load()` once at start up |
 | a `WebAssembly` compile or fetch error | `load(url)` pointed at a missing or wrong file | call `load()` with no argument to use the inlined copy, or check the URL serves `organic_bg.wasm` |
 
-### mistakes to avoid
-
-- Calling a wasm class or `PoseInertializer` before `await load()`; the scalar functions are the only part that runs without it.
-- Calling `Math.random` for motion. Pass `seededRng(seed)` as the `rng` argument so a seed replays the same motion.
-- Passing a stiffness or a frequency where a half life in seconds is wanted.
-- Calling `PoseInertializer.capture()` before writing the new pose, or every frame; call it once, on the frame the source changes, then `apply` every frame.
-
 ## Works with
 
 - [@hackbuild/presence](../presence/README.md) builds gaze, blink and breath on these springs and samplers.

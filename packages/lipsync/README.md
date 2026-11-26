@@ -128,13 +128,6 @@ Nothing in this package throws: unknown phonemes give `sil`, and an empty timeli
 | none; the mouth trails the sound | events pushed on a different clock, or `lead` too small | pass `ctx.currentTime` based times; raise `lead` from 0.04 s |
 | none; the mouth flutters on breath | the level gate is too low | raise `gate` from 0.015 |
 
-### mistakes to avoid
-
-- Do not mix clocks: event `time` and the `t` you pass to `update` must be on the same clock, usually the AudioContext's.
-- Do not pass an offset to `fromSungPlan` for a live bellows plan; live plans are already on the context clock. Pass the play time only for an offline render that starts at 0.
-- Do not import bellows-voice just to type the calls; the subpaths read its plans and frames by shape, so pass what the engine returns.
-- Call `stop()` when speech is cut short, or the rest of the timeline keeps moving the mouth.
-
 ## Works with
 
 - [@hackbuild/rig](../rig/README.md) holds the expression and viseme table this package writes through.

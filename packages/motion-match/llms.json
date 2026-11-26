@@ -1,0 +1,8 @@
+{
+  "mistakes": [
+    "Calling `new ClipSet()` before `await load()`: every class needs the wasm core.",
+    "Mixing rigs in one `ClipSet`: all clips must share bones and feet; retarget them first.",
+    "Expecting locked feet: the matcher does not pin planted feet, so add `FootLock` from `@hackbuild/ik` on top.",
+    "Forgetting `dispose()` on the matcher and the set: they hold wasm memory."
+  ]
+}

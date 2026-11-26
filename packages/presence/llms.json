@@ -1,0 +1,8 @@
+{
+  "mistakes": [
+    "Writing bones or expression channels from two places. Let `ClipPlayer` own the bones and `Face` own the weights, and add gaze after the pose.",
+    "Calling `Math.random` or passing a fresh seed each frame. Pass one `Rng`, such as `seededRng(\"name\")`, when you build each controller.",
+    "Feeding bones that are not in the normalized humanoid space (+Y up, +Z forward). Load the model through `@hackbuild/avatar` first.",
+    "Forgetting `face.update(dt, player.faces)` each frame: clip face tracks and mood easing only show after it."
+  ]
+}

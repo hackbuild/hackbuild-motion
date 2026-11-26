@@ -154,14 +154,6 @@ The wasm uses SIMD128 and no threads, so no page needs cross origin isolation. W
 
 Warnings that do not throw land in `avatar.warnings`, for instance `vrm loaded as plain gltf. pass vrmHook() from @hackbuild/avatar/vrm for spring bones and expressions.`
 
-### mistakes to avoid
-
-- Loading a `.vrm` without `vrm: vrmHook()`: it loads as plain glTF with no spring bones or expressions.
-- Forgetting `await load()` before `loadAvatar`: the rig wasm maps the bones.
-- Adding `avatar.humanoid.model` or the raw glTF scene to your scene instead of `avatar.root`, which holds the normalized wrapper.
-- Sharing or bundling a model without `checkRedistribution`, or uploading an MMD model the result marks `local: true`.
-- Using skinned mesh bounds for framing: they stay at the rest pose. Use `posedBounds(avatar.bones)`.
-
 ## Works with
 
 - [@hackbuild/rig](../rig/README.md) maps the bone names and measures the rest pose.

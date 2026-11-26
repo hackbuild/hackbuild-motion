@@ -1,0 +1,9 @@
+{
+  "mistakes": [
+    "Calling a solver before `await load()`.",
+    "Mixing units: positions are meters in one space, +Y up and +Z forward; a rig in centimeters needs scaling first (see `@hackbuild/rig` `analyzeRest`).",
+    "Applying the deltas child first; apply each world delta parent first, as `segmentDeltas` and `lookChain` order them.",
+    "Passing `prevYaw` as 0 every frame; pass last frame's `yaw + bodyYaw`, or a target crossing behind the head flips sides.",
+    "Forgetting `free()` on a `ContactLock` you no longer use (or `dispose()` on `FootLock`); it holds wasm memory."
+  ]
+}

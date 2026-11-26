@@ -127,13 +127,6 @@ The views throw nothing to your code; a failure becomes an event and a plain lin
 | `-1` from `play` | the clip cannot play on this body | check the body has the bones the clip moves |
 | `false` from `gesture` | the body lacks the bones the gesture needs | check the rig check lines of the body |
 
-### mistakes to avoid
-
-- Load the hackbuild-ui stylesheet on the page; the views add no styles and look broken without it.
-- Call `defineMotionViews()` once before using the elements; importing `/vanilla` defines nothing.
-- Pass the VRM hook (`vrm: () => import("@hackbuild/avatar/vrm").then((m) => m.vrmHook())`) to read VRM files as VRM; without it a .vrm loads as plain glTF.
-- Call `dispose()` on a handle you mount yourself; it stops the audio and frees the stage.
-
 ## Works with
 
 - [@hackbuild/avatar-host](../avatar-host/README.md) is the stage under CharacterStage and draws the clip stills.

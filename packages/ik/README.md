@@ -128,14 +128,6 @@ Nothing falls back: a browser without wasm SIMD128 cannot load the core.
 
 A target out of reach is not an error: `twoBone` returns `reached: false` with the chain stretched toward it, and `fabrik` and `ccd` return the remaining `error` in meters. A zero length bone or a non finite input leaves the chain as it was.
 
-### mistakes to avoid
-
-- Calling a solver before `await load()`.
-- Mixing units: positions are meters in one space, +Y up and +Z forward; a rig in centimeters needs scaling first (see `@hackbuild/rig` `analyzeRest`).
-- Applying the deltas child first; apply each world delta parent first, as `segmentDeltas` and `lookChain` order them.
-- Passing `prevYaw` as 0 every frame; pass last frame's `yaw + bodyYaw`, or a target crossing behind the head flips sides.
-- Forgetting `free()` on a `ContactLock` you no longer use (or `dispose()` on `FootLock`); it holds wasm memory.
-
 ## Works with
 
 - [@hackbuild/rig](../rig/README.md) maps bone names and measures the rest pose, so you know which bones to solve.

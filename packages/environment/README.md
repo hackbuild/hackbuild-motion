@@ -137,13 +137,6 @@ Frame cost on a phone is unknown.
 | `environment: could not load <file>. drop the file or pick the studio.` | `MissingFileError`: the resolver gave null, threw, or its URL did not fetch; `error.file` holds the path | give the file through `resolve`, or use the studio |
 | `environment: no scene named <id>.` | `loadEnvironment` got an id that is not in `PRESETS` | use `studio`, `room`, `cafe` or `outdoors`, or pass a preset object |
 
-### mistakes to avoid
-
-- Do not add the loaded scene by hand or expect `loadEnvironment` to show it; call `attach()` when you want it on screen and `dispose()` on the old one.
-- Do not bundle the HDRIs or kit models with your page build; give them through `resolve` from a drop or a URL and show the licence from the preset.
-- Do not move the character away from the origin to fit a set; layouts are built around the origin facing +Z.
-- Import `loadEnvironment` from `@hackbuild/environment/three`, not the main entry, which has no three.js.
-
 ## Works with
 
 - [@hackbuild/avatar-host](../avatar-host/README.md) holds an environment slot and imports this package on first use.

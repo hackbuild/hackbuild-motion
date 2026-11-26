@@ -1,0 +1,9 @@
+{
+  "mistakes": [
+    "Loading a `.vrm` without `vrm: vrmHook()`: it loads as plain glTF with no spring bones or expressions.",
+    "Forgetting `await load()` before `loadAvatar`: the rig wasm maps the bones.",
+    "Adding `avatar.humanoid.model` or the raw glTF scene to your scene instead of `avatar.root`, which holds the normalized wrapper.",
+    "Sharing or bundling a model without `checkRedistribution`, or uploading an MMD model the result marks `local: true`.",
+    "Using skinned mesh bounds for framing: they stay at the rest pose. Use `posedBounds(avatar.bones)`."
+  ]
+}

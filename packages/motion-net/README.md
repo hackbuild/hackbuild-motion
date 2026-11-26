@@ -136,14 +136,6 @@ No WebGPU and no wasm threads, so no cross origin isolation. A page whose policy
 | `motion-net: the predictor was disposed. the run was dropped.` | a run asked for after `dispose()` | create a new predictor |
 | `@hackbuild/motion-net: wasm not loaded. call load() first.` | `goldenTrace` before `load()` | `await load()`; the predictor loads its own copy |
 
-### mistakes to avoid
-
-- Bundling, committing or hosting the weights: they are CC BY-NC 4.0 and load at run time from a URL or a File the user gives.
-- Using the weights in a commercial product: the licence forbids it, whatever this package's MIT code allows.
-- Calling `load()` and expecting the predictor to use that copy: `Predictor.create` loads its own wasm, from `wasm` or the inlined copy.
-- Reading bone axes as the normalized humanoid's: the 27 bone dog keeps its source rig's conventions; retarget it yourself.
-- Calling `update` with no frame time: pass seconds since the last frame; the host plays predictions on that clock.
-
 ## Works with
 
 - [@hackbuild/gait](../gait/README.md) defines the same backend contract; the host can replace the procedural gait.

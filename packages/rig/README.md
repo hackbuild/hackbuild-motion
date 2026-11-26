@@ -121,13 +121,6 @@ The full reference is in [docs/api/rig](../../docs/api/rig/README.md).
 
 Nothing else throws. A rig that is not a humanoid comes back with `missingRequired` filled and a low `coverage`, and `analyzeRest` returns null when hips, head or arms are missing; use `limbChains` for such rigs.
 
-### mistakes to avoid
-
-- Calling the mapper or rest analysis before `await load()`.
-- Treating every rig as a humanoid; check `report.missingRequired` before calling `restOf` or `applyRestFix`.
-- Calling `restOf` on a posed model; it reads the current world positions, so measure in the rest pose.
-- Keeping your own copy of the expression or viseme table; import it from here so avatar and lipsync agree.
-
 ## Works with
 
 - [@hackbuild/avatar](../avatar/README.md) loads VRM, GLB and FBX files and uses this mapper and rest fix.

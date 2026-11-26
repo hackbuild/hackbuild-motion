@@ -147,14 +147,6 @@ No WebGPU, workers or wasm threads. Nothing here has run in a real browser yet; 
 
 A primitive the optimizer cannot handle is not an error: it is left as it was and named in `report.skipped`.
 
-### mistakes to avoid
-
-- Calling a bake function before `await load()`; only `decodePack` and `sampleClip` work without the wasm.
-- Expecting the package to resize textures: it never decodes images, so pass a `resize` hook or the images pass through.
-- Feeding a Draco or meshopt compressed file, or a .gltf with external buffers: decode or embed first.
-- Leaving the licence empty in a lock entry: the check fails on it, by design.
-- Looking for the `hackbuild-bake` binary in node_modules: build it with cargo from the repository.
-
 ## Works with
 
 - [@hackbuild/avatar](../avatar/README.md) loads the optimized models.

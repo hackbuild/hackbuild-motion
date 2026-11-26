@@ -109,13 +109,6 @@ No WebGPU, no workers and no wasm threads, so no cross origin isolation. From fi
 | `@hackbuild/motion-match: wasm not loaded. call load() first.` | a `ClipSet`, `MotionMatcher` or `goldenTrace` call before `load()` resolved | `await load()` once before building anything |
 | an error from `ClipSet.add` | the arrays of a clip disagree on frame, bone or foot counts | give every array the same frame count and every clip the same bones and feet |
 
-### mistakes to avoid
-
-- Calling `new ClipSet()` before `await load()`: every class needs the wasm core.
-- Mixing rigs in one `ClipSet`: all clips must share bones and feet; retarget them first.
-- Expecting locked feet: the matcher does not pin planted feet, so add `FootLock` from `@hackbuild/ik` on top.
-- Forgetting `dispose()` on the matcher and the set: they hold wasm memory.
-
 ## Works with
 
 - [@hackbuild/gait](../gait/README.md) defines the same backend contract; the matcher can replace the procedural gait.

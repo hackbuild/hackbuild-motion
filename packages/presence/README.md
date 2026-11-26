@@ -125,13 +125,6 @@ Nothing in this package throws. What can go wrong shows as motion:
 - Arms stay in a T pose: there is no idle clip. Pass `restStance(names)` or `restStanceFromThree(...)` as the idle.
 - The gaze stares without drifting: `organic` is off. Leave it on for aversion and saccades.
 
-### mistakes to avoid
-
-- Writing bones or expression channels from two places. Let `ClipPlayer` own the bones and `Face` own the weights, and add gaze after the pose.
-- Calling `Math.random` or passing a fresh seed each frame. Pass one `Rng`, such as `seededRng("name")`, when you build each controller.
-- Feeding bones that are not in the normalized humanoid space (+Y up, +Z forward). Load the model through `@hackbuild/avatar` first.
-- Forgetting `face.update(dt, player.faces)` each frame: clip face tracks and mood easing only show after it.
-
 ## Works with
 
 - [@hackbuild/organic](../organic/README.md) gives the springs, samplers and the seeded `Rng`.

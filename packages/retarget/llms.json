@@ -1,0 +1,9 @@
+{
+  "mistakes": [
+    "Calling a parser or `new RetargetRig()` before `await load()`.",
+    "Retargeting rig to rig directly: read the source into a `HumanoidMotion` with `toHumanoid`, then `bind` it on the target, so any pair of rigs works.",
+    "Passing hip travel in meters: `HumanoidMotion` stores it in hip heights; `bind` scales it to the target.",
+    "Importing `@hackbuild/retarget/three` without three.js installed, or using the single file build on a page without a `THREE` global.",
+    "Forgetting `dispose()` on a `RetargetRig`: it holds wasm memory."
+  ]
+}

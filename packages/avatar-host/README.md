@@ -157,14 +157,6 @@ Load failures do not throw from `show`: the stage emits `failed` with a line for
 
 The `failed` event lines include `this model has no humanoid rig the stage can map. missing bones: <bones>.`, `the model did not download (http <status>). check the url.` and `the model did not load. its file may be damaged or of a kind the stage does not read.`
 
-### mistakes to avoid
-
-- Sizing the canvas to the window or calling `renderer.setSize` yourself: the stage follows its container.
-- Leaving the loop running under a sheet or on a hidden route: call `setCovered` and `setActive`, or set the `covered` and `inactive` attributes.
-- Writing bones or expression weights outside the body's frame order: use `body.play`, `body.setExpression` and `body.lip` so one owner writes each channel.
-- Showing a VRM without the `vrm` hook in the stage options: it loads as plain glTF with no expressions or spring bones.
-- Forgetting `stage.dispose()` when the stage leaves the page: it frees the body and the WebGL context.
-
 ## Works with
 
 - [@hackbuild/avatar](../avatar/README.md) loads and repairs the bodies the stage shows.

@@ -139,14 +139,6 @@ The full reference is in [docs/api/gait](../../docs/api/gait/README.md).
 
 `driveQuadruped` returns the legs whose target was out of reach; a long list means the leg specs or the leg length do not match the rig.
 
-### mistakes to avoid
-
-- Making a class before `await load()`.
-- Calling `measureQuadruped` on a posed or turned model; the root must sit at the origin with identity rotation, facing +Z, in its rest pose.
-- Moving the body without telling the gait: pass the same pose you move the root by to `update` each frame.
-- Skipping `gait.setOffsets(body.legOffsets)`; postures then leave the feet where they stood.
-- Dropping a `QuadrupedGait`, `BodyDynamics`, `TailWag` or `Ears` without `dispose()`; each holds wasm memory.
-
 ## Works with
 
 - [@hackbuild/rig](../rig/README.md) finds the leg, tail and ear chains to name.

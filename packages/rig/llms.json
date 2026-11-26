@@ -1,0 +1,8 @@
+{
+  "mistakes": [
+    "Calling the mapper or rest analysis before `await load()`.",
+    "Treating every rig as a humanoid; check `report.missingRequired` before calling `restOf` or `applyRestFix`.",
+    "Calling `restOf` on a posed model; it reads the current world positions, so measure in the rest pose.",
+    "Keeping your own copy of the expression or viseme table; import it from here so avatar and lipsync agree."
+  ]
+}
