@@ -10,6 +10,7 @@ import type { EnvironmentLayout, EnvironmentPreset } from "./layout.js";
 const K = "kenney-furniture/";
 const N = "kenney-nature/";
 
+/** The studio: room environment light, a grey floor and a flat backdrop; needs no file. */
 export const studio: EnvironmentLayout = {
   scale: 1,
   keyAzimuth: 30,
@@ -25,6 +26,7 @@ export const studio: EnvironmentLayout = {
   items: [],
 };
 
+/** A furnished room from the Kenney Furniture kit under an indoor HDRI. */
 export const room: EnvironmentLayout = {
   scale: 2.1,
   keyAzimuth: 35,
@@ -59,6 +61,7 @@ export const room: EnvironmentLayout = {
   ],
 };
 
+/** A cafe corner from the Kenney Furniture kit under a cafe HDRI. */
 export const cafe: EnvironmentLayout = {
   scale: 2.1,
   keyAzimuth: -30,
@@ -98,6 +101,7 @@ export const cafe: EnvironmentLayout = {
   ],
 };
 
+/** An open scene of Kenney Nature kit models on a ground disk under a sky HDRI. */
 export const outdoors: EnvironmentLayout = {
   scale: 3,
   keyAzimuth: 40,

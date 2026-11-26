@@ -12,6 +12,7 @@ import type { SpeechEvent } from "./index.js";
 
 /** The bellows-voice npm release the optional peer pins; the commit is its gitHead. */
 export const BELLOWS_VOICE_VERSION = "0.8.0";
+/** The git commit of the pinned bellows-voice release. */
 export const BELLOWS_VOICE_COMMIT = "ac30dc229f492ecb6bd80b2ea0f71c6a370b368c";
 /** The bellowsjs version bellows-voice 0.8.0 runs on. */
 export const BELLOWSJS_VERSION = "0.5.0";

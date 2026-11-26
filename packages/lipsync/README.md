@@ -1,191 +1,173 @@
 # @hackbuild/lipsync
 
-A viseme driver for talking characters. Timed speech events from a TTS
-engine build a timeline that is sampled with coarticulation; when no
-timings exist, the audio level moves the jaw. Output goes to the 15 Oculus
-visemes, the five VRM vowels or ARKit blendshapes through the one
-expression and viseme table in `@hackbuild/rig`.
+Move a character's mouth from speech timings or the audio level, out to Oculus visemes, VRM vowels or ARKit blendshapes.
 
-- `SpeechEvent`: `word`, `phoneme`, `viseme` and `end` events on the
-  caller's clock in seconds, the shape `@hackbuild/speak` style engines
-  report. Phonemes may be ARPAbet (stress digits allowed), IPA or Oculus
-  names. The IPA table covers every sound bellows-voice emits (the dark
-  coda l `ɫ`, the flap `ɾ`, the glottal stop `ʔ` and its non General
-  American vowels) and the common IPA consonant and vowel charts; stress,
-  length, nasal, syllabic, aspiration and tie marks are stripped. Only
-  bellows' pause `_` and unknown symbols give `sil`.
-- Words without phonemes are spelled into visemes by English letter rules.
-  A word with no end time gets a length from its letters at once, so the
-  mouth moves in real time; when the next word arrives sooner, the word's
-  visemes are squeezed to end there. `estimateWords(text, start, end)`
-  spreads an utterance by syllables for engines that give only its bounds.
-- Coarticulation: each viseme rises and falls over 70 ms (default) centred
-  on its edges, and overlapping visemes share the mouth by dominance after
-  the Cohen and Massaro model, so p, b and m still close the lips between
-  two open vowels. Weights never sum past 1 (property tested).
-- The mouth leads the sound by 40 ms by default (inferred).
-- Audio fallback: `rms(samples)` and `bandsFromSpectrum(spectrum,
-  sampleRate, fftSize)` read an AnalyserNode's arrays; `vowelFromBands`
-  picks a rough shape from three formant bands in place of cycling vowels
-  on a timer. A gate keeps breath noise closed.
-- `LipSync.update(t, dt)` prefers timings while they cover `t`, falls back
-  to the level, then goes quiet, and reports which (`source`). Output
-  rises with a 20 ms and falls with a 60 ms half-life (defaults).
-- `drive(sink, frame, "vrm" | "oculus" | "arkit")` writes to anything with
-  `setValue(name, weight)`: an `@hackbuild/avatar` ExpressionRig or a
-  three-vrm expression manager.
+[![npm](https://img.shields.io/npm/v/@hackbuild/lipsync)](https://www.npmjs.com/package/@hackbuild/lipsync) [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](../../LICENSE) ![gzip 6.0 kB measured](https://img.shields.io/badge/gzip-6.0%20kB-blue) ![types included](https://img.shields.io/badge/types-included-blue)
+
+## What it does
+
+- Turns word, phoneme and viseme events from a TTS engine into a viseme timeline, with ARPAbet, IPA or Oculus phoneme names.
+- Blends neighbouring visemes by dominance, so p, b and m still close the lips between two open vowels.
+- Spells words with no phonemes into visemes by English letter rules, in real time as words arrive.
+- Falls back to the audio level when no timings cover the moment, with a rough vowel shape from three formant bands.
+- Reads the bellows voice's phoneme spans or its vocal tract state through two subpaths, with no import of bellows.
 
 ## Install
 
-Not published yet. From a clone:
+```sh
+npm install @hackbuild/lipsync
+```
 
-    npm ci && npm run build -w @hackbuild/lipsync
+It depends on `@hackbuild/rig` for the one expression and viseme table. It needs no three.js and no Web Audio: you pass levels or analyser arrays.
 
-## Use
+| subpath | drives it | pin |
+|---|---|---|
+| `@hackbuild/lipsync` | speech events, audio level | none |
+| `@hackbuild/lipsync/bellows` | `bellows-voice` plans (optional peer, structural types only) | 0.8.0, `bellowsjs` 0.5.0 |
+| `@hackbuild/lipsync/articulatory` | `bellows-voice` articulator frames, probe or `TractModel` (optional peer, structural types only) | 0.8.0 |
+
+## Quick start
 
 ```ts
-import { LipSync, drive, rms } from "@hackbuild/lipsync";
+import { LipSync, OCULUS_VISEMES, drive, type ExpressionSink } from "@hackbuild/lipsync";
 
 const lips = new LipSync();
-tts.onEvent = (e) => lips.push(e); // { type: "word", time: ctx.currentTime, text }
+// word timings as a TTS engine reports them, in seconds on your clock
+lips.push([
+  { type: "word", time: 0.0, end: 0.35, text: "hello" },
+  { type: "word", time: 0.4, end: 0.8, text: "mama" },
+]);
+
+// any object with setValue: an avatar ExpressionRig or a three-vrm expression manager
+const face = new Map<string, number>();
+const sink: ExpressionSink = { setValue: (name, weight) => face.set(name, weight) };
+
+for (let t = 0; t <= 1; t += 1 / 30) {
+  const frame = lips.update(t, 1 / 30);
+  const top = frame.visemes.indexOf(Math.max(...frame.visemes));
+  console.log(t.toFixed(2), frame.source, OCULUS_VISEMES[top], frame.open.toFixed(2));
+  drive(sink, frame, "vrm"); // face now holds aa, ih, ou, ee, oh
+}
+```
+
+## Live example
+
+The demo page drives a 2D face from the system voice, timed text, the bellows voice and audio level: [hackbuild-motion/lipsync](https://hackbuild.github.io/hackbuild-motion/lipsync/). The suite's lip sync screen: [hackbuild-suite lipsync](https://hackbuild.github.io/hackbuild-suite/#/motion/lipsync).
+
+## Concepts
+
+### events on your clock
+
+A `SpeechEvent` is a `word`, `phoneme`, `viseme` or `end` event with `time` in seconds on your clock, usually an AudioContext time. `end` is optional: a word with no end gets a length from its letters at once, and when the next word arrives sooner the word's visemes are squeezed to end there. `estimateWords(text, start, end)` spreads an utterance by syllables for engines that give only its bounds.
+
+### coarticulation
+
+Each viseme rises and falls over 70 ms by default, centred on its edges, and overlapping visemes share the mouth by dominance after the Cohen and Massaro model. Lip closures and lip to teeth contacts dominate; tongue consonants yield to the vowels around them. Weights never sum past 1.
+
+### timings first, then the level
+
+`LipSync.update(t, dt)` uses the timeline while it covers `t`, falls back to the audio level you set with `setLevel(rms, bands)`, then goes quiet, and reports which in `frame.source`. The mouth leads the sound by 40 ms by default, and the output rises with a 20 ms and falls with a 60 ms half-life:
+
+```ts
 const buf = new Uint8Array(analyser.fftSize);
-
-function frame(dt: number) {
-  analyser.getByteTimeDomainData(buf);
-  lips.setLevel(rms(buf));
-  drive(avatar.expressions, lips.update(ctx.currentTime, dt), "vrm");
-}
+analyser.getByteTimeDomainData(buf);
+lips.setLevel(rms(buf));
+drive(avatar.expressions, lips.update(ctx.currentTime, dt), "vrm");
 ```
 
-### Bellows voice
+### one output, three targets
 
-`@hackbuild/lipsync/bellows` reads the plan bellows-voice (the owner's
-articulatory voice for the bellowsjs engine, MIT) returns from `speak()`,
-`sing()` and `beatbox()`. Its spans are the exact sounds the engine plays,
-already on the AudioContext clock, so the mouth needs no estimate:
+`drive(sink, frame, target)` writes to anything with `setValue(name, weight)`: an `@hackbuild/avatar` ExpressionRig or a three-vrm expression manager. `"vrm"` writes the five vowels, `"oculus"` the 15 visemes, `"arkit"` jaw, closure, pucker, funnel and smile shapes through the rig table.
+
+### the bellows voice
+
+`@hackbuild/lipsync/bellows` reads the plan bellows-voice returns from `speak()`, `sing()` and `beatbox()`. Its spans are the exact sounds the engine plays, already on the AudioContext clock, so the mouth needs no estimate. `@hackbuild/lipsync/articulatory` builds the mouth from vocal tract state (jaw, lips, tongue, velum) in place of a viseme lookup; `fromProbe` follows the audio as it plays, look ahead included.
 
 ```ts
-import { fromSungPlan } from "@hackbuild/lipsync/bellows";
-
 const plan = alto.speak("Shall we meet at noon?");
-lips.push(fromSungPlan(plan)); // offset 0: live plans are on the context clock
+lips.push(fromSungPlan(plan)); // live plans are on the context clock, offset 0
 ```
 
-For an offline render that starts at 0, pass the play time as the offset.
-Beatbox spans map to the viseme of each sound's place; bellows' pause `_`
-makes no event. The span shape is copied structurally, so the subpath
-imports nothing from bellows. `bellows-voice` is an optional peer pinned
-to 0.8.0 on npm and `bellowsjs` to 0.5.0; the package runs without
-either.
+## API overview
 
-### Articulatory source
+| export | what it does |
+|---|---|
+| [`LipSync`](../../docs/api/lipsync/index.md#lipsync) | the driver: push events, set the level, update per frame |
+| [`VisemeTimeline`](../../docs/api/lipsync/index.md#visemetimeline) | timed visemes sampled with coarticulation |
+| [`drive`](../../docs/api/lipsync/index.md#drive) | write a frame to VRM vowels, Oculus visemes or ARKit shapes |
+| [`SpeechEvent`](../../docs/api/lipsync/index.md#speechevent) | the word, phoneme, viseme and end events |
+| [`phonemeToViseme`](../../docs/api/lipsync/index.md#phonemetoviseme) | ARPAbet, IPA or Oculus name to a viseme |
+| [`wordToVisemes`](../../docs/api/lipsync/index.md#wordtovisemes) | English letter rules for a word with no phonemes |
+| [`estimateWords`](../../docs/api/lipsync/index.md#estimatewords) | spread an utterance over its bounds by syllables |
+| [`rms`](../../docs/api/lipsync/index.md#rms) | the level of an analyser's time domain bytes |
+| [`bandsFromSpectrum`](../../docs/api/lipsync/index.md#bandsfromspectrum) | three formant band energies from a spectrum |
+| [`fromSungPlan`](../../docs/api/lipsync/bellows.md#fromsungplan) | speech events from a bellows voice plan |
+| [`fromProbe`](../../docs/api/lipsync/articulatory.md#fromprobe) | a frame from the bellows articulator probe |
+| [`articulatoryFrame`](../../docs/api/lipsync/articulatory.md#articulatoryframe) | a frame from vocal tract state |
+| [`mouthChannels`](../../docs/api/lipsync/articulatory.md#mouthchannels) | open, closure, round and place channels from tract state |
 
-`@hackbuild/lipsync/articulatory` builds the mouth from vocal tract state
-in place of a viseme lookup: jaw arc, lip aperture, protrusion and width,
-the labiodental contact, tongue body and tip positions and the velum port,
-in the units of bellows-voice's articulator frame (centimetres, cm^2 for
-the velum). `ArticulatorFrame` is a plain structural interface, so any
-source with those fields drives it.
+The full reference is in [docs/api/lipsync](../../docs/api/lipsync/README.md).
 
-- `mouthChannels(frame)`: open, closure, round, spread, labiodental,
-  dental, alveolar, postalveolar, sibilant, retroflex, velar and nasal,
-  each 0 to 1, each from the articulators that make that shape
-  (thresholds inferred from bellows-voice's body 0 targets and a rendered engine track).
-- `articulatoryFrame(frame)`: a `LipFrame` for `drive()`. Consonant
-  visemes come from the channels, the rest of the mouth goes to the vowel
-  visemes; the five VRM vowels are a softmax over their distance to points
-  taken from bellows' own vowels (aa, ee, ih, oh, ou), shut by the lip
-  closure. `sounding: 0` gives a silent frame.
-- `arkitFromChannels(channels)`: jawOpen, mouthClose, pucker and funnel,
-  stretch and smile, mouthRollLower and tongueOut straight from the
-  channels.
-- `fromProbe(probe)`: a frame from bellows-voice 0.8.0's
-  `articulatorProbe(b, singer)` at the time being heard, the engine's own
-  state as the audio plays, look ahead included. A frame from
-  `probe.at(t)` or from the `track` of the offline `renderSpeech` passes
-  straight to `articulatoryFrame`.
-- `fromTractModel(model)`: a frame from bellows-voice's main thread
-  `TractModel` (`postureByName()`), which follows the plan rather than the
-  audio and has no gesture look ahead; call its `step()` at a fixed step.
+## Browser support
 
-```ts
-import { articulatorProbe, singer } from "bellows-voice";
-import { fromProbe } from "@hackbuild/lipsync/articulatory";
+| feature | needs | notes |
+|---|---|---|
+| timeline and driver | any JavaScript runtime | no DOM, no Web Audio, runs in Node |
+| audio level | an `AnalyserNode` you make | pass its arrays to `rms` and `bandsFromSpectrum` |
+| system voice timings | `speechSynthesis` word boundary events | Chrome gave 17 word events for one line (measured); other browsers unknown |
+| bellows voice | Web Audio, bellows-voice 0.8.0 | runs on the demo page from the npm CDN |
+| single file build | `dist/lipsync.iife.js` | `HackbuildLipsync` global, no wasm, runs from file:// |
 
-const probe = articulatorProbe(b, alto, { rate: 60 });
-alto.speak("Shall we meet at noon?");
-function frame() {
-  drive(avatar.expressions, fromProbe(probe), "vrm");
-  requestAnimationFrame(frame);
-}
-```
+## Errors and troubleshooting
 
-`dist/lipsync.iife.js` is the single file build (`HackbuildLipsync`). It
-uses only the rig's plain data tables, so it carries no wasm.
+Nothing in this package throws: unknown phonemes give `sil`, and an empty timeline hands over to the audio level.
 
-## Develop
+| message | cause | what to do |
+|---|---|---|
+| none; `frame.source` stays `"silent"` | no event covers `t` and the level is under the gate | check `t` and the event times are on the same clock; raise the level or lower `gate` |
+| none; the mouth trails the sound | events pushed on a different clock, or `lead` too small | pass `ctx.currentTime` based times; raise `lead` from 0.04 s |
+| none; the mouth flutters on breath | the level gate is too low | raise `gate` from 0.015 |
 
-    npm run build -w @hackbuild/lipsync
-    npx vitest run packages/lipsync
+### mistakes to avoid
+
+- Do not mix clocks: event `time` and the `t` you pass to `update` must be on the same clock, usually the AudioContext's.
+- Do not pass an offset to `fromSungPlan` for a live bellows plan; live plans are already on the context clock. Pass the play time only for an offline render that starts at 0.
+- Do not import bellows-voice just to type the calls; the subpaths read its plans and frames by shape, so pass what the engine returns.
+- Call `stop()` when speech is cut short, or the rest of the timeline keeps moving the mouth.
+
+## Works with
+
+- [@hackbuild/rig](../rig/README.md) holds the expression and viseme table this package writes through.
+- [@hackbuild/avatar](../avatar/README.md) gives the ExpressionRig `drive` writes to.
+- [@hackbuild/presence](../presence/README.md) runs blink, gaze and breath alongside the mouth.
+- [@hackbuild/motion-views](../motion-views/README.md) speaks real audio on the character stage with this package.
+
+## Changelog and licences
+
+Changes are in the repository [CHANGELOG](../../CHANGELOG.md). Code is MIT ([LICENSE](../../LICENSE)); this README is CC-BY-4.0 with its code samples also MIT. bellows-voice and bellowsjs are MIT, installed by you as optional peers.
 
 ## What is verified, and what is not
 
 ### Verified on this machine
 
-- 2026-11-22: `npx vitest run packages/lipsync` passed 11 of 11 tests
-  (counted), one a fast-check property: viseme weights stay non negative,
-  sum to 1 or less, and change by less than 0.05 over 0.1 ms at any time
-  over random segment lists (computed).
-- 2026-11-22: a 60 ms PP between two aa vowels reaches above 0.9 at its
-  middle; an ARKit target gets `mouthClose` above 0.9 for an M phoneme
-  (computed).
-- 2026-11-22: synthetic spectra with energy at 2.5 to 4 kHz pick ee over
-  aa, at 300 to 500 Hz pick oh and ou over aa, at 0.5 to 1.5 kHz pick aa
-  above 0.9 (computed).
-
-- 2026-11-23: `packages/lipsync/test/ipa.test.ts` maps the 53 sounds on
-  bellows-voice 0.7.3's phoneme list besides its pause, its 5 aliases and 97 IPA
-  symbols, to a viseme other than sil (counted); a "little bottle" span
-  list with flaps and dark l keeps sil at 0 from its first to its last
-  span (computed).
-
-- 2026-11-23: `test/bellows.test.ts` runs a real plan made by
-  bellows-voice 0.7.3 (`test/fixtures/bellows-plan.json`, two sentences,
-  flaps, dark l and an in breath): one event per sounding span at its
-  times, no sil at the middle of any span, a 60 ms m between vowels
-  reaches 0.9 or more on the timeline and 0.55 after the default output
-  follower (computed).
-
-- 2026-11-23: `test/articulatory.test.ts` reads settled bellows-voice
-  0.8.0 `TractModel` postures for all 53 of its sounds
-  (`test/fixtures/bellows-frames.json`): every consonant's strongest
-  viseme matches its place (l reads DD, the frame has no lateral channel),
-  ten anchor vowels match their viseme and the rest read as a vowel shape,
-  the five VRM presets each win on their own bellows vowel, and the VRM
-  vowels shut under p, b and m (computed).
-- 2026-11-23: on a real engine track (`test/fixtures/bellows-track.json`,
-  `renderSpeech("Shall we meet at noon?")` at 60 frames per second, 96
-  frames) the lips close past 0.9 during m, ou and ih pass 0.5 during u
-  and i, sh reads CH and t reads DD, and frames that do not sound give a
-  silent frame (computed). 48 of 90 sounding frames read the viseme of the
-  phoneme the engine labels them with (measured); the rest are mostly the
-  engine's look ahead (the lips close for m while i still sounds) and the
-  rest posture after the line.
+| check | result |
+|---|---|
+| `npx vitest run packages/lipsync` | 32 of 32 tests pass, one a fast-check property (counted) |
+| viseme weights stay non negative, sum to 1 or less, and change by less than 0.05 over 0.1 ms over random segment lists | property holds (computed) |
+| a 60 ms PP between two aa vowels | above 0.9 at its middle (computed) |
+| synthetic spectra pick ee for 2.5 to 4 kHz, oh and ou for 300 to 500 Hz, aa for 0.5 to 1.5 kHz | pass (computed) |
+| bellows-voice phoneme list, aliases and 97 IPA symbols map to a viseme other than sil | 53 sounds, 5 aliases, 97 symbols (counted) |
+| a real bellows-voice plan: one event per sounding span, no sil mid span, an m between vowels closes the lips | 0.9 on the timeline, 0.55 after the output follower (computed) |
+| bellows-voice `TractModel` postures for all 53 sounds: strongest viseme matches the place, VRM vowels shut under p, b and m | pass (computed) |
+| a real engine track, frames reading the viseme of the labelled phoneme | 48 of 90 sounding frames (measured) |
+| a 2D face from Chrome system voice word events in headless Chrome | mouth open on 200 frames (measured) |
+| the bellows articulator probe in Chrome | open on 293 of 371 frames, lips shut on 30 (measured) |
 
 ### Not verified by anything
 
-- No real TTS engine's events or real speech audio have gone through it;
-  the band thresholds are inferred from formant ranges, not fitted.
-- Nobody has watched a face driven by it in a browser or listened to it;
-  the automated pass in `docs/browser-checks.md` drove the 2D face on the
-  lipsync page from the bellows voice's spans, tract model and live
-  articulator probe (bellows-voice 0.8.0 from the npm CDN) and counted
-  open and shut frames only.
-- Dominance values and viseme to vowel weights were chosen by eye.
-- The articulatory thresholds have not been tuned by eye on a face, and
-  the articulatory source has not been compared in time against the
-  dominance timeline. The live probe ran once in Chrome (open on 293 of
-  371 frames, lips shut on 30, measured); nobody has judged its timing.
+- No real speech audio from a microphone has gone through it; the band thresholds come from formant ranges, not fitted.
+- Nobody has watched a face driven by it or listened for sync; the browser checks count open and shut frames only.
+- Dominance values and viseme to vowel weights were chosen by eye; the articulatory thresholds have not been tuned on a face.
 - The letter rules are English only.
 
 ## Size budget
@@ -198,8 +180,3 @@ uses only the rig's plain data tables, so it carries no wasm.
 Measured 2026-11-25 by `node tools/lint-packages.mjs` (gzip level 9) from the packed
 tarball. Generated from `tools/size-budget.json`; CI fails when a file moves more than
 5 percent from its row.
-
-## Licence
-
-Code MIT (`LICENSE` at the repository root). This README is CC-BY-4.0, its
-code samples also MIT.

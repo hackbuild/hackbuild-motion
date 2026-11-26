@@ -20,8 +20,18 @@ import {
   oculusMorph,
 } from "@hackbuild/rig/expressions";
 
-export { OCULUS_VISEMES, VRM_VOWELS };
-export type { OculusViseme, VrmVowel };
+export {
+  /** The 15 Oculus visemes, silence first, from @hackbuild/rig. */
+  OCULUS_VISEMES,
+  /** The five VRM mouth vowel presets, from @hackbuild/rig. */
+  VRM_VOWELS,
+};
+export type {
+  /** One Oculus viseme. */
+  OculusViseme,
+  /** One VRM mouth vowel preset. */
+  VrmVowel,
+};
 
 // ---------------------------------------------------------------- events
 
@@ -152,6 +162,7 @@ export function estimateWords(text: string, start: number, end: number): SpeechE
 
 // ---------------------------------------------------------------- timeline
 
+/** One viseme on the timeline, from `start` to `end` in seconds. */
 export interface VisemeKey {
   viseme: OculusViseme;
   start: number;
@@ -176,6 +187,7 @@ function raised(x: number): number {
   return 0.5 - 0.5 * Math.cos(Math.PI * x);
 }
 
+/** Timed visemes built from speech events and sampled with coarticulation. */
 export class VisemeTimeline {
   keys: VisemeKey[] = [];
   /** Keys of the last word that came without an end, open to rescaling. */
@@ -300,6 +312,7 @@ export function rms(samples: Float32Array | Uint8Array): number {
   return Math.sqrt(s / samples.length);
 }
 
+/** Energy in three formant bands of an audio spectrum. */
 export interface Bands {
   /** Energy near the first formant of open vowels, 250 to 900 Hz. */
   low: number;
@@ -356,6 +369,7 @@ export function follow(cur: number, goal: number, dt: number, rise: number, fall
 
 // ---------------------------------------------------------------- driver
 
+/** Timing, smoothing and gain options of `LipSync`. */
 export interface LipSyncOptions {
   /** Seconds the mouth leads the sound. Default 0.04 (inferred; visible speech leads audio). */
   lead?: number;
@@ -372,8 +386,10 @@ export interface LipSyncOptions {
   strength?: number;
 }
 
+/** What moved the mouth this frame: timed events, the audio level, or nothing. */
 export type LipSource = "timeline" | "energy" | "silent";
 
+/** The mouth for one frame: viseme weights, VRM vowels, jaw openness and its source. */
 export interface LipFrame {
   /** Indexed like OCULUS_VISEMES. */
   visemes: Float32Array;
@@ -397,6 +413,7 @@ export function visemesToVowels(v: Float32Array): Record<VrmVowel, number> {
 
 const JAW: Record<VrmVowel, number> = { aa: 1, oh: 0.7, ee: 0.35, ih: 0.3, ou: 0.25 };
 
+/** The viseme driver: timed events first, the audio level when no timings cover the moment. */
 export class LipSync {
   readonly timeline = new VisemeTimeline();
   readonly opts: Required<LipSyncOptions>;
@@ -410,6 +427,7 @@ export class LipSync {
     this.opts = { lead: 0.04, blend: 0.07, rise: 0.02, fall: 0.06, gate: 0.015, gain: 6, strength: 1, ...opts };
   }
 
+  /** Adds speech events to the timeline. */
   push(events: SpeechEvent | readonly SpeechEvent[]): void {
     this.timeline.push(events);
   }
@@ -475,6 +493,7 @@ export interface ExpressionSink {
   setValue(name: string, weight: number): void;
 }
 
+/** The expression set `drive` writes to: VRM vowels, Oculus visemes or ARKit blendshapes. */
 export type MouthTarget = "vrm" | "oculus" | "arkit";
 
 /**

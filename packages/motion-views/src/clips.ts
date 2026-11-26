@@ -4,8 +4,10 @@
 // wasm package; pass what bake and retarget hand back.
 import { secondsWord } from "./words.js";
 
+/** Where a clip came from: a baked pack, a retarget, the body's own file, or code. */
 export type ClipFrom = "bake" | "retarget" | "body" | "code";
 
+/** One clip as the strip shows it: id, name, length, loop, source, tags, warning and still. */
 export interface ClipItem {
   id: string;
   name: string;

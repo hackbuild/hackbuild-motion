@@ -15,6 +15,7 @@ import { button, el, statusLine, urlSlot } from "./dom.js";
 import { Still } from "./thumb.js";
 import { type LicenceMeta, type RigCheck, type RigLine, licenceLine, rigCheck, sizeLine } from "./words.js";
 
+/** What AvatarDrop learned about a dropped avatar: name, format, size, rig check, licence and still. */
 export interface AvatarReport {
   name: string;
   format: string;
@@ -29,6 +30,7 @@ export interface AvatarReport {
   thumb: Blob | null;
 }
 
+/** Options of `avatarDrop`: the load options of a body plus the pick button and hint words. */
 export interface AvatarDropOptions extends BodyLoadOptions {
   /** The pick button is the one pink action of the screen. Default false. */
   go?: boolean;
@@ -38,6 +40,7 @@ export interface AvatarDropOptions extends BodyLoadOptions {
   hint?: string;
 }
 
+/** Events of AvatarDrop: files picked, the report checked, a failure, or the card pressed to use the avatar. */
 export type AvatarDropEvent =
   | { type: "picked"; files: readonly DroppedFile[] }
   | { type: "checked"; report: AvatarReport; files: readonly DroppedFile[] }
@@ -45,6 +48,7 @@ export type AvatarDropEvent =
   /** The card was pressed: wear this avatar. */
   | { type: "use"; report: AvatarReport; files: readonly DroppedFile[] };
 
+/** The handle `avatarDrop` returns: the last report, take files, open the picker, listen, dispose. */
 export interface AvatarDropHandle {
   readonly report: AvatarReport | null;
   /** Reads files as a drop would. Resolves to the report, or null when the files held no body it could read. */

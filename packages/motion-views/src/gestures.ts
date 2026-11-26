@@ -6,7 +6,9 @@
 import { AnimationClip, Quaternion, QuaternionKeyframeTrack, Vector3 } from "three";
 import type { Clip } from "@hackbuild/presence";
 
+/** A gesture written in code over the body's own bones. */
 export type Gesture = "wave" | "nod" | "shake" | "bow";
+/** Every gesture `gestureClip` can make. */
 export const GESTURES: readonly Gesture[] = ["wave", "nod", "shake", "bow"];
 
 interface Axes {

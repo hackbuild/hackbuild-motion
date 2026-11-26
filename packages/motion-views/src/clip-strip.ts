@@ -13,6 +13,7 @@ export interface StripItem extends ClipItem {
   animation?: () => AnimationClip | Promise<AnimationClip>;
 }
 
+/** Options of `clipStrip`: the items, the picked clip, the play button and stills. */
 export interface ClipStripOptions {
   items?: readonly StripItem[];
   /** The picked clip; default the first. */
@@ -25,12 +26,14 @@ export interface ClipStripOptions {
   thumbs?: boolean;
 }
 
+/** Events of ClipStrip: a clip picked, play or stop pressed, a still drawn or failed. */
 export type ClipStripEvent =
   | { type: "pick"; item: StripItem }
   | { type: "play"; item: StripItem }
   | { type: "stop"; item: StripItem }
   | { type: "thumb"; id: string; ok: boolean };
 
+/** The handle `clipStrip` returns: set items, pick, set the play state, wait for stills, listen. */
 export interface ClipStripHandle {
   readonly current: StripItem | null;
   readonly playing: boolean;

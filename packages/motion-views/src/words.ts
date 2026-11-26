@@ -17,6 +17,7 @@ export interface RigFacts {
   warnings?: readonly string[];
 }
 
+/** How a rig check line reads: fine, a limit, or a blocker. */
 export type RigTone = "ok" | "warn" | "bad";
 
 /** One line of the rig check: what works or what does not, and why. */
@@ -25,6 +26,7 @@ export interface RigLine {
   text: string;
 }
 
+/** The rig check: overall tone, a headline and the lines worst first. */
 export interface RigCheck {
   tone: RigTone;
   /** The headline: "ready to act", "ready, with limits", "cannot act". */
@@ -77,6 +79,7 @@ export function bytesWord(n: number): string {
 /** Thousands as "38 k". */
 const countWord = (n: number): string => (n < 1000 ? String(n) : `${n < 10000 ? (n / 1000).toFixed(1) : Math.round(n / 1000)} k`);
 
+/** The facts the size line reads: bytes, format, file and triangle counts. */
 export interface SizeFacts {
   /** Every file of the drop, model and textures. */
   bytes: number;

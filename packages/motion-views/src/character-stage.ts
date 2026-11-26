@@ -16,6 +16,7 @@ import { dropRoutes } from "@virgilvox/hackbuild-ui/vanilla";
 import { button, el, iconButton, part } from "./dom.js";
 import { type Gesture, GESTURES, gestureClip } from "./gestures.js";
 
+/** The stage shot: bust, or the full body. */
 export type Framing = "bust" | "full";
 
 /** One verb on the stage. `go` makes it the one pink action; give it to one verb at most. */
@@ -33,13 +34,14 @@ export const DEFAULT_VERBS: readonly Verb[] = [
   { id: "look", label: "look around" },
 ];
 
+/** Options of `characterStage`: stage options plus name, model URL, verbs, framing, drop and the hello speech. */
 export interface CharacterStageOptions extends StageOptions {
   /** The name on the corner plate. Default the body's name. */
   name?: string;
   /** A model URL to show; the placeholder body shows until it loads, and without one. */
   src?: string;
   verbs?: readonly Verb[];
-  /** Bust is the original's opening shot. Default bust. */
+  /** Bust frames from the knees to just over the head; full shows the whole body. Default bust. */
   framing?: Framing;
   /** Take files dropped on the stage. Default true. */
   drop?: boolean;
@@ -49,6 +51,7 @@ export interface CharacterStageOptions extends StageOptions {
   audioContext?: AudioContext;
 }
 
+/** Events of CharacterStage: a body loaded or failed, what it is doing, a verb pressed, the framing changed. */
 export type CharacterStageEvent =
   | { type: "loaded"; name: string; caps: BodyCaps; warnings: string[]; placeholder: boolean }
   | { type: "failed"; message: string }
@@ -56,6 +59,7 @@ export type CharacterStageEvent =
   | { type: "verb"; id: string }
   | { type: "framing"; framing: Framing };
 
+/** The handle `characterStage` returns: show a body, speak, gesture, play clips, frame and listen. */
 export interface CharacterStageHandle {
   readonly stage: AvatarStage;
   readonly body: Body | null;

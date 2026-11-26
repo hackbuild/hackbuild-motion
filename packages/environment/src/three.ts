@@ -242,6 +242,7 @@ export async function probeFrom(renderer: WebGLRenderer, source: Scene, intensit
   }
 }
 
+/** A loaded scene, held off screen until `attach()`. */
 export interface LoadedEnvironment {
   readonly id: string;
   /** The key light casts a shadow; the stage decides what casts one. */
@@ -252,6 +253,7 @@ export interface LoadedEnvironment {
   dispose(): void;
 }
 
+/** Options of `loadEnvironment`: where the files come from and how kit models load. */
 export interface EnvironmentOptions {
   /** Gives the files a preset needs; the studio needs none. */
   resolve?: Resolve;

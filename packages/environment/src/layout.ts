@@ -3,6 +3,7 @@
 // layout arranges its set around that spot. Colors here are scene data
 // (light, ground and fog tints), not interface colors. No three.js.
 
+/** One kit model placed in a layout, in kit units, optionally repeated on a grid. */
 export interface LayoutItem {
   /** Kit model path as the caller's resolver knows it, e.g. "kenney-furniture/wall.glb". */
   model: string;
@@ -15,6 +16,7 @@ export interface LayoutItem {
   grid?: [number, number];
 }
 
+/** A scene as data: key and rim light, image light, backdrop, ground, fog and the set of kit models. */
 export interface EnvironmentLayout {
   /** Kit units to meters, for every item. */
   scale: number;
@@ -45,6 +47,7 @@ export interface EnvironmentLayout {
   items: LayoutItem[];
 }
 
+/** An HDRI a preset needs, with its licence and source for the credit line. */
 export interface HdriRef {
   /** Path as the caller's resolver knows it. */
   file: string;
@@ -54,6 +57,7 @@ export interface HdriRef {
   source: string;
 }
 
+/** A named scene: its layout, the HDRI it lights from and the licence of its kit models. */
 export interface EnvironmentPreset {
   id: string;
   label: string;

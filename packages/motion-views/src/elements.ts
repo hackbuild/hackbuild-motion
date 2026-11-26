@@ -10,6 +10,7 @@ import { type CharacterStageHandle, type CharacterStageOptions, type Framing, ch
 import { type AvatarDropHandle, type AvatarDropOptions, avatarDrop } from "./avatar-drop.js";
 import { type ClipStripHandle, type StripItem, clipStrip } from "./clip-strip.js";
 
+/** Options `defineMotionViews` shares with every element it defines. */
 export interface MotionViewsOptions {
   /** Options every hb-character-stage shares: the vrm hook, lights, follow. */
   stage?: CharacterStageOptions;
@@ -17,12 +18,15 @@ export interface MotionViewsOptions {
   drop?: AvatarDropOptions;
 }
 
+/** The hb-character-stage element, with its view handle once connected. */
 export interface CharacterStageElement extends HTMLElement {
   readonly handle: CharacterStageHandle | null;
 }
+/** The hb-avatar-drop element, with its view handle once connected. */
 export interface AvatarDropElement extends HTMLElement {
   readonly handle: AvatarDropHandle | null;
 }
+/** The hb-clip-strip element, with its view handle and the items and picked clip as properties. */
 export interface ClipStripElement extends HTMLElement {
   readonly handle: ClipStripHandle | null;
   items: readonly StripItem[];
