@@ -10,15 +10,19 @@
 //   quick     examples/<pkg>/quick.ts exists and the first ts block under
 //             "Quick start" is that file, byte for byte after trimming;
 //             npm run typecheck compiles it (examples/tsconfig.json).
-//   install   "Install" holds npm install @hackbuild/<pkg> and every other
-//             package examples/<pkg>/quick.ts imports.
-//   mistakes  "Errors and troubleshooting" has a "### mistakes to avoid"
-//             list; tools/llms.mjs puts it in the package's llms.md.
+//   install   "Install" holds npm install @hackbuild/<pkg>.
 //   api       "API overview" links into docs/api/<pkg>/.
 //   text      no "not on npm" text, no internal design ids.
 //   links     every relative link resolves to a file in the repository and,
 //             with an anchor, to a heading or id in that file; links into
 //             the Pages site name a page the site builds.
+//   model     a README with "Models and weights" has one "Browser status: "
+//             paragraph under the badges.
+//   quick     also: every package quick.ts imports is a dependency or named
+//             in "Install"; no empty File or Blob; no licence constant.
+//   prose     no internal provenance (also in the package.json description
+//             and the generated API reference), no number labels outside
+//             tables, no dated log lines.
 // A deprecated package (SHORT) needs the H1, the line, the badges, "Install"
 // and "Changelog and licences", and a link to the package that replaces it.
 // Usage: node tools/check-readme.mjs [--fix-badges] [package...]
@@ -45,10 +49,17 @@ export const SECTIONS = [
   ["Errors and troubleshooting", true],
   ["Works with", true],
   ["Changelog and licences", true],
-  // the two extras a package may add, after the 13 template parts
-  ["What is verified, and what is not", false],
+  // the two parts after the template: RULES.md requires the first, tools/lint-packages.mjs writes the second
+  ["What is verified, and what is not", true],
   ["Size budget", false],
 ];
+
+/** Internal provenance that has no place in published text. */
+export const PROVENANCE = /\bearlier (builds?|tools?|transcription|captioner|live|relief|scan|bench)\b|\bas earlier builds\b|\bfrom earlier builds\b/i;
+/** A number label in prose; labels belong in tables. */
+const PROSE_LABEL = /\((measured|vendor|computed|inferred)\b|\b(measured|vendor|computed|inferred)\)/;
+/** The lead paragraph a model package carries under its badges. */
+export const STATUS = /^Browser status: /;
 
 const DESIGN_IDS = [
   [/\bP-[A-Z][A-Z0-9]*(-\d+)?\b/, "a pattern id"],
@@ -121,17 +132,6 @@ export function firstBlock(text, langs = ["ts", "typescript", "js"]) {
   return null;
 }
 
-/** npm package names a file imports (scoped or bare, without subpath), node builtins left out. */
-export function quickImports(code) {
-  const out = new Set();
-  for (const m of code.matchAll(/^\s*import\s[^;]*?from\s+"([^"./][^"]*)"/gm)) {
-    if (m[1].startsWith("node:")) continue;
-    const parts = m[1].split("/");
-    out.add(m[1].startsWith("@") ? parts.slice(0, 2).join("/") : parts[0]);
-  }
-  return [...out];
-}
-
 /** Problems of one README, as strings. */
 export function checkReadme(name, md, { pages = new Set() } = {}) {
   const out = [];
@@ -144,6 +144,10 @@ export function checkReadme(name, md, { pages = new Set() } = {}) {
   if (!leadParas[1] || leadParas[1].startsWith("[![") || leadParas[1].startsWith("#")) out.push("no one line description after the title");
   else if (leadParas[1].split("\n").length > 3) out.push("the description after the title runs past three lines; keep it to one sentence");
   if (leadParas[2] !== badges(name)) out.push(`badge line differs from the generated one. fix: node tools/check-readme.mjs --fix-badges ${name}`);
+  const models = /^## Models and weights$/m.test(stripFences(md));
+  const extra = leadParas.slice(3);
+  if (models && !(extra.length === 1 && STATUS.test(extra[0]))) out.push(`a model package needs one "Browser status: " paragraph under the badges, saying plainly which model runs a real browser has verified, or that none has`);
+  if (!models && extra.length) out.push(`text between the badges and "What it does": only a model package carries a "Browser status: " paragraph there`);
   const titles = list.map((s) => s.title);
   const known = SECTIONS.map(([t]) => t);
   for (const t of titles) if (!known.includes(t)) out.push(`H2 "${t}" is not in the template`);
@@ -163,13 +167,20 @@ export function checkReadme(name, md, { pages = new Set() } = {}) {
       const want = readFileSync(quickFile, "utf8");
       if (block === null) out.push(`"Quick start" has no ts block`);
       else if (block.trim() !== want.trim()) out.push(`"Quick start" block differs from examples/${name}/quick.ts`);
-      const line = /npm install ([^\n`]*)/.exec(body("Install"))?.[1] ?? "";
-      for (const dep of quickImports(want)) if (!line.split(/\s+/).includes(dep)) out.push(`"Install" npm install line does not list ${dep}, which the quick start imports`);
       const n = want.trim().split("\n").length;
       if (n < 5 || n > 25) out.push(`examples/${name}/quick.ts is ${n} lines, keep it to 10 to 20`);
     }
   }
-  if (!short && !/^### mistakes to avoid\n+(- .+\n?)+/m.test(body("Errors and troubleshooting").trim() + "\n")) out.push(`"Errors and troubleshooting" has no "### mistakes to avoid" list`);
+  if (existsSync(quickFile)) {
+    const quick = readFileSync(quickFile, "utf8");
+    const pkg = JSON.parse(readFileSync(join(root, "packages", name, "package.json"), "utf8"));
+    const deps = new Set([full, ...Object.keys(pkg.dependencies ?? {})]);
+    const install = body("Install");
+    for (const dep of quickImports(quick)) if (!deps.has(dep) && !install.includes(dep)) out.push(`quick.ts imports ${dep}; "Install" must name it or it must be a dependency`);
+    if (/new (File|Blob)\(\s*\[\s*\]/.test(quick)) out.push("quick.ts builds an empty File or Blob; take input from a file input, a fetch of a sample or the microphone");
+    const lit = /licence(For)?\s*:\s*(\([^)]*\)\s*=>\s*)?["'`]|licenceFor\s*:[^\n]*\?\s*["']/.exec(quick);
+    if (lit) out.push(`quick.ts states a licence as a constant (${lit[0]}); take it from the model record`);
+  }
   if (!short && !body("API overview").includes(`../../docs/api/${name}/`)) out.push(`"API overview" has no link into ../../docs/api/${name}/`);
 
   const prose = stripFences(md);
@@ -179,7 +190,32 @@ export function checkReadme(name, md, { pages = new Set() } = {}) {
     if (m) out.push(`names ${what}: ${JSON.stringify(m[0])}`);
   }
   for (const p of linkProblems(join(root, "packages", name), prose, pages)) out.push(p);
+  const words = proseLines(md, ["Size budget"]);
+  const prov = PROVENANCE.exec(words);
+  if (prov) out.push(`names internal provenance: ${JSON.stringify(prov[0])}`);
+  const label = PROSE_LABEL.exec(words);
+  if (label) out.push(`a number label in prose: ${JSON.stringify(label[0])}; put labelled numbers in a table`);
+  const dated = /^\s*[-*] \d{4}-\d{2}-\d{2}\b.*$/m.exec(words);
+  if (dated) out.push(`a dated log line in prose: ${JSON.stringify(dated[0].trim().slice(0, 60))}; put checks in a table`);
   return out;
+}
+
+/** Package names a module imports, type imports included. */
+export function quickImports(code) {
+  const out = new Set();
+  for (const m of code.matchAll(/(?:\bfrom\s*|\bimport\s*\(?\s*)["']([^"'.][^"']*)["']/g)) {
+    const parts = m[1].split("/");
+    out.add(m[1].startsWith("@") ? parts.slice(0, 2).join("/") : parts[0]);
+  }
+  return out;
+}
+
+/** Prose of a README: no fences, no table rows, no headings, and without the named sections. */
+export function proseLines(md, skip = []) {
+  const { list } = sections(md);
+  let text = md;
+  for (const s of list) if (skip.includes(s.title)) text = text.replace(s.body, "");
+  return stripFences(text).split("\n").filter((l) => !/^\s*\|/.test(l) && !/^#/.test(l)).join("\n");
 }
 
 /** Links that do not resolve, for markdown at dir. */
@@ -229,6 +265,13 @@ function main() {
       if (next !== md) writeFileSync(file, (md = next));
     }
     const problems = checkReadme(name, md, { pages });
+    const desc = JSON.parse(readFileSync(join(root, "packages", name, "package.json"), "utf8")).description ?? "";
+    if (PROVENANCE.test(desc)) problems.push(`package.json description names internal provenance: ${JSON.stringify(PROVENANCE.exec(desc)[0])}`);
+    const apiDir = join(root, "docs", "api", name);
+    for (const f of existsSync(apiDir) ? readdirSync(apiDir) : []) {
+      const m = PROVENANCE.exec(readFileSync(join(apiDir, f), "utf8"));
+      if (m) problems.push(`docs/api/${name}/${f} (from TSDoc) names internal provenance: ${JSON.stringify(m[0])}`);
+    }
     for (const p of problems) console.error(`check-readme: ${name}: ${p}`);
     if (problems.length) failed += 1;
   }

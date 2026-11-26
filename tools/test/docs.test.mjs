@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { anchors, checkReadme, firstBlock, quickImports, sections, slug } from "../check-readme.mjs";
+import { anchors, checkReadme, firstBlock, PROVENANCE, quickImports, sections, slug } from "../check-readme.mjs";
 import { exportText, oneLine, typeText } from "../llms.mjs";
 
 test("slug follows the GitHub heading rule", () => {
@@ -43,13 +43,13 @@ test("exportText and oneLine give a signature and the first sentence", () => {
   assert.equal(oneLine({ summary: [{ kind: "text", text: "Does a thing, e.g. this. Then more." }] }), "Does a thing, e.g. this.");
 });
 
-test("quickImports names each npm package once, without subpaths or node builtins", () => {
-  const code = 'import { a } from "@hackbuild/ik";\nimport { b } from "@hackbuild/ik/three";\nimport * as THREE from "three";\nimport { c } from "./local";\nimport { d } from "node:fs";\n';
-  assert.deepEqual(quickImports(code), ["@hackbuild/ik", "three"]);
+test("quickImports names packages, type imports and subpaths included", () => {
+  const code = 'import { a } from "@hackbuild/chat/wllama";\nimport type { B } from "@hackbuild/ai-env";\nimport x from "./local.js";\nconst m = await import("three/addons");\n';
+  assert.deepEqual([...quickImports(code)].sort(), ["@hackbuild/ai-env", "@hackbuild/chat", "three"]);
 });
 
-test("checkReadme wants the mistakes list and the two extras after the template", () => {
-  const out = checkReadme("ik", "# @hackbuild/ik\n\nline.\n\n## Size budget\n\n## Changelog and licences\n\n## Errors and troubleshooting\n\nnone\n");
-  assert.ok(out.some((p) => p.includes("mistakes to avoid")));
-  assert.ok(out.some((p) => p.includes("out of order")));
+test("provenance phrases are caught", () => {
+  assert.ok(PROVENANCE.test("Default 6144 (as earlier builds did)."));
+  assert.ok(PROVENANCE.test("the earlier transcription tool's layouts"));
+  assert.ok(!PROVENANCE.test("earlier segments stay on screen"));
 });

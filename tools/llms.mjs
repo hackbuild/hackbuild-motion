@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // llms: the files a coding agent reads. The same tool in each hackbuild
-// library repository; the repository specific parts are REPO, SITE and
-// SUMMARY below. Generated, never hand edited:
+// library repository; the repository specific parts are REPO, SITE and SUMMARY
+// below. Generated, never hand edited:
 //
 //   packages/<pkg>/llms.md   shipped in each tarball: purpose, install,
 //                            every public export's signature with its one
@@ -14,9 +14,8 @@
 //   docs/llms-full.txt       llms.txt followed by every llms.md.
 //
 // Inputs: the TypeDoc JSON in .local/api/<pkg>.json (node tools/api-docs.mjs
-// writes it), each README (one line, "What it does", "Install", ts blocks of
-// "Concepts", "Errors and troubleshooting" with its "### mistakes to avoid"
-// list, which is per package) and examples/<pkg>/quick.ts.
+// writes it), packages/<pkg>/llms.json (its mistakes), each README (one line, "What it does", "Install", ts blocks of
+// "Concepts", "Errors and troubleshooting") and examples/<pkg>/quick.ts.
 // Usage: node tools/llms.mjs [--check]
 //   --check  fail when a generated file differs from what is on disk
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -29,6 +28,18 @@ export const REPO = "hackbuild-motion";
 export const SUMMARY =
   "hackbuild-motion is a set of ESM packages under @hackbuild for moving 3D characters on the web: springs and seeded noise, a humanoid bone mapper, inverse kinematics, procedural legged gait, clip retargeting with BVH and VMD readers, a runtime for a quadruped motion network, motion matching, gaze, blink and idle presence, avatar loading for VRM, GLB and FBX, a three.js stage host, lit scenes, lip sync, a GLB and clip baker, and Vue and custom element views. The cores are Rust compiled to wasm, three.js is a peer, model and weight files are never bundled and load from a URL or a file you give, and every package has a single file build that runs from file://.";
 const NOTE = `Every package is ESM only with types included, installs from npm under @hackbuild, and is MIT. Each llms.md below lists the package's exports with signatures, minimal examples and the mistakes to avoid. Code: https://github.com/hackbuild/${REPO}`;
+/**
+ * The mistakes an agent makes with one package, from packages/<pkg>/llms.json
+ * ({ "mistakes": ["...", ...] }, written by hand, not shipped). Every package
+ * has one; a package without it fails the run.
+ */
+export function mistakes(name) {
+  const file = join(root, "packages", name, "llms.json");
+  if (!existsSync(file)) throw new Error(`llms: packages/${name}/llms.json is missing; it holds the package's mistakes list`);
+  const list = JSON.parse(readFileSync(file, "utf8")).mistakes;
+  if (!Array.isArray(list) || !list.length || list.some((m) => typeof m !== "string" || !m.trim())) throw new Error(`llms: packages/${name}/llms.json needs a non empty "mistakes" array of strings`);
+  return list;
+}
 
 const names = () => readdirSync(join(root, "packages")).filter((n) => existsSync(join(root, "packages", n, "package.json"))).sort();
 
@@ -200,13 +211,6 @@ function errorRows(text) {
   return out;
 }
 
-/** Bullets of the "### mistakes to avoid" list in a README section, each joined to one line. */
-function mistakeList(text) {
-  const m = /^### mistakes to avoid\n([\s\S]*?)(?=^#{1,3} |$(?![\s\S]))/m.exec(text);
-  if (!m) return [];
-  return m[1].split(/\n(?=- )/).map((b) => b.trim()).filter((b) => b.startsWith("- ")).map((b) => b.slice(2).replace(/\s*\n\s*/g, " "));
-}
-
 // ---------------------------------------------------------------- output
 
 /** The llms.md of one package. */
@@ -236,10 +240,8 @@ export function llmsMd(name) {
     out.push("## Examples", "");
     for (const [t, code] of examples) out.push(`### ${t}`, "", "```ts", code, "```", "");
   }
-  const errText = r.body("Errors and troubleshooting");
-  const mistakes = mistakeList(errText);
-  if (mistakes.length) out.push("## Mistakes to avoid", "", ...mistakes.map((m) => `- ${m}`));
-  const errs = errorRows(errText);
+  out.push("## Mistakes to avoid", "", ...mistakes(name).map((m) => `- ${m}`));
+  const errs = errorRows(r.body("Errors and troubleshooting"));
   if (errs.length) out.push("", "## Errors this package throws", "", ...errs.map((e) => `- ${e}`));
   return absLinks(out.join("\n"), name).trimEnd() + "\n";
 }
@@ -247,7 +249,7 @@ export function llmsMd(name) {
 /** docs/llms.txt in the llmstxt.org format. */
 export function llmsTxt(list) {
   const out = [`# ${REPO}`, "", `> ${SUMMARY}`, "", NOTE, "", "## Packages", ""];
-  for (const n of list) out.push(`- [@hackbuild/${n}](${SITE}docs/${n}/llms.md): ${readme(n).line}`);
+  for (const n of list) out.push(`- [@hackbuild/${n}](${SITE}docs/${n}/llms.md): ${absLinks(readme(n).line, n)}`);
   out.push("", "## Quick starts", "");
   for (const n of list) if (existsSync(join(root, "examples", n, "quick.ts"))) out.push(`- [${n} quick start](${SITE}docs/${n}/quick.ts): the smallest program for @hackbuild/${n}, typechecked in CI`);
   out.push("", "## Docs", "", `- [getting started](${SITE}docs/): install, the first program, and how the packages fit`, `- [concepts](${SITE}docs/concepts.html): the normalized humanoid space, loading the wasm cores, three.js as a peer, files you give, file:// builds, labels on numbers`, `- [examples](${SITE}): the live demo pages`, "", "## Optional", "");
